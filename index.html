@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CoreoMVP v9 — Sincronização de Áudio (TS Modules)</title>
+    <style>
+      :root {
+        --cor-fundo: #111827;
+        --cor-fundo-secundaria: #1f2937;
+        --cor-fundo-terciaria: #374151;
+        --cor-borda: #4b5563;
+        --cor-texto: #e5e7eb;
+        --cor-destaque: #3b82f6;
+        --cor-transicao: #db2777;
+        --cor-playhead: #f87171;
+        --cor-onda-audio: #5eead4;
+      }
+      * { box-sizing: border-box; }
+      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--cor-fundo); color: var(--cor-texto); margin: 0; padding: 0; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+      button { background-color: var(--cor-fundo-terciaria); border: 1px solid var(--cor-borda); color: var(--cor-texto); padding: 8px 12px; border-radius: 6px; cursor: pointer; transition: background-color 0.2s; }
+      button:hover { background-color: var(--cor-borda); }
+      input[type="file"] { display: none; }
+      .barra-superior { padding: 10px 16px; background-color: var(--cor-fundo-secundaria); border-bottom: 1px solid var(--cor-borda); display: flex; gap: 12px; align-items: center; justify-content: space-between; }
+      .left, .right { display: flex; gap: 8px; align-items: center; }
+      .container-principal { display: flex; flex: 1; min-height: 0; }
+      .barra-lateral { width: 280px; background: var(--cor-fundo-secundaria); border-right: 1px solid var(--cor-borda); padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+      .palco-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; }
+      .palco-controles { padding: 10px; background-color: var(--cor-fundo-secundaria); border-bottom: 1px solid var(--cor-borda); display: flex; gap: 8px; align-items: center; justify-content: space-between; width: 100%; }
+      
+      /* === Palco retangular 16:9 com grade e moldura === */
+      .palco-container {
+        position: relative;
+        width: min(100%, 1200px);   /* limita a largura máxima para não estourar a viewport */
+        aspect-ratio: 16 / 9;       /* <- retangular como a referência */
+        margin: 0 auto;
+        overflow: hidden;
+        background-image:
+          linear-gradient(var(--cor-borda) 1px, transparent 1px),
+          linear-gradient(90deg, var(--cor-borda) 1px, transparent 1px);
+        background-size: 40px 40px, 40px 40px; /* densidade da grade */
+        background-position: 0 0, 0 0;
+      }
+      /* Moldura e rótulo BACKSTAGE */
+      #palco::before {
+        content: "";
+        position: absolute;
+        inset: 12px;
+        border: 2px solid #cc4a7a;
+        border-radius: 10px;
+        pointer-events: none;
+      }
+      #palco::after {
+        content: "BACKSTAGE";
+        position: absolute;
+        top: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 12px;
+        letter-spacing: 1px;
+        color: #cc4a7a;
+        opacity: .6;
+        pointer-events: none;
+      }
+
+      .linha-do-tempo { background-color: var(--cor-fundo-secundaria); border-top: 1px solid var(--cor-borda); padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+      .lista-formacoes { list-style: none; padding: 0; margin: 0; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+      .lista-formacoes li { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 8px; padding: 8px; border-radius: 6px; cursor: pointer; border: 1px solid transparent; }
+      .lista-formacoes li.ativa { background-color: var(--cor-destaque); color: white; font-weight: 600; }
+      .lista-formacoes li:not(.ativa):hover { background-color: var(--cor-fundo-terciaria); }
+      .nome-formacao { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .lista-formacoes button.icon { font-size: 12px; padding: 4px 6px; }
+      .lista-formacoes input.edit-input { width: 100%; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--cor-borda); background: var(--cor-fundo-terciaria); color: var(--cor-texto); }
+      .marcador { position: absolute; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; cursor: grab; user-select: none; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 2px solid rgba(0,0,0,0.2); }
+      .marcador:active { cursor: grabbing; z-index: 1000; }
+      .controles-playback { display: flex; gap: 10px; justify-content: center; align-items: center; }
+      .timeline-container { position: relative; height: 60px; border: 1px solid var(--cor-borda); background: #0b1322; border-top: none; border-radius: 0 0 8px 8px; overflow-x: auto; overflow-y: hidden; }
+      .timeline-blocos { display: flex; height: 100%; width: 100%; align-items: stretch; overflow: hidden; border-radius: 8px; }
+      .bloco-formacao { position: relative; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; height: 100%; background-color: var(--cor-fundo-terciaria); border-right: 1px solid var(--cor-borda); font-size: 13px; cursor: pointer; color: var(--cor-texto); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .bloco-formacao:last-child { border-right: none; }
+      .bloco-formacao.ativa { outline: 2px solid var(--cor-destaque); z-index: 2; }
+      .sub-bloco-transicao { position: absolute; left: 0; top: 0; height: 100%; background-color: var(--cor-transicao); z-index: 1; opacity: .85; }
+      .bloco-formacao span { position: relative; z-index: 2; }
+      .playhead { position: absolute; top: -6px; bottom: -6px; left: 0; width: 2px; background-color: var(--cor-playhead); pointer-events: none; z-index: 10; display: none; transform: translateX(0px); }
+      .playhead::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 8px solid var(--cor-playhead); }
+      .hint { opacity: .8; font-size: 12px; }
+      .painel-bailarinos { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+      .painel-bailarinos h3 { margin: 0; font-size: 14px; opacity: .95; }
+      .busca-input { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--cor-borda); background: var(--cor-fundo-terciaria); color: var(--cor-texto); outline: none; }
+      .busca-input:focus { border-color: var(--cor-destaque); }
+      .lista-bailarinos { list-style: none; padding: 0; margin: 0; max-height: 28vh; overflow: auto; display: flex; flex-direction: column; gap: 6px; }
+      .bailarino-item { display: grid; grid-template-columns: 16px 1fr auto; align-items: center; gap: 8px; padding: 6px 8px; border: 1px solid transparent; border-radius: 6px; cursor: pointer; }
+      .bailarino-item:hover { background: var(--cor-fundo-terciaria); }
+      .bailarino-item .cor-dot { width: 12px; height: 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.3); }
+      .bailarino-item .nome { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .bailarino-item button.edit { font-size: 12px; padding: 4px 6px; }
+      .bailarino-item input.edit-input { width: 100%; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--cor-borda); background: var(--cor-fundo-terciaria); color: var(--cor-texto); }
+      .time-ruler { position: relative; height: 28px; background: var(--cor-fundo-secundaria); border: 1px solid var(--cor-borda); border-bottom: none; border-radius: 8px 8px 0 0; overflow-x: auto; scrollbar-width: none; }
+      .time-ruler::-webkit-scrollbar { display: none; }
+      .handle { position: absolute; top: 0; bottom: 0; width: 8px; cursor: ew-resize; opacity: 0; transition: opacity .15s; }
+      .bloco-formacao:hover .handle { opacity: 1; }
+      .handle-end { right: 0; background: linear-gradient(to left, rgba(255,255,255,.15), rgba(255,255,255,0)); }
+      .sub-bloco-transicao .handle-split { position: absolute; right: 0; top: 0; bottom: 0; width: 8px; cursor: ew-resize; background: linear-gradient(to left, rgba(219,39,119,.45), rgba(219,39,119,0)); }
+      .audio-track { position: relative; height: 46px; background: #0a1222; border: 1px solid var(--cor-borda); border-top: none; border-radius: 0 0 8px 8px; display: block; cursor: pointer; }
+      .audio-track canvas { width: 100%; height: 100%; display: block; }
+
+      /* === Time Ruler: major/minor ticks e labels === */
+      .time-ruler .tick {
+        position: absolute; bottom: 0; width: 1px; height: 6px;
+        background: var(--cor-borda); opacity: .7;
+      }
+      .time-ruler .tick.minor { height: 6px; opacity: .55; }
+      .time-ruler .tick.major { height: 12px; background: var(--cor-texto); opacity: 1; }
+      .time-ruler .tick-label {
+        position: absolute; bottom: 12px; transform: translateX(-50%);
+        font-size: 11px; opacity: .9; white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="barra-superior">
+      <div class="left">
+        <h1 id="titulo-projeto" style="font-size: 1.05em; margin: 0;">Coreografia</h1>
+        <button id="btn-exportar">Exportar JSON</button>
+        <button id="btn-importar">Importar JSON</button>
+        <input id="import-file" type="file" accept="application/json" />
+        <button id="btn-carregar-audio">Carregar Áudio</button>
+        <input id="audio-file-input" type="file" accept="audio/*" />
+      </div>
+      <div class="right" id="audio-info">
+        <span class="hint">Nenhum áudio carregado</span>
+      </div>
+    </header>
+
+    <div class="container-principal">
+      <aside class="barra-lateral">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h2 style="margin:0; font-size:16px;">Formações</h2>
+          <button id="btn-add-formacao" title="Adicionar formação">+ Add</button>
+        </div>
+        <ul id="lista-formacoes" class="lista-formacoes"></ul>
+        <div class="hint">Dica: clique para ativar, <b>duplo clique para renomear</b>, SHIFT+clique para editar tempos.</div>
+        <div class="painel-bailarinos">
+          <h3>Bailarinos</h3>
+          <input id="busca-bailarinos" class="busca-input" placeholder="Buscar bailarino..." />
+          <ul id="lista-bailarinos" class="lista-bailarinos"></ul>
+        </div>
+      </aside>
+
+      <div class="palco-wrapper">
+        <div class="palco-controles">
+          <div style="display:flex; gap:8px; align-items:center;">
+            <button id="btn-add-bailarino">+ Adicionar Bailarino</button>
+            <span class="hint">SHIFT+arrastar para grade. Duplo clique para renomear.</span>
+          </div>
+          <div class="controles-playback">
+            <button id="btn-anterior" title="Anterior (←)">Anterior</button>
+            <button id="btn-play-pause" title="Play/Pause (Barra de espaço)">▶ Play</button>
+            <button id="btn-proxima" title="Próxima (→)">Próxima</button>
+          </div>
+        </div>
+        <main id="palco" class="palco-container"></main>
+      </div>
+    </div>
+
+    <footer class="linha-do-tempo">
+      <div id="timeline-toolbar" style="display:flex; align-items:center; justify-content: space-between; gap:8px; margin-bottom:6px;">
+        <div class="hint">Timeline</div>
+        <div id="zoom-controls" style="display:flex; gap:6px; align-items:center;">
+          <button id="zoom-out" title="Diminuir zoom">−</button>
+          <span id="zoom-value" class="hint">100%</span>
+          <button id="zoom-in" title="Aumentar zoom">+</button>
+          <button id="zoom-reset" title="Resetar para 100%">⟲</button>
+        </div>
+      </div>    
+      <div id="time-ruler" class="time-ruler"></div>
+      <div class="timeline-container" id="timeline-container">
+        <div id="timeline-blocos" class="timeline-blocos"></div>
+        <div id="playhead" class="playhead"></div>
+      </div>
+      <div id="audio-track" class="audio-track" title="Clique ou arraste na régua ou aqui para navegar">
+        <canvas id="audio-canvas"></canvas>
+      </div>
+    </footer>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
