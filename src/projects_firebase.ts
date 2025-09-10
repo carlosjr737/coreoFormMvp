@@ -1,15 +1,13 @@
 // src/projects_firebase.ts
 import { db as localDb } from './state';
-
-import { ensureAudioContext, getAudioBuffer } from './audio';
+import { getAudioBuffer } from './audio';
 
 import {
-  db, st,                 // Firestore e Storage
-  collection, doc, getDocs, getDoc, setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp,
-  ref, sRef, uploadBytes, getDownloadURL, deleteObject
+  db, st,
+  collection, doc, getDocs, setDoc, serverTimestamp,
+  sRef, uploadBytes, getDownloadURL, deleteObject
 } from './firebase';
 
-// Tipos simples
 type ProjectMeta = {
   id: string;
   titulo: string;
@@ -18,12 +16,10 @@ type ProjectMeta = {
   durationSec: number;
 };
 
-// util
 function now() { return Date.now(); }
 
 export async function createNewProjectFirebase(titulo = 'Coreografia'): Promise<string> {
   const id = `p${now()}`;
-  // zera seu estado local
   localDb.projeto   = { id, titulo };
   localDb.formacoes = [];
   return id;
@@ -31,32 +27,30 @@ export async function createNewProjectFirebase(titulo = 'Coreografia'): Promise<
 
 export async function saveProjectFirebase(projectId?: string): Promise<string> {
   const id = projectId || localDb.projeto?.id || `p${now()}`;
-  localDb.projeto = localDb.projeto || { id, titulo: 'Coreografia' };
+  if (!localDb.projeto) localDb.projeto = { id, titulo: 'Coreografia' };
 
-  // 1) salva JSON no Storage
+  // 1) estado (JSON) no Storage
   const stateBlob = new Blob([JSON.stringify(localDb)], { type: 'application/json' });
   await uploadBytes(sRef(st, `projects/${id}/state.json`), stateBlob);
 
-  // 2) se houver áudio decodificado, salve também o arquivo bruto se você o tiver (opcional).
-  // Se seu fluxo já guarda o Blob do áudio original, suba aqui. Como fallback, só meta a flag.
-  const hasAudio = !!getAudioBuffer();
-  // 3) metadados no Firestore
-  const durationSec = localDb.formacoes
-    .reduce((a,f)=> a + f.tempoTransicaoEntradaSegundos + f.duracaoSegundos, 0);
+  // 2) metadados no Firestore
+  const durationSec = (localDb.formacoes || [])
+    .reduce((a,f)=> a + (f.tempoTransicaoEntradaSegundos||0) + (f.duracaoSegundos||0), 0);
 
   const meta: ProjectMeta = {
     id,
     titulo: localDb.projeto.titulo || 'Coreografia',
     updatedAt: now(),
-    hasAudio,
+    hasAudio: !!getAudioBuffer(),
     durationSec
   };
-  await setDoc(doc(dbFs, 'projects', id), { ...meta, updatedAtTS: serverTimestamp() });
+
+  await setDoc(doc(db, 'projects', id), { ...meta, updatedAtTS: serverTimestamp() }, { merge: true });
   return id;
 }
 
 export async function listProjectsFirebase(): Promise<Array<{id:string; titulo:string}>> {
-  const snap = await getDocs(collection(dbFs, 'projects'));
+  const snap = await getDocs(collection(db, 'projects'));
   return snap.docs
     .map(d => d.data() as any)
     .sort((a,b)=> (b.updatedAt||0) - (a.updatedAt||0))
@@ -66,15 +60,13 @@ export async function listProjectsFirebase(): Promise<Array<{id:string; titulo:s
 export async function openProjectFirebase(id: string): Promise<void> {
   const url = await getDownloadURL(sRef(st, `projects/${id}/state.json`));
   const json = await (await fetch(url)).json();
-  // aplica no estado
   Object.assign(localDb, json);
 }
 
 export async function deleteProjectFirebase(id: string): Promise<void> {
-  // apaga arquivos conhecidos; ignore erros
   await Promise.allSettled([
     deleteObject(sRef(st, `projects/${id}/state.json`)),
   ]);
-  // Firestore
-  // (Você pode também deletar o doc do Firestore se quiser)
+  // Se quiser, apague o doc:
+  // await deleteDoc(doc(db, 'projects', id));
 }

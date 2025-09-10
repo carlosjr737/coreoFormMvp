@@ -12,7 +12,7 @@ import {
   ref as storageRef, uploadBytes, getDownloadURL, deleteObject
 } from 'firebase/storage';
 
-// Se tiver .env, pode ler de import.meta.env. Se não, estes valores funcionam:
+// Variáveis de ambiente (ou usa os defaults abaixo)
 const cfg = {
   apiKey:            import.meta?.env?.VITE_FIREBASE_API_KEY            ?? "AIzaSyBUd7mOWqTXP3E_dNAs-TXAeF9d_WE5rS4",
   authDomain:        import.meta?.env?.VITE_FIREBASE_AUTH_DOMAIN        ?? "pinaform-a5fec.firebaseapp.com",
@@ -26,18 +26,16 @@ export const app: FirebaseApp = initializeApp(cfg);
 
 // Núcleo
 export const auth: Auth = getAuth(app);
-export const dbFs: Firestore = getFirestore(app);
+export const db: Firestore = getFirestore(app);
 export const st: FirebaseStorage = getStorage(app);
 
-// Aliases para manter compatibilidade com o resto do código
+// Provider de login
 export const provider = new GoogleAuthProvider();
-export const db = dbFs;   // alguns arquivos esperam "db"
-export const dbx = dbFs;  // alguns arquivos esperam "dbx"
 
-// Ref do Storage com dois nomes (já vi uso de "ref" e "sRef")
+// Atalhos de Storage
 export { storageRef as ref, storageRef as sRef };
 
-// Re-exports úteis (assim todo mundo importa só de './firebase')
+// Re-exports (pra importar tudo só de './firebase')
 export {
   GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
   collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp,

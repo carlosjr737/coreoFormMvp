@@ -9,7 +9,7 @@ import { initPersistenceUI, refreshProjectListUI } from './persist';
 import { initUI } from './ui';
 document.addEventListener('DOMContentLoaded', () => initUI());
 
-
+initUI();
 // logo após sua inicialização atual:
 initAuthUI();
 initPersistenceUI();

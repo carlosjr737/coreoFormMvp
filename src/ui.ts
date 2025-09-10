@@ -1,6 +1,9 @@
 import { renderizarBarraLateral } from './timeline';
 import { renderizarPainelBailarinos } from './bailarinos';
 
+export function initUI() {
+  // por enquanto pode ficar vazio, só pra existir
+}
 export function initSidePanels() {
   const btnN = document.getElementById('btn-new') as HTMLButtonElement | null;
   if (btnN) btnN.addEventListener('click', onNew);
