@@ -1,37 +1,45 @@
 // src/firebase.ts
-// src/firebase.ts
 import { initializeApp, type FirebaseApp } from 'firebase/app';
 import {
   getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, type Auth
 } from 'firebase/auth';
 import {
-  getFirestore, type Firestore, collection, doc, getDoc, getDocs,
-  setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp
+  getFirestore, type Firestore,
+  collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp
 } from 'firebase/firestore';
 import {
-  getStorage, type FirebaseStorage, ref as storageRef,
-  uploadBytes, getDownloadURL, deleteObject
+  getStorage, type FirebaseStorage,
+  ref as storageRef, uploadBytes, getDownloadURL, deleteObject
 } from 'firebase/storage';
 
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FB_API_KEY,
-  authDomain: import.meta.env.VITE_FB_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FB_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FB_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FB_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FB_APP_ID,
+// Se tiver .env, pode ler de import.meta.env. Se não, estes valores funcionam:
+const cfg = {
+  apiKey:            import.meta?.env?.VITE_FIREBASE_API_KEY            ?? "AIzaSyBUd7mOWqTXP3E_dNAs-TXAeF9d_WE5rS4",
+  authDomain:        import.meta?.env?.VITE_FIREBASE_AUTH_DOMAIN        ?? "pinaform-a5fec.firebaseapp.com",
+  projectId:         import.meta?.env?.VITE_FIREBASE_PROJECT_ID         ?? "pinaform-a5fec",
+  storageBucket:     import.meta?.env?.VITE_FIREBASE_STORAGE_BUCKET     ?? "pinaform-a5fec.firebasestorage.app",
+  messagingSenderId: import.meta?.env?.VITE_FIREBASE_MESSAGING_SENDER_ID?? "885677342214",
+  appId:             import.meta?.env?.VITE_FIREBASE_APP_ID             ?? "1:885677342214:web:fe9f74a1065f0ec9ce4d87",
 };
 
-export const app: FirebaseApp = initializeApp(firebaseConfig);
+export const app: FirebaseApp = initializeApp(cfg);
 
-// Auth / DB / Storage
+// Núcleo
 export const auth: Auth = getAuth(app);
 export const dbFs: Firestore = getFirestore(app);
 export const st: FirebaseStorage = getStorage(app);
 
-// Re-exports de conveniência (assim outros arquivos importam só de './firebase')
+// Aliases para manter compatibilidade com o resto do código
+export const provider = new GoogleAuthProvider();
+export const db = dbFs;   // alguns arquivos esperam "db"
+export const dbx = dbFs;  // alguns arquivos esperam "dbx"
+
+// Ref do Storage com dois nomes (já vi uso de "ref" e "sRef")
+export { storageRef as ref, storageRef as sRef };
+
+// Re-exports úteis (assim todo mundo importa só de './firebase')
 export {
   GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
   collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp,
-  storageRef as ref, uploadBytes, getDownloadURL, deleteObject,
+  uploadBytes, getDownloadURL, deleteObject,
 };

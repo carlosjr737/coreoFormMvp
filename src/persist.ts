@@ -1,5 +1,5 @@
 // src/persist.ts
-import { dbx } from './firebase';
+
 import { db } from './firebase';
 import { getUser } from './auth';
 import {
@@ -21,7 +21,7 @@ type ProjetoDoc = {
 export async function listProjects(): Promise<{id:string; title:string}[]> {
   const user = getUser();
   if (!user) return [];
-  const colRef = collection(dbx, 'users', user.uid, 'projects');
+  const colRef = collection(db, 'users', user.uid, 'projects');
   const q = query(colRef, orderBy('updatedAt', 'desc'));
   const snap = await getDocs(q);
   return snap.docs.map(d => ({ id: d.id, title: (d.data() as any).title || '(sem título)' }));
@@ -30,7 +30,7 @@ export async function listProjects(): Promise<{id:string; title:string}[]> {
 export async function loadProject(projectId: string) {
   const user = getUser();
   if (!user) throw new Error('Não autenticado.');
-  const ref = doc(dbx, 'users', user.uid, 'projects', projectId);
+  const ref = doc(db, 'users', user.uid, 'projects', projectId);
   const snap = await getDoc(ref);
   if (!snap.exists()) throw new Error('Projeto não encontrado');
   const data = snap.data() as ProjetoDoc;
@@ -57,10 +57,10 @@ export async function saveProject(explicitId?: string) {
     db: JSON.parse(JSON.stringify(State.db)),
   };
 
-  const colRef = collection(dbx, 'users', user.uid, 'projects');
+  const colRef = collection(db, 'users', user.uid, 'projects');
 
   if (explicitId) {
-    const ref = doc(dbx, 'users', user.uid, 'projects', explicitId);
+    const ref = doc(db, 'users', user.uid, 'projects', explicitId);
     await setDoc(ref, payload, { merge: true });
     setCurrentProjectId(explicitId);
     localStorage.setItem('lastProjectId', explicitId);

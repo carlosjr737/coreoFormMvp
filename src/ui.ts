@@ -7,8 +7,8 @@ export function initSidePanels() {
   
   const btnB = document.getElementById('btn-save') as HTMLButtonElement | null;
   if (btnB) btnB.addEventListener('click', onSave);
-  const pF = document.getElementById('project-form') as HTMLFormElement | null;
-  const pB = document.getElementById('project-backdrop') as HTMLDivElement | null;
+const pF = document.getElementById('project-form') as HTMLFormElement | null;
+const pB = document.getElementById('project-backdrop') as HTMLDivElement | null;
 
   if (!btnF || !btnB || !pF || !pB) return;
 

@@ -1,8 +1,9 @@
 // src/auth.ts
-import { auth, provider } from './firebase';
+import { auth, provider, signInWithPopup, signOut, onAuthStateChanged } from './firebase';
 import { signInWithPopup, onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { renderizarTudo } from './timeline';
 import { btnLogin, btnLogout, userBadgeEl } from './dom';
+
 
 let _user: User | null = null;
 export function getUser(){ return _user; }

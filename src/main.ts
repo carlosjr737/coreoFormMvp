@@ -6,6 +6,9 @@ import { initAudioUI } from './audio';
 import { initSidePanels } from './ui';
 import { initAuthUI } from './auth';
 import { initPersistenceUI, refreshProjectListUI } from './persist';
+import { initUI } from './ui';
+document.addEventListener('DOMContentLoaded', () => initUI());
+
 
 // logo após sua inicialização atual:
 initAuthUI();

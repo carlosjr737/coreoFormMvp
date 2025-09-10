@@ -4,9 +4,9 @@ import { db as localDb } from './state';
 import { ensureAudioContext, getAudioBuffer } from './audio';
 
 import {
-  dbFs, st,                // <- do wrapper
+  db, st,                 // Firestore e Storage
   collection, doc, getDocs, getDoc, setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp,
-  ref, uploadBytes, getDownloadURL, deleteObject
+  ref, sRef, uploadBytes, getDownloadURL, deleteObject
 } from './firebase';
 
 // Tipos simples
