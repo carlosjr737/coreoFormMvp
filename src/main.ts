@@ -16,7 +16,9 @@ initPersistenceUI();
 // tenta preencher a combo de projetos quando possível
 setTimeout(refreshProjectListUI, 600);
 
-
+window.addEventListener('DOMContentLoaded', () => {
+  initUI();
+});
 
 // Stage hooks from timeline
 document.addEventListener('stage-render-transition' as any, (e:any)=> {

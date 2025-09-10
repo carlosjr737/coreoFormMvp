@@ -1,44 +1,63 @@
-import { renderizarBarraLateral } from './timeline';
-import { renderizarPainelBailarinos } from './bailarinos';
+// src/ui.ts
+import { renderizarTudo } from './timeline';
+import { db } from './state';
+import {
+  createNewProjectFirebase,
+  saveProjectFirebase,
+  listProjectsFirebase,
+  openProjectFirebase,
+} from './projects_firebase';
 
-export function initUI() {
-  // por enquanto pode ficar vazio, só pra existir
+// Elements (ajuste os IDs se forem diferentes no seu HTML)
+const btnNew  = document.getElementById('btn-new')  as HTMLButtonElement | null;
+const btnSave = document.getElementById('btn-save') as HTMLButtonElement | null;
+const ddProjects = document.getElementById('projects-dd') as HTMLSelectElement | null;
+
+// Preenche o dropdown de projetos
+async function refreshProjectsDD() {
+  if (!ddProjects) return;
+  const list = await listProjectsFirebase();
+
+  ddProjects.innerHTML = '';
+  const opt0 = document.createElement('option');
+  opt0.value = '';
+  opt0.textContent = '(selecione um projeto)';
+  ddProjects.appendChild(opt0);
+
+  list.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = p.titulo;
+    if (db.projeto?.id === p.id) opt.selected = true;
+    ddProjects.appendChild(opt);
+  });
 }
-export function initSidePanels() {
-  const btnN = document.getElementById('btn-new') as HTMLButtonElement | null;
-  if (btnN) btnN.addEventListener('click', onNew);
-  
-  const btnB = document.getElementById('btn-save') as HTMLButtonElement | null;
-  if (btnB) btnB.addEventListener('click', onSave);
-const pF = document.getElementById('project-form') as HTMLFormElement | null;
-const pB = document.getElementById('project-backdrop') as HTMLDivElement | null;
 
-  if (!btnF || !btnB || !pF || !pB) return;
+// ==== Handlers esperados pelo build ====
+export async function onNew() {
+  const nome = prompt('Nome do projeto:', db.projeto?.titulo || 'Coreografia') || 'Coreografia';
+  await createNewProjectFirebase(nome);
+  await refreshProjectsDD();
+  renderizarTudo(true);
+}
 
-  function show(panel: 'f'|'b') {
-    const fActive = panel === 'f';
-    btnF?.classList.toggle('active', fActive);
-    btnB?.classList.toggle('active', !fActive);
-    pF?.classList.toggle('hidden', !fActive);
-    pB?.classList.toggle('hidden', fActive);
+export async function onSave() {
+  await saveProjectFirebase();
+  await refreshProjectsDD();
+}
 
-    if (fActive) renderizarBarraLateral();
-    else renderizarPainelBailarinos();
-  }
+// Bootstrap simples da UI
+export function initUI() {
+  btnNew?.addEventListener('click', onNew);
+  btnSave?.addEventListener('click', onSave);
 
-  btnF.addEventListener('click', () => show('f'));
-  btnB.addEventListener('click', () => show('b'));
+  ddProjects?.addEventListener('change', async (e) => {
+    const id = (e.target as HTMLSelectElement).value;
+    if (!id) return;
+    await openProjectFirebase(id);
+    renderizarTudo(true);
+  });
 
   // inicial
-  show('f');
-
-  // quando o DB mudar (criou formação, adicionou bailarino etc.), re-render do painel visível
-  document.addEventListener('db-changed' as any, () => {
-    if (!pF.classList.contains('hidden')) renderizarBarraLateral();
-    if (!pB.classList.contains('hidden')) renderizarPainelBailarinos();
-  });
-  // quando seleção mudar, atualizar painel de bailarinos (highlight)
-  document.addEventListener('selection-changed' as any, () => {
-    if (!pB.classList.contains('hidden')) renderizarPainelBailarinos();
-  });
+  refreshProjectsDD();
 }

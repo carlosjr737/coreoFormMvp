@@ -519,7 +519,8 @@ export function criarMarcador(marcador: Marcador) {
 
         info.el.style.left = `${nx}px`;
         info.el.style.top = `${ny}px`;
-
+        
+        if (!f) return;
         const m = f.marcadores.find(x => x.id === id);
         if (m) { m.x = nx; m.y = ny; }
       });
