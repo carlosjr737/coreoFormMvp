@@ -89,7 +89,7 @@
       .busca-input { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--cor-borda); background: var(--cor-fundo-terciaria); color: var(--cor-texto); outline: none; }
       .busca-input:focus { border-color: var(--cor-destaque); }
       .lista-bailarinos { list-style: none; padding: 0; margin: 0; max-height: 28vh; overflow: auto; display: flex; flex-direction: column; gap: 6px; }
-      .bailarino-item { display: grid; grid-template-columns: 16px 1fr auto; align-items: center; gap: 8px; padding: 6px 8px; border: 1px solid transparent; border-radius: 6px; cursor: pointer; }
+      .bailarino-item { display: grid; grid-template-columns: 16px 1fr auto auto; align-items: center; gap: 8px; padding: 6px 8px; border: 1px solid transparent; border-radius: 6px; cursor: pointer; }
       .bailarino-item:hover { background: var(--cor-fundo-terciaria); }
       .bailarino-item .cor-dot { width: 12px; height: 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.3); }
       .bailarino-item .nome { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -103,6 +103,35 @@
       .sub-bloco-transicao .handle-split { position: absolute; right: 0; top: 0; bottom: 0; width: 8px; cursor: ew-resize; background: linear-gradient(to left, rgba(219,39,119,.45), rgba(219,39,119,0)); }
       .audio-track { position: relative; height: 46px; background: #0a1222; border: 1px solid var(--cor-borda); border-top: none; border-radius: 0 0 8px 8px; display: block; cursor: pointer; }
       .audio-track canvas { width: 100%; height: 100%; display: block; }
+      .bailarino-item .cor-dot { cursor: pointer; }
+      .bailarino-item.selected {
+  background: rgba(59,130,246,.18);
+  outline: 2px solid var(--cor-destaque);
+}
+
+      /* Caixa de seleção (marquee) no palco */
+/* visual da seleção */
+.marcador.selecionado {
+  outline: 3px solid var(--cor-destaque);
+  box-shadow: 0 0 0 4px rgba(59,130,246,.35);
+}
+.bailarino-item.selected {
+  background: rgba(59,130,246,.18);
+  outline: 2px solid var(--cor-destaque);
+}
+
+/* caixa de seleção */
+.marquee-select {
+  position: absolute;
+  border: 1px dashed var(--cor-destaque);
+  background: rgba(59,130,246,0.18);
+  pointer-events: none;
+  z-index: 999;
+}
+
+.bailarino-item .cor-dot { cursor: pointer; }
+
+
 
       /* === Time Ruler: major/minor ticks e labels === */
       .time-ruler .tick {
@@ -115,6 +144,181 @@
         position: absolute; bottom: 12px; transform: translateX(-50%);
         font-size: 11px; opacity: .9; white-space: nowrap;
       }
+      /* Rail (barra de ícones) */
+.side-rail{
+  width:56px; background:var(--cor-fundo-secundaria);
+  border-right:1px solid var(--cor-borda);
+  display:flex; flex-direction:column; align-items:center; gap:6px; padding:8px 6px;
+}
+.rail-btn{
+  width:42px; height:42px; border-radius:10px; border:1px solid var(--cor-borda);
+  background:var(--cor-fundo-terciaria); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; opacity:.9; transition:all .15s;
+}
+.rail-btn:hover{ opacity:1; transform:translateY(-1px); }
+.rail-btn.active{ outline:2px solid var(--cor-destaque); }
+.rail-btn .ico{ font-size:18px; line-height:1; }
+
+/* Dock (painel que abre) */
+.side-dock{
+  width:300px; min-width:300px; background:var(--cor-fundo-secundaria);
+  border-right:1px solid var(--cor-borda); display:flex; flex-direction:column; min-height:0;
+}
+.side-panel{ padding:14px; display:flex; flex-direction:column; gap:10px; min-height:0; }
+.side-panel.hidden{ display:none; }
+.panel-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+
+/* Ajustes preexistentes que continuam válidos */
+.lista-formacoes{ list-style:none; padding:0; margin:0; flex:1; overflow:auto; display:flex; flex-direction:column; gap:6px; }
+.lista-bailarinos{ list-style:none; padding:0; margin:0; max-height:none; flex:1; overflow:auto; display:flex; flex-direction:column; gap:6px; }
+
+/* Responsivo: esconde dock em telas bem estreitas (pode ajustar) */
+@media (max-width: 900px){
+  .side-dock{ width:240px; min-width:240px; }
+}
+
+/* --- Toolbar contextual perto do(s) bailarino(s) --- */
+.context-toolbar{
+  position: fixed; z-index: 9999;
+  background: var(--cor-fundo-secundaria);
+  border: 1px solid var(--cor-borda);
+  border-radius: 10px; padding: 8px 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  display: none; align-items: center; gap: 8px;
+  pointer-events: auto;
+}
+.context-toolbar::after{ /* “setinha” apontando pro alvo */
+  content:''; position:absolute; left:16px; top:-6px;
+  border-left:6px solid transparent; border-right:6px solid transparent;
+  border-bottom:6px solid var(--cor-fundo-secundaria);
+}
+.context-toolbar .label{ font-size:12px; opacity:.9; margin-right:4px; }
+.context-toolbar .swatches{ display:flex; gap:6px; align-items:center; }
+
+/* Reuso dos estilos existentes de .swatch e .btn-mini */
+/* --- Context toolbar: seta acima/abaixo --- */
+.context-toolbar::after{ content:''; position:absolute; left:16px; }
+.context-toolbar--below::after{
+  top:-6px;
+  border-left:6px solid transparent; border-right:6px solid transparent;
+  border-bottom:6px solid var(--cor-fundo-secundaria);
+}
+.context-toolbar--above::after{
+  bottom:-6px;
+  border-left:6px solid transparent; border-right:6px solid transparent;
+  border-top:6px solid var(--cor-fundo-secundaria);
+}
+
+/* Blocos de cor (swatches) e botão mini */
+.context-toolbar .swatches{ display:flex; gap:6px; align-items:center; }
+.context-toolbar .swatch{
+  width:18px; height:18px; border-radius:4px;
+  border:1px solid rgba(255,255,255,.35);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.2);
+  cursor:pointer; transition: transform .12s, box-shadow .12s;
+}
+.context-toolbar .swatch:hover{
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 4px 10px rgba(0,0,0,.35), inset 0 0 0 1px rgba(0,0,0,.2);
+}
+.btn-mini{
+  font-size:12px; padding:4px 8px; border-radius:6px;
+  background:var(--cor-fundo-terciaria);
+  border:1px solid var(--cor-borda); color:var(--cor-texto);
+  cursor:pointer;
+}
+
+/* Toolbar da timeline em 3 colunas: esquerda | centro | direita */
+.timeline-toolbar{
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.timeline-toolbar .tl-left{ justify-self: start; }
+.timeline-toolbar .tl-right{ justify-self: end; display:flex; gap:6px; align-items:center; }
+
+/* Controles minimalistas */
+.transport{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--cor-fundo-secundaria);
+  border: 1px solid var(--cor-borda);
+  border-radius: 999px;
+  padding: 6px 10px;
+  box-shadow: 0 6px 16px rgba(0,0,0,.25);
+}
+.icon-btn{
+  width: 34px; height: 34px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--cor-borda);
+  background: var(--cor-fundo-terciaria);
+  font-size: 16px; line-height: 1; cursor: pointer;
+  transition: transform .08s ease, background-color .15s ease;
+}
+.icon-btn:hover{ background: #2a3546; transform: translateY(-1px); }
+.icon-btn.primary{ background: var(--cor-destaque); border-color: transparent; color: #fff; }
+.icon-btn.primary:hover{ filter: brightness(1.05); }
+
+.timecode{
+  font-variant-numeric: tabular-nums;
+  opacity: .9; font-size: 14px; padding-left: 4px;
+}
+/* a trilha vira referencial para posicionamento absoluto */
+.timeline-blocos { position: relative; }
+
+/* tile “+” fora dos cards */
+.add-formation-tile{
+  position: absolute;             /* <--- fora dos blocos */
+  top: 8px;                       /* ajusta vertical pra ficar centrado */
+  width: 140px; height: 44px;     /* tamanho como na referência */
+  border-radius: 10px;
+  border: 1px solid var(--cor-borda);
+  background: var(--cor-fundo-terciaria);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0,0,0,.28);
+  transition: transform .12s, box-shadow .12s, background .12s;
+}
+.add-formation-tile:hover{
+  transform: translateY(-1px);
+  background: #2b3647;
+  box-shadow: 0 10px 24px rgba(0,0,0,.35);
+}
+.add-formation-tile .plus{
+  font-size: 22px; line-height: 1;
+  opacity: .9;
+}
+.add-formation-tile{
+  position:absolute; width:140px; top:0; height:100%;
+  border:1px dashed var(--cor-borda);
+  background:var(--cor-fundo-terciaria);
+  border-radius:10px; display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+}
+.add-formation-tile:hover{ background: rgba(255,255,255,.06); }
+.add-formation-tile .plus{ font-size:22px; line-height:1; opacity:.9; }
+.add-formation-tile{
+  z-index: 0;              /* tile SEMPRE abaixo dos cards */
+  width: 140px;
+  border: 1px dashed var(--cor-borda);
+  background: var(--cor-fundo-terciaria);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; opacity: .9; transition: .15s;
+}
+.add-formation-tile:hover{ opacity: 1; }
+.add-formation-tile .plus{ font-size: 22px; line-height: 1; }
+.bloco-formacao{
+  position: relative;
+  z-index: 2;              /* cards SEMPRE acima do tile */
+}
+
+
     </style>
   </head>
   <body>
@@ -127,25 +331,52 @@
         <button id="btn-carregar-audio">Carregar Áudio</button>
         <input id="audio-file-input" type="file" accept="audio/*" />
       </div>
-      <div class="right" id="audio-info">
-        <span class="hint">Nenhum áudio carregado</span>
+      <div class="right" id="audio-info" style="gap:10px; align-items:center;">
+        <span id="user-badge" class="hint">offline</span>
+        <select id="sel-projeto" style="background:var(--cor-fundo-terciaria); border:1px solid var(--cor-borda); color:var(--cor-texto); padding:6px; border-radius:6px;">
+          <option value="">(sem projetos)</option>
+        </select>
+        <button id="btn-novo-projeto" title="Criar novo projeto">Novo</button>
+        <button id="btn-salvar-projeto" title="Salvar o projeto">Salvar</button>
+        <button id="btn-login">Entrar</button>
+        <button id="btn-logout" style="display:none;">Sair</button>
+      </div>      
       </div>
     </header>
 
     <div class="container-principal">
-      <aside class="barra-lateral">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <h2 style="margin:0; font-size:16px;">Formações</h2>
-          <button id="btn-add-formacao" title="Adicionar formação">+ Add</button>
-        </div>
-        <ul id="lista-formacoes" class="lista-formacoes"></ul>
-        <div class="hint">Dica: clique para ativar, <b>duplo clique para renomear</b>, SHIFT+clique para editar tempos.</div>
-        <div class="painel-bailarinos">
-          <h3>Bailarinos</h3>
-          <input id="busca-bailarinos" class="busca-input" placeholder="Buscar bailarino..." />
-          <ul id="lista-bailarinos" class="lista-bailarinos"></ul>
-        </div>
-      </aside>
+<!-- RAIL + DOCK LATERAL -->
+<nav id="side-rail" class="side-rail">
+  <button id="btn-panel-formacoes" class="rail-btn active" title="Formações" aria-label="Formações">
+    <!-- ícone simples -->
+    <span class="ico">🧩</span>
+  </button>
+  <button id="btn-panel-bailarinos" class="rail-btn" title="Bailarinos" aria-label="Bailarinos">
+    <span class="ico">🕺</span>
+  </button>
+</nav>
+
+<aside id="side-dock" class="side-dock">
+  <!-- Painel: FORMAÇÕES -->
+  <section id="panel-formacoes" class="side-panel">
+    <div class="panel-head">
+      <h2>Formações</h2>
+      <button id="btn-add-formacao" title="Adicionar formação">+ Add</button>
+    </div>
+    <ul id="lista-formacoes" class="lista-formacoes"></ul>
+    <div class="hint">Dica: clique para ativar, <b>duplo clique para renomear</b>, SHIFT+clique para editar tempos.</div>
+  </section>
+
+  <!-- Painel: BAILARINOS -->
+  <section id="panel-bailarinos" class="side-panel hidden">
+    <div class="panel-head">
+      <h2>Bailarinos</h2>
+    </div>
+    <input id="busca-bailarinos" class="busca-input" placeholder="Buscar bailarino..." />
+    <ul id="lista-bailarinos" class="lista-bailarinos"></ul>
+  </section>
+</aside>
+
 
       <div class="palco-wrapper">
         <div class="palco-controles">
@@ -153,26 +384,32 @@
             <button id="btn-add-bailarino">+ Adicionar Bailarino</button>
             <span class="hint">SHIFT+arrastar para grade. Duplo clique para renomear.</span>
           </div>
-          <div class="controles-playback">
-            <button id="btn-anterior" title="Anterior (←)">Anterior</button>
-            <button id="btn-play-pause" title="Play/Pause (Barra de espaço)">▶ Play</button>
-            <button id="btn-proxima" title="Próxima (→)">Próxima</button>
-          </div>
         </div>
         <main id="palco" class="palco-container"></main>
       </div>
     </div>
 
     <footer class="linha-do-tempo">
-      <div id="timeline-toolbar" style="display:flex; align-items:center; justify-content: space-between; gap:8px; margin-bottom:6px;">
-        <div class="hint">Timeline</div>
-        <div id="zoom-controls" style="display:flex; gap:6px; align-items:center;">
+      <!-- NOVO toolbar em 3 colunas -->
+      <div id="timeline-toolbar" class="timeline-toolbar">
+        <div class="tl-left hint">Timeline</div>
+    
+        <!-- CONTROLES CENTRALIZADOS (mesmos IDs de antes!) -->
+        <div id="transport" class="transport">
+          <button id="btn-anterior" class="icon-btn" title="Anterior (←)" aria-label="Anterior">«</button>
+          <button id="btn-play-pause" class="icon-btn primary" title="Play/Pause (Barra de espaço)" aria-label="Play">▶</button>
+          <button id="btn-proxima" class="icon-btn" title="Próxima (→)" aria-label="Próxima">»</button>
+          <span id="time-display" class="timecode">00:00.0</span>
+        </div>
+    
+        <div class="tl-right" id="zoom-controls">
           <button id="zoom-out" title="Diminuir zoom">−</button>
           <span id="zoom-value" class="hint">100%</span>
           <button id="zoom-in" title="Aumentar zoom">+</button>
           <button id="zoom-reset" title="Resetar para 100%">⟲</button>
         </div>
-      </div>    
+      </div>
+    
       <div id="time-ruler" class="time-ruler"></div>
       <div class="timeline-container" id="timeline-container">
         <div id="timeline-blocos" class="timeline-blocos"></div>
@@ -182,6 +419,7 @@
         <canvas id="audio-canvas"></canvas>
       </div>
     </footer>
+    
 
     <script type="module" src="/src/main.ts"></script>
   </body>

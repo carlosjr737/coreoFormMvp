@@ -7,6 +7,12 @@ import { exportarJSON, importarJSON } from './io';
 import { ensureAudioContext, getAudioBuffer, getAudioContext, getAudioSource, setAudioSource } from './audio';
 
 let _isPlaying = isPlaying;
+function setPlayUI(playing: boolean) {
+  if (!btnPlayPause) return;
+  btnPlayPause.textContent = playing ? '⏸' : '▶';
+  btnPlayPause.setAttribute('aria-label', playing ? 'Pausar' : 'Tocar');
+}
+
 let _playbackLoopId: number | undefined = playbackLoopId;
 let _tempoInicioPlayback = tempoInicioPlayback;
 let _tempoPausadoAcumulado = tempoPausadoAcumulado;
@@ -69,7 +75,9 @@ export async function startPlayback() {
   if (_isPlaying) return;
   _isPlaying = true;
   playheadEl.style.display = 'block';
-  btnPlayPause.textContent = '❚❚ Pause';
+  setPlayUI(true);
+
+
 
   const audioBuffer = getAudioBuffer();
   const ctx = ensureAudioContext();
@@ -124,7 +132,8 @@ export async function startPlayback() {
 export function pausePlayback() {
   if (!_isPlaying) return;
   _isPlaying = false;
-  btnPlayPause.textContent = '▶ Play';
+  setPlayUI(false);
+
   if (_playbackLoopId) cancelAnimationFrame(_playbackLoopId);
 
   const node = getAudioSource();

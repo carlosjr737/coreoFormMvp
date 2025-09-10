@@ -1,8 +1,31 @@
 import { BASE_PX_PER_SEC, db, formacaoAtivaId, globalMsAtual, setFormacaoAtiva, setGlobalMs, zoom } from './state';
-import { listaFormacoesEl, timeRulerEl, timelineBlocosEl, timelineContainerEl, playheadEl, tituloProjetoEl, btnZoomIn, btnZoomOut, btnZoomReset, zoomValueEl, audioTrackEl } from './dom';
+import {
+  listaFormacoesEl, timeRulerEl, timelineBlocosEl, timelineContainerEl, playheadEl,
+  tituloProjetoEl, btnZoomIn, btnZoomOut, btnZoomReset, zoomValueEl, audioTrackEl,
+  timeDisplayEl
+} from './dom';
 import { renderizarPalco } from './stage';
 import { renderizarPainelBailarinos } from './bailarinos';
 import { getAudioBuffer, renderizarFaixaAudio } from './audio';
+
+function deepClone<T>(x: T): T {
+  return JSON.parse(JSON.stringify(x));
+}
+function getFormationWithMostMarkers() {
+  if (!db.formacoes.length) return null;
+  return db.formacoes.reduce((best, f) =>
+    (f.marcadores?.length || 0) > (best.marcadores?.length || 0) ? f : best
+  , db.formacoes[0]);
+}
+
+/** 00:SS.s ou MM:SS.s */
+function formatTimecode(ms: number): string {
+  const totalSec = Math.max(0, ms / 1000);
+  const m = Math.floor(totalSec / 60);
+  const s = Math.floor(totalSec % 60);
+  const d = Math.floor((totalSec - Math.floor(totalSec)) * 10);
+  return (m > 0 ? `${m}:${String(s).padStart(2,'0')}` : `00:${String(s).padStart(2,'0')}`) + `.${d}`;
+}
 
 export function getTimelineTotalSegundos(): number {
   const totalFormacoes = db.formacoes.reduce((acc,f)=> acc + f.duracaoSegundos + f.tempoTransicaoEntradaSegundos, 0);
@@ -23,7 +46,7 @@ export function ensurePlayheadInView() {
   const viewWidth = timelineContainerEl.clientWidth;
   const viewEnd = viewStart + viewWidth;
 
-  const margin = Math.max(40, Math.floor(viewWidth * 0.2)); // zona de conforto
+  const margin = Math.max(40, Math.floor(viewWidth * 0.2));
   const leftGuard = viewStart + margin;
   const rightGuard = viewEnd - margin;
 
@@ -64,6 +87,45 @@ export function renderizarBarraLateral() {
     listaFormacoesEl.appendChild(li);
   });
 }
+function updateAddTile() {
+  const ativaEl = timelineBlocosEl.querySelector('.bloco-formacao.ativa') as HTMLElement | null;
+  if (!ativaEl) return;
+
+  const GAP = 8;           // espaço horizontal entre o card e o "+"
+  const TILE_W = 140;      // largura do tile
+
+  // cria o tile se ainda não existir
+  let addTile = timelineBlocosEl.querySelector('.add-formation-tile') as HTMLButtonElement | null;
+  if (!addTile) {
+    addTile = document.createElement('button');
+    addTile.type = 'button';
+    addTile.className = 'add-formation-tile';
+    addTile.style.position = 'absolute';
+    addTile.style.top = '6px';                              // não “pega” a borda do card
+    addTile.style.height = 'calc(100% - 12px)';            // fica dentro da faixa, sem encostar
+    addTile.style.zIndex = '0';                            // SEMPRE por baixo dos cards
+    addTile.innerHTML = '<span class="plus">＋</span>';
+    addTile.title = 'Nova formação após a atual';
+    addTile.addEventListener('click', (e) => {
+      e.stopPropagation();
+      adicionarFormacaoDepois(formacaoAtivaId!);
+    });
+    addTile.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); addTile!.click(); }
+    });
+    (timelineBlocosEl as HTMLElement).style.position = 'relative';
+    timelineBlocosEl.appendChild(addTile);
+  }
+
+  // ancora depois do fim da ativa (sem jamais “entrar” no card)
+  const left = ativaEl.offsetLeft + ativaEl.offsetWidth + GAP;
+  addTile.style.left = `${left}px`;
+
+  // garante largura suficiente para o tile (sem quebrar layout)
+  const needWidth = Math.max(getTotalTimelinePx(), left + TILE_W + 16);
+  timelineBlocosEl.style.width = needWidth + 'px';
+}
+
 
 function iniciarEdicaoFormacao(li: HTMLLIElement, id: string, nomeAtual: string) {
   const nomeSpan = li.querySelector('.nome-formacao') as HTMLElement | null;
@@ -86,10 +148,14 @@ function iniciarEdicaoFormacao(li: HTMLLIElement, id: string, nomeAtual: string)
 
 export function renderizarLinhaDoTempo() {
   timelineBlocosEl.innerHTML = '';
-  const totalSeg = getTimelineTotalSegundos();
-  const totalPx = getTotalTimelinePx();
-  timelineBlocosEl.style.width = totalPx + 'px';
 
+  // dimensões totais
+  const totalSeg = getTimelineTotalSegundos();
+  const totalPx  = getTotalTimelinePx();
+  timelineBlocosEl.style.width = totalPx + 'px';
+  (timelineBlocosEl as HTMLElement).style.position = 'relative'; // para posicionar o tile absoluto
+
+  // desenha TODOS os cards
   db.formacoes.forEach((f) => {
     const tempoTotalDoBloco = f.tempoTransicaoEntradaSegundos + f.duracaoSegundos;
 
@@ -97,27 +163,32 @@ export function renderizarLinhaDoTempo() {
     bloco.className = 'bloco-formacao';
     if (f.id === formacaoAtivaId) bloco.classList.add('ativa');
 
-    const blocoPx = (tempoTotalDoBloco / totalSeg) * totalPx;
-    bloco.style.width = `${blocoPx}px`;
+    const blocoPx = (tempoTotalDoBloco / Math.max(1e-6, totalSeg)) * totalPx;
+    bloco.style.width = `${Math.max(1, Math.round(blocoPx))}px`;
 
     const texto = document.createElement('span');
     texto.textContent = f.nome;
     bloco.appendChild(texto);
 
-    bloco.addEventListener('click', (e: MouseEvent)=> {
+    // clique / duplo clique
+    bloco.addEventListener('click', (e: MouseEvent) => {
       if ((e as any).shiftKey) editarTemposFormacao(f);
       else mudarFormacaoAtiva(f.id);
     });
-    bloco.addEventListener('dblclick', (e)=> {
+    bloco.addEventListener('dblclick', (e) => {
       e.stopPropagation();
       const novo = prompt('Novo nome da formação:', f.nome);
-      if (novo !== null) { const n = novo.trim(); if (n) { f.nome = n; renderizarBarraLateral(); } }
+      if (novo !== null) {
+        const n = novo.trim();
+        if (n) { f.nome = n; renderizarBarraLateral(); }
+      }
     });
 
-    // sub-bloco transição com handle
+    // sub-bloco de transição + handle
     const sub = document.createElement('div');
     sub.className = 'sub-bloco-transicao';
-    if (tempoTotalDoBloco > 0) sub.style.width = `${(f.tempoTransicaoEntradaSegundos / tempoTotalDoBloco) * 100}%`;
+    const totalBloco = tempoTotalDoBloco;
+    if (totalBloco > 0) sub.style.width = `${(f.tempoTransicaoEntradaSegundos / totalBloco) * 100}%`;
     sub.title = `Transição: ${f.tempoTransicaoEntradaSegundos}s`;
 
     const handleSplit = document.createElement('div');
@@ -128,10 +199,10 @@ export function renderizarLinhaDoTempo() {
       const blocoRect = bloco.getBoundingClientRect();
       const startX = (e as MouseEvent).clientX;
       const transIni = f.tempoTransicaoEntradaSegundos;
-      const totalBloco = f.tempoTransicaoEntradaSegundos + f.duracaoSegundos;
+
       function onMove(ev: MouseEvent) {
         const dx = ev.clientX - startX;
-        const secPerPx = totalBloco / (blocoRect.width || 1);
+        const secPerPx = totalBloco / Math.max(1, blocoRect.width);
         let novaTrans = transIni + dx * secPerPx;
         const minDur = 0.1;
         novaTrans = Math.max(0, Math.min(totalBloco - minDur, novaTrans));
@@ -140,7 +211,7 @@ export function renderizarLinhaDoTempo() {
       }
       function onUp(ev: MouseEvent) {
         const dx = ev.clientX - startX;
-        const secPerPx = totalBloco / (blocoRect.width || 1);
+        const secPerPx = totalBloco / Math.max(1, blocoRect.width);
         let novaTrans = transIni + dx * secPerPx;
         const minDur = 0.1;
         novaTrans = Math.max(0, Math.min(totalBloco - minDur, novaTrans));
@@ -156,6 +227,7 @@ export function renderizarLinhaDoTempo() {
     sub.appendChild(handleSplit);
     bloco.appendChild(sub);
 
+    // handle de duração (fim do card)
     const handleEnd = document.createElement('div');
     handleEnd.className = 'handle handle-end';
     handleEnd.title = 'Arraste para ajustar duração';
@@ -166,17 +238,18 @@ export function renderizarLinhaDoTempo() {
       const durIni = f.duracaoSegundos;
       const transConst = f.tempoTransicaoEntradaSegundos;
       const totalTimelineLocal = getTimelineTotalSegundos();
+
       function onMove(ev: MouseEvent) {
         const dx = ev.clientX - startX;
-        const secPerPxContainer = totalTimelineLocal / (timelineRect.width || 1);
+        const secPerPxContainer = totalTimelineLocal / Math.max(1, timelineRect.width);
         let novaDur = durIni + dx * secPerPxContainer * (timelineContainerEl.clientWidth / getTotalTimelinePx());
         novaDur = Math.max(0.1, novaDur);
-        if (sub) sub.style.width = `${(transConst / (transConst + novaDur)) * 100}%`;
+        sub.style.width = `${(transConst / (transConst + novaDur)) * 100}%`;
         bloco.title = `Duração: ${novaDur.toFixed(2)}s`;
       }
       function onUp(ev: MouseEvent) {
         const dx = ev.clientX - startX;
-        const secPerPxContainer = totalTimelineLocal / (timelineRect.width || 1);
+        const secPerPxContainer = totalTimelineLocal / Math.max(1, timelineRect.width);
         let novaDur = durIni + dx * secPerPxContainer * (timelineContainerEl.clientWidth / getTotalTimelinePx());
         novaDur = Math.max(0.1, novaDur);
         f.duracaoSegundos = +novaDur.toFixed(2);
@@ -190,11 +263,45 @@ export function renderizarLinhaDoTempo() {
     bloco.appendChild(handleEnd);
 
     timelineBlocosEl.appendChild(bloco);
+  }); // fecha o forEach
+
+  // tile "+" único, fora dos cards, posicionado após o card ATIVO
+  const oldTile = timelineBlocosEl.querySelector('.add-formation-tile');
+  if (oldTile) oldTile.remove();
+
+  const ativaEl = timelineBlocosEl.querySelector('.bloco-formacao.ativa') as HTMLElement | null;
+  if (!ativaEl) return; // sem ativa, nada pra posicionar
+
+  const GAP = 8, TILE_W = 140;
+  const tileLeft = ativaEl.offsetLeft + ativaEl.offsetWidth + GAP;
+
+  // garante largura suficiente pra aparecer o tile
+  const alvoW = Math.max(totalPx, tileLeft + TILE_W + 16);
+  timelineBlocosEl.style.width = alvoW + 'px';
+
+  const addTile = document.createElement('button');
+  addTile.type = 'button';
+  addTile.className = 'add-formation-tile';
+  addTile.style.position = 'absolute';
+  addTile.style.left = `${tileLeft}px`;
+  addTile.style.top = '0';
+  addTile.style.height = '100%';
+  addTile.innerHTML = '<span class="plus">＋</span>';
+  addTile.title = 'Nova formação após a atual';
+
+  addTile.addEventListener('click', (e) => {
+    e.stopPropagation();
+    adicionarFormacaoDepois(formacaoAtivaId!);
   });
+  addTile.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); addTile.click(); }
+  });
+
+  timelineBlocosEl.appendChild(addTile);
 }
 
 /* ======== RÉGUA (helpers + render) ======== */
-const TARGET_MAJOR_PX = 120; // espaçamento alvo entre marcas principais (px)
+const TARGET_MAJOR_PX = 120;
 
 function escolherPassos(pxPorSegundo: number) {
   const candidates = [0.1, 0.2, 0.5, 1, 2, 4, 5, 8, 10, 15, 20, 30, 60, 120, 300, 600];
@@ -326,12 +433,57 @@ export function removerFormacao(id: string) {
 }
 
 export function adicionarFormacao() {
-  const novaOrdem = db.formacoes.length ? Math.max(...db.formacoes.map(f => f.ordem)) + 1 : 1;
-  const fAtual = db.formacoes.find(f => f.id === formacaoAtivaId);
-  const nova = { id: `f${Date.now()}`, nome: `Formação ${novaOrdem}`, ordem: novaOrdem, duracaoSegundos: 3, tempoTransicaoEntradaSegundos: 1, marcadores: JSON.parse(JSON.stringify(fAtual?.marcadores || [])) };
-  db.formacoes.push(nova as any);
+  const novaOrdem = db.formacoes.length
+    ? Math.max(...db.formacoes.map(f => f.ordem)) + 1
+    : 1;
+
+  // base padrão: formação ativa; fallback: formação com MAIS marcadores
+  const base =
+    db.formacoes.find(f => f.id === formacaoAtivaId) ||
+    getFormationWithMostMarkers();
+
+  const nova = {
+    id: `f${Date.now()}`,
+    nome: `Formação ${novaOrdem}`,
+    ordem: novaOrdem,
+    duracaoSegundos: 3,
+    tempoTransicaoEntradaSegundos: 1,
+    marcadores: deepClone(base?.marcadores || [])
+  } as any;
+
+  db.formacoes.push(nova);
   mudarFormacaoAtiva(nova.id);
 }
+
+
+export function adicionarFormacaoDepois(id: string) {
+  const idx = db.formacoes.findIndex(f => f.id === id);
+  const ref = idx >= 0 ? db.formacoes[idx] : null;
+
+  const novaOrdem = ref
+    ? ref.ordem + 1
+    : (db.formacoes.length ? Math.max(...db.formacoes.map(f=>f.ordem)) + 1 : 1);
+
+  // abre espaço nas ordens
+  db.formacoes.forEach(f => { if (f.ordem >= novaOrdem) f.ordem += 1; });
+
+  // base padrão: a "ref"; fallback: a que tem MAIS marcadores
+  const base = ref || getFormationWithMostMarkers();
+
+  const nova = {
+    id: `f${Date.now()}`,
+    nome: `Formação ${novaOrdem}`,
+    ordem: novaOrdem,
+    duracaoSegundos: 3,
+    tempoTransicaoEntradaSegundos: 1,
+    marcadores: deepClone(base?.marcadores || [])
+  } as any;
+
+  db.formacoes.push(nova);
+  db.formacoes.sort((a,b)=> a.ordem - b.ordem);
+  mudarFormacaoAtiva(nova.id);
+}
+
 
 export function mudarFormacaoAtiva(id: string) {
   setFormacaoAtiva(id);
@@ -372,20 +524,41 @@ export function renderAtGlobalMs(globalMs: number) {
 
   posicionarPlayheadNoPercentual(progressoTotal);
   ensurePlayheadInView();
+  if (timeDisplayEl) timeDisplayEl.textContent = formatTimecode(globalMs);
   if (!fez) {
     const last = db.formacoes[db.formacoes.length - 1];
     if (last) document.dispatchEvent(new CustomEvent('stage-render-pause', { detail: { formacao: last } }));
   }
+
+  updateAddTile();
 }
 
 export function initZoomControls(onZoomChange: (z:number)=>void) {
   function setZoomUI(z: number) {
     zoomValueEl.textContent = Math.round(z * 100) + '%';
   }
-  btnZoomOut.addEventListener('click', ()=> { onZoomChange(zoom - 0.25); setZoomUI(zoom); renderizarReguaTempo(); renderizarLinhaDoTempo(); renderAtGlobalMs(globalMsAtual); ensurePlayheadInView(); renderizarFaixaAudio(); });
-  btnZoomIn.addEventListener('click', ()=> { onZoomChange(zoom + 0.25); setZoomUI(zoom); renderizarReguaTempo(); renderizarLinhaDoTempo(); renderAtGlobalMs(globalMsAtual); ensurePlayheadInView(); renderizarFaixaAudio(); });
-  btnZoomReset.addEventListener('click', ()=> { onZoomChange(1); setZoomUI(zoom); renderizarReguaTempo(); renderizarLinhaDoTempo(); renderAtGlobalMs(globalMsAtual); ensurePlayheadInView(); renderizarFaixaAudio(); });
-  setZoomUI(zoom);
+  btnZoomOut.addEventListener('click', ()=> {
+    onZoomChange(zoom - 0.25);
+    setZoomUI(zoom);
+    renderizarReguaTempo(); renderizarLinhaDoTempo(); renderAtGlobalMs(globalMsAtual);
+    ensurePlayheadInView(); renderizarFaixaAudio();
+    updateAddTile();
+  });
+  btnZoomIn.addEventListener('click', ()=> {
+    onZoomChange(zoom + 0.25);
+    setZoomUI(zoom);
+    renderizarReguaTempo(); renderizarLinhaDoTempo(); renderAtGlobalMs(globalMsAtual);
+    ensurePlayheadInView(); renderizarFaixaAudio();
+    updateAddTile();
+  });
+  btnZoomReset.addEventListener('click', ()=> {
+    onZoomChange(1);
+    setZoomUI(zoom);
+    renderizarReguaTempo(); renderizarLinhaDoTempo(); renderAtGlobalMs(globalMsAtual);
+    ensurePlayheadInView(); renderizarFaixaAudio();
+    updateAddTile();
+  });
+    setZoomUI(zoom);
 }
 
 export function initScrubHandlers() {
