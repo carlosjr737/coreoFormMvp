@@ -8,7 +8,7 @@ import { initPersistenceUI, refreshProjectListUI } from './persist';
 import { initUI } from './ui';
 document.addEventListener('DOMContentLoaded', () => initUI());
 
-initUI();
+
 // logo após sua inicialização atual:
 initAuthUI();
 initPersistenceUI();
@@ -32,13 +32,12 @@ document.addEventListener('stage-render-pause' as any, (e:any)=> {
 // 👇 re-render quando o banco muda (cria 1ª formação, adiciona bailarino, etc.)
 document.addEventListener('db-changed' as any, () => renderizarTudo(true));
 
-
+initUI();
 initZoomControls(setZoom);
 initScrubHandlers();
 initPlaybackAndIO();
 initAudioUI();
 initBailarinoUI(); // <-- LIGA O BOTÃO + Adicionar Bailarino
-initSidePanels();
 renderizarTudo(true);
 
 window.addEventListener('resize', ()=> renderizarTudo());
