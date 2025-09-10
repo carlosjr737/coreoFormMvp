@@ -11,10 +11,10 @@ export function initSidePanels() {
 
   function show(panel: 'f'|'b') {
     const fActive = panel === 'f';
-    btnF.classList.toggle('active', fActive);
-    btnB.classList.toggle('active', !fActive);
-    pF.classList.toggle('hidden', !fActive);
-    pB.classList.toggle('hidden', fActive);
+    btnF?.classList.toggle('active', fActive);
+    btnB?.classList.toggle('active', !fActive);
+    pF?.classList.toggle('hidden', !fActive);
+    pB?.classList.toggle('hidden', fActive);
 
     if (fActive) renderizarBarraLateral();
     else renderizarPainelBailarinos();

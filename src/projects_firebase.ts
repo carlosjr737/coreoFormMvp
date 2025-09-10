@@ -1,12 +1,7 @@
 // src/projects_firebase.ts
 import { db as localDb } from './state';
 import { dbFs, st } from './firebase';
-import {
-  doc, setDoc, getDoc, getDocs, collection, serverTimestamp
-} from 'firebase/firestore';
-import {
-  ref, uploadBytes, getDownloadURL, deleteObject
-} from 'firebase/storage';
+import { db, storage } from './firebase';
 import { ensureAudioContext, getAudioBuffer } from './audio';
 
 // Tipos simples
