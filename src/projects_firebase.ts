@@ -1,8 +1,13 @@
 // src/projects_firebase.ts
 import { db as localDb } from './state';
-import { dbFs, st } from './firebase';
-import { db, storage } from './firebase';
+
 import { ensureAudioContext, getAudioBuffer } from './audio';
+
+import {
+  dbFs, st,                // <- do wrapper
+  collection, doc, getDocs, getDoc, setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp,
+  ref, uploadBytes, getDownloadURL, deleteObject
+} from './firebase';
 
 // Tipos simples
 type ProjectMeta = {
@@ -30,7 +35,7 @@ export async function saveProjectFirebase(projectId?: string): Promise<string> {
 
   // 1) salva JSON no Storage
   const stateBlob = new Blob([JSON.stringify(localDb)], { type: 'application/json' });
-  await uploadBytes(ref(st, `projects/${id}/state.json`), stateBlob);
+  await uploadBytes(sRef(st, `projects/${id}/state.json`), stateBlob);
 
   // 2) se houver áudio decodificado, salve também o arquivo bruto se você o tiver (opcional).
   // Se seu fluxo já guarda o Blob do áudio original, suba aqui. Como fallback, só meta a flag.
@@ -59,7 +64,7 @@ export async function listProjectsFirebase(): Promise<Array<{id:string; titulo:s
 }
 
 export async function openProjectFirebase(id: string): Promise<void> {
-  const url = await getDownloadURL(ref(st, `projects/${id}/state.json`));
+  const url = await getDownloadURL(sRef(st, `projects/${id}/state.json`));
   const json = await (await fetch(url)).json();
   // aplica no estado
   Object.assign(localDb, json);
@@ -68,7 +73,7 @@ export async function openProjectFirebase(id: string): Promise<void> {
 export async function deleteProjectFirebase(id: string): Promise<void> {
   // apaga arquivos conhecidos; ignore erros
   await Promise.allSettled([
-    deleteObject(ref(st, `projects/${id}/state.json`)),
+    deleteObject(sRef(st, `projects/${id}/state.json`)),
   ]);
   // Firestore
   // (Você pode também deletar o doc do Firestore se quiser)

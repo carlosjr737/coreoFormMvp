@@ -1,5 +1,6 @@
 // src/persist.ts
 import { dbx } from './firebase';
+import { db } from './firebase';
 import { getUser } from './auth';
 import {
   collection, addDoc, setDoc, getDocs, doc, getDoc,

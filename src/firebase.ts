@@ -1,8 +1,17 @@
 // src/firebase.ts
-import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
+// src/firebase.ts
+import { initializeApp, type FirebaseApp } from 'firebase/app';
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, type Auth
+} from 'firebase/auth';
+import {
+  getFirestore, type Firestore, collection, doc, getDoc, getDocs,
+  setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp
+} from 'firebase/firestore';
+import {
+  getStorage, type FirebaseStorage, ref as storageRef,
+  uploadBytes, getDownloadURL, deleteObject
+} from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FB_API_KEY,
@@ -13,11 +22,16 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FB_APP_ID,
 };
 
-export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
-export const db = getFirestore(app);
-export const storage = getStorage(app);
+export const app: FirebaseApp = initializeApp(firebaseConfig);
 
-// ===== compat antigos =====
-export { db as dbFs, storage as st };
+// Auth / DB / Storage
+export const auth: Auth = getAuth(app);
+export const dbFs: Firestore = getFirestore(app);
+export const st: FirebaseStorage = getStorage(app);
+
+// Re-exports de conveniência (assim outros arquivos importam só de './firebase')
+export {
+  GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
+  collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp,
+  storageRef as ref, uploadBytes, getDownloadURL, deleteObject,
+};

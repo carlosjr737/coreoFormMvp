@@ -2,10 +2,13 @@ import { renderizarBarraLateral } from './timeline';
 import { renderizarPainelBailarinos } from './bailarinos';
 
 export function initSidePanels() {
-  const btnF = document.getElementById('btn-panel-formacoes') as HTMLButtonElement | null;
-  const btnB = document.getElementById('btn-panel-bailarinos') as HTMLButtonElement | null;
-  const pF = document.getElementById('panel-formacoes') as HTMLElement | null;
-  const pB = document.getElementById('panel-bailarinos') as HTMLElement | null;
+  const btnN = document.getElementById('btn-new') as HTMLButtonElement | null;
+  if (btnN) btnN.addEventListener('click', onNew);
+  
+  const btnB = document.getElementById('btn-save') as HTMLButtonElement | null;
+  if (btnB) btnB.addEventListener('click', onSave);
+  const pF = document.getElementById('project-form') as HTMLFormElement | null;
+  const pB = document.getElementById('project-backdrop') as HTMLDivElement | null;
 
   if (!btnF || !btnB || !pF || !pB) return;
 
