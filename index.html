@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="pt-BR">
   <head>
+    <!-- Controles de gravação -->
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CoreoMVP v9 — Sincronização de Áudio (TS Modules)</title>
@@ -32,7 +34,7 @@
       .palco-container {
         position: relative;
         width: min(100%, 1200px);   /* limita a largura máxima para não estourar a viewport */
-        aspect-ratio: 16 / 9;       /* <- retangular como a referência */
+        /* aspect-ratio: 16 / 9;       /<- retangular como a referência  */
         margin: 0 auto;
         overflow: hidden;
         background-image:
@@ -319,7 +321,74 @@
 }
 
 
+  /* Modo apresentação: esconda tudo que não é palco/timeline */
+  body.presentation header,
+  body.presentation .sidebar,
+  body.presentation .controles,
+  body.presentation .painel-projetos,
+  body.presentation .topbar,
+  body.presentation .footer-controles {
+    display: none !important;
+  }
+
+  /* Indicadores de estado */
+  body.recording .rec-indicator { display: inline; }
+  body.recording #btn-start-present-rec { opacity:.5; pointer-events:none; }
+  body.recording #btn-stop-present-rec  { opacity:1; pointer-events:auto; }
+  /* Ajuste os seletores aos seus elementos reais */
+  body.presentation [data-role="audio-name"],
+  body.presentation #audio-file-name, */
+  body.presentation .audio-file-label,
+  body.presentation .now-playing {
+    display: none !important;}
+  body.presentation #audio-info { display: none !important; }
+  body.presentation #audio-info { display: none !important; } /* esconde nome do áudio */
+  body.recording .rec-indicator { display:inline; }
+  body.recording #btn-start-present-rec { opacity:.5; pointer-events:none; }
+  body.recording #btn-stop-present-rec  { opacity:1; pointer-events:auto; }
+  
+    /* Área útil do palco (dentro) — grid mais claro + moldura rosa */
+.palco-container .stage-area{
+  position: absolute;
+  inset: 12px;                 /* deixa uma borda que vira “backstage” */
+  border: 2px solid #cc4a7a;
+  border-radius: 10px;
+  background-image:
+    linear-gradient(rgba(255,255,255,.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.12) 1px, transparent 1px);
+  background-size: 40px 40px, 40px 40px;
+  pointer-events: none;
+}
+
+/* Fora do palco (backstage) — escurece de leve */
+.palco-container::after{
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.18);
+  pointer-events: none;
+}
+
+/* Rótulo “BACKSTAGE” */
+.palco-container .stage-area::after{
+  content: 'BACKSTAGE';
+  position: absolute;
+  top: -8px; left: 50%; transform: translate(-50%, -100%);
+  font-size: 12px; letter-spacing: 1px;
+  color: #cc4a7a; opacity: .6;
+}
+#present-canvas{
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
     </style>
+ -->
+ <div id="present-rec-bar">
+  <button id="btn-start-present-rec">🎥 Gravar (apresentação)</button>
+  <button id="btn-stop-present-rec" disabled>■ Parar</button>
+  <span class="rec-indicator" aria-live="polite" style="display:none">● gravando…</span>
+</div>
   </head>
   <body>
     <header class="barra-superior">
@@ -422,5 +491,13 @@
     
 
     <script type="module" src="/src/main.ts"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('#audio-file-name,[data-role="audio-name"],.audio-file-label,.now-playing')
+          .forEach(el => el.remove());
+      });
+      </script>
+      
+    
   </body>
 </html>

@@ -3,17 +3,56 @@ import { audioCanvas, audioFileInput, audioInfoEl, audioTrackEl, btnCarregarAudi
 import { getTotalTimelinePx, getTimelineTotalSegundos, renderizarTudo } from './timeline';
 import { globalMsAtual } from './state';
 
+
 let audioContext: AudioContext | null = null;
+let masterGain: GainNode | null = null;
+let recDest: MediaStreamAudioDestinationNode | null = null;
 export let audioBuffer: AudioBuffer | null = null;
 let audioSourceNode: AudioBufferSourceNode | null = null;
 let waveformData: number[] | null = null;
+
+
+
 
 export function getAudioBuffer() { return audioBuffer; }
 export function getAudioSource() { return audioSourceNode; }
 export function setAudioSource(n: AudioBufferSourceNode | null) { audioSourceNode = n; }
 export function getWaveformData() { return waveformData; }
 export function setWaveformData(d: number[] | null){ waveformData = d; }
-export function getAudioContext() { return audioContext; }
+export function getAudioContext(): AudioContext {
+  if (!audioContext) audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  return audioContext;
+}
+export function getMasterGain(): GainNode {
+  const ctx = ensureAudioContext();
+  if (!masterGain) {
+    masterGain = ctx.createGain();
+    masterGain.connect(ctx.destination); // alto-falantes
+  }
+  return masterGain;
+}
+
+/** Conecta o source atual no grafo (alto-falantes + gravação). */
+export function wireSourceToGraph(src: AudioBufferSourceNode) {
+  const mg = getMasterGain();
+  try { src.disconnect(); } catch {}
+  src.connect(mg); // masterGain alimenta saída normal e (quando existir) o recDest
+}
+
+/** Prepara o destino de gravação e garante AudioContext ativo. */
+export async function prepareRecordingAudio(): Promise<void> {
+  const ctx = ensureAudioContext();
+  try { await (ctx as any).resume?.(); } catch {}
+  if (!recDest) {
+    recDest = ctx.createMediaStreamDestination();
+    getMasterGain().connect(recDest); // espelha tudo que passa no master
+  }
+}
+/** Stream para o MediaRecorder. */
+export function getRecordingAudioStream(): MediaStream | null {
+  return recDest?.stream ?? null;
+}
+
 export function ensureAudioContext() {
   if (!audioContext) {
     audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -57,6 +96,25 @@ export function carregarArquivoDeAudio(file: File) {
   };
   reader.readAsArrayBuffer(file);
 }
+// src/audio.ts  (ADICIONE ao final do arquivo ou numa seção adequada)
+let _recDest: MediaStreamAudioDestinationNode | null = null;
+
+// src/audio.ts
+export async function ensureRecordingAudioReady(): Promise<void> {
+  const ctx = getAudioContext?.();
+  if (!ctx) return;
+  // Alguns browsers exigem linha abaixo dentro de gesto do usuário
+  await ctx.resume().catch(() => {});
+  // Conecte seu masterGain aqui se existir:
+  // masterGain.connect(_recDest)
+  const node = getAudioSource?.();
+  if (_recDest && node && !(node as any)._connectedToRecDest) {
+    node.connect(_recDest);
+    (node as any)._connectedToRecDest = true;
+  }
+}
+
+
 
 export function processarAudioParaVisualizacao() {
   if (!audioBuffer) return;
@@ -122,4 +180,5 @@ export function renderizarFaixaAudio() {
     const bw = Math.max(1, Math.floor(barWidth));
     ctx.fillRect(x, y, bw, barH);
   }
+  
 }

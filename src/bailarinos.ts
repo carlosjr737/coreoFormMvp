@@ -210,3 +210,30 @@ document.addEventListener('bailarinos-updated', () => {
 
 // re-render em busca
 buscaBailarinosInput?.addEventListener('input', () => renderizarPainelBailarinos());
+
+// === Troca entre os painéis (Formações ↔ Bailarinos) ===
+function setupSidePanels() {
+  const btnForm = document.getElementById('btn-panel-formacoes');
+  const btnDancers = document.getElementById('btn-panel-bailarinos');
+  const panelForm = document.getElementById('panel-formacoes');
+  const panelDancers = document.getElementById('panel-bailarinos');
+
+  const setActive = (which: 'form' | 'dancers') => {
+    btnForm?.classList.toggle('active', which === 'form');
+    btnDancers?.classList.toggle('active', which === 'dancers');
+    panelForm?.classList.toggle('hidden', which !== 'form');
+    panelDancers?.classList.toggle('hidden', which !== 'dancers');
+  };
+
+  btnForm?.addEventListener('click',   () => setActive('form'));
+  btnDancers?.addEventListener('click', () => setActive('dancers'));
+
+  // Começa mostrando "Formações"
+  setActive('form');
+}
+
+// Chama quando a página carrega:
+document.addEventListener('DOMContentLoaded', () => {
+  setupSidePanels();
+});
+

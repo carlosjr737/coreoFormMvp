@@ -4,7 +4,7 @@ import { adicionarFormacao, calcularTempoAcumuladoAteFormacao, getTimelineTotalM
 import { db, formacaoAtivaId, globalMsAtual, isPlaying, playbackLoopId, tempoInicioPlayback, tempoPausadoAcumulado } from './state';
 import { renderizarPalco, renderizarPalcoEmTransicao, renderizarPalcoComFormacao } from './stage';
 import { exportarJSON, importarJSON } from './io';
-import { ensureAudioContext, getAudioBuffer, getAudioContext, getAudioSource, setAudioSource } from './audio';
+import { ensureAudioContext, getAudioBuffer, getAudioContext, getAudioSource, setAudioSource, wireSourceToGraph } from './audio';
 
 let _isPlaying = isPlaying;
 function setPlayUI(playing: boolean) {
@@ -95,12 +95,16 @@ export async function startPlayback() {
   if (audioBuffer && ctx) {
     const node = ctx.createBufferSource();
     node.buffer = audioBuffer;
-    node.connect(ctx.destination);
-    node.onended = ()=> stopPlayback();
-    const offsetSec = Math.min(offsetMs / 1000, Math.max(0, audioBuffer.duration - 0.001));
-    node.start(0, offsetSec);
-    _tempoInicioPlayback = ctx.currentTime - offsetSec;
-    setAudioSource(node);
+    // Conecta áudio do play ao master (alto-falantes + gravação)
+wireSourceToGraph(node);
+
+
+node.onended = ()=> stopPlayback();
+const offsetSec = Math.min(offsetMs / 1000, Math.max(0, audioBuffer.duration - 0.001));
+node.start(0, offsetSec);
+_tempoInicioPlayback = ctx.currentTime - offsetSec;
+setAudioSource(node);
+
   } else {
     _tempoInicioPlayback = performance.now() - offsetMs;
   }
