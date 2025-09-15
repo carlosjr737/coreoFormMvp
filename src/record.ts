@@ -17,13 +17,14 @@ function pickMime(): string | undefined {
 
 export async function startRecording() {
   // Dica: escolha a ABA do navegador e marque "compartilhar áudio da guia"
-  stream = await (navigator.mediaDevices as any).getDisplayMedia({
+  const newStream: MediaStream = await (navigator.mediaDevices as any).getDisplayMedia({
     video: { frameRate: 60 }, // 60fps quando possível
     audio: true               // habilita áudio da aba (se selecionado pelo usuário)
   });
+  stream = newStream;
 
   const mimeType = pickMime();
-  mr = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+  mr = new MediaRecorder(newStream, mimeType ? { mimeType } : undefined);
   chunks = [];
 
   mr.ondataavailable = (e) => { if (e.data?.size) chunks.push(e.data); };
