@@ -3,20 +3,43 @@ import { initPlaybackAndIO } from './playback';
 import { renderizarPalco, renderizarPalcoEmTransicao, renderizarPalcoComFormacao, initBailarinoUI } from './stage'; // <-- ADICIONE initBailarinoUI
 import { setZoom } from './state';
 import { initAudioUI } from './audio';
-import { initAuthUI } from './auth';
+import { requireAuth, logout, getUser } from './auth';
 import { initPersistenceUI, refreshProjectListUI } from './persist';
 import { initUI } from './ui';
 import { startRecording, stopRecording } from './record';
 import { startPresentationRecording, stopPresentationRecording } from './record_canvas';
+import { btnLogout, userBadgeEl } from './dom';
 
 document.addEventListener('DOMContentLoaded', () => initUI());
 
 
 // logo após sua inicialização atual:
-initAuthUI();
+requireAuth();
 initPersistenceUI();
 // tenta preencher a combo de projetos quando possível
 setTimeout(refreshProjectListUI, 600);
+
+btnLogout?.addEventListener('click', async () => {
+  try {
+    await logout();
+  } catch (e) {
+    console.error(e);
+  }
+});
+
+const updateAuthUI = () => {
+  const user = getUser();
+  if (user) {
+    if (btnLogout) btnLogout.style.display = '';
+    if (userBadgeEl) userBadgeEl.textContent = user.displayName || user.email || 'logado';
+  } else {
+    if (btnLogout) btnLogout.style.display = 'none';
+    if (userBadgeEl) userBadgeEl.textContent = 'offline';
+  }
+};
+
+document.addEventListener('auth-changed' as any, updateAuthUI);
+updateAuthUI();
 
 document.addEventListener('DOMContentLoaded', () => {
   const btnStart = document.getElementById('btn-start-present-rec') as HTMLButtonElement | null;
