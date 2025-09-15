@@ -1,38 +1,35 @@
 // src/auth.ts
 import { auth, provider, signInWithPopup, signOut, onAuthStateChanged } from './firebase';
 import type { User } from 'firebase/auth';
-import { renderizarTudo } from './timeline';
-import { btnLogin, btnLogout, userBadgeEl } from './dom';
 
 let _user: User | null = null;
 export function getUser(){ return _user; }
 
-export function initAuthUI() {
-  btnLogin?.addEventListener('click', async () => {
-    try { await signInWithPopup(auth, provider); } catch (e) { console.error(e); }
-  });
+export async function login() {
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (e) {
+    console.error(e);
+  }
+}
 
-  btnLogout?.addEventListener('click', async () => {
-    try { await signOut(auth); } catch (e) { console.error(e); }
-  });
+export async function logout() {
+  try {
+    await signOut(auth);
+  } catch (e) {
+    console.error(e);
+  }
+  window.location.href = 'landing.html';
+}
 
+export function requireAuth() {
   onAuthStateChanged(auth, (u) => {
     _user = u;
-
-    if (u) {
-      if (btnLogin) btnLogin.style.display = 'none';
-      if (btnLogout) btnLogout.style.display = '';
-      if (userBadgeEl) userBadgeEl.textContent = u.displayName || u.email || 'logado';
-    } else {
-      if (btnLogin) btnLogin.style.display = '';
-      if (btnLogout) btnLogout.style.display = 'none';
-      if (userBadgeEl) userBadgeEl.textContent = 'offline';
-    }
-
     document.dispatchEvent(new CustomEvent('auth-changed', {
       detail: u ? { uid: u.uid } : null
     }));
-
-    renderizarTudo();
+    if (!u) {
+      window.location.href = 'landing.html';
+    }
   });
 }
