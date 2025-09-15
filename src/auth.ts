@@ -7,10 +7,12 @@ import { btnLogin, btnLogout, userBadgeEl } from './dom';
 let _user: User | null = null;
 export function getUser(){ return _user; }
 
+export async function signIn() {
+  try { await signInWithPopup(auth, provider); } catch (e) { console.error(e); }
+}
+
 export function initAuthUI() {
-  btnLogin?.addEventListener('click', async () => {
-    try { await signInWithPopup(auth, provider); } catch (e) { console.error(e); }
-  });
+  btnLogin?.addEventListener('click', signIn);
 
   btnLogout?.addEventListener('click', async () => {
     try { await signOut(auth); } catch (e) { console.error(e); }
