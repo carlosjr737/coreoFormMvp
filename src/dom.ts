@@ -40,9 +40,6 @@ export const btnZoomReset = el<HTMLButtonElement>('zoom-reset');
 export const zoomValueEl = el<HTMLSpanElement>('zoom-value');
 
 // Firebase/auth/projetos
-export const btnLogin       = document.getElementById('btn-login') as HTMLButtonElement;
-export const btnLogout      = document.getElementById('btn-logout') as HTMLButtonElement;
-export const userBadgeEl    = document.getElementById('user-badge') as HTMLSpanElement;
 
 export const btnSalvarProjeto = document.getElementById('btn-salvar-projeto') as HTMLButtonElement;
 export const btnNovoProjeto   = document.getElementById('btn-novo-projeto') as HTMLButtonElement;
