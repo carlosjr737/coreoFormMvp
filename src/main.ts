@@ -3,7 +3,8 @@ import { initPlaybackAndIO } from './playback';
 import { renderizarPalco, renderizarPalcoEmTransicao, renderizarPalcoComFormacao, initBailarinoUI } from './stage'; // <-- ADICIONE initBailarinoUI
 import { setZoom } from './state';
 import { initAudioUI } from './audio';
-import { initAuthUI } from './auth';
+import { initAuthUI } from './auth-ui';
+import { getUser } from './auth';
 import { initPersistenceUI, refreshProjectListUI } from './persist';
 import { initUI } from './ui';
 import { startRecording, stopRecording } from './record';
@@ -13,7 +14,17 @@ document.addEventListener('DOMContentLoaded', () => initUI());
 
 
 // logo após sua inicialização atual:
-initAuthUI();
+document.addEventListener('auth-changed', () => {
+  if (!getUser()) {
+    window.location.href = '/login.html';
+  }
+});
+
+initAuthUI({
+  btnLogin: document.getElementById('btn-login') as HTMLButtonElement | null,
+  btnLogout: document.getElementById('btn-logout') as HTMLButtonElement | null,
+  userBadgeEl: document.getElementById('user-badge') as HTMLSpanElement | null,
+});
 initPersistenceUI();
 // tenta preencher a combo de projetos quando possível
 setTimeout(refreshProjectListUI, 600);
