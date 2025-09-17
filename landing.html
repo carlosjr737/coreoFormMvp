@@ -10,6 +10,7 @@
     />
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@400;600&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
 
       :root {
         --color-night: #04060f;
@@ -111,21 +112,22 @@
       }
 
       .brand {
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        gap: 14px;
+        gap: 16px;
+        color: inherit;
+        text-decoration: none;
+        transition: opacity 0.2s ease;
       }
 
-      .brand-mark {
-        width: 48px;
-        height: 48px;
-        border-radius: 16px;
-        background: linear-gradient(145deg, rgba(244, 114, 182, 0.28), rgba(168, 85, 247, 0.35));
-        border: 1px solid rgba(244, 114, 182, 0.45);
-        display: grid;
-        place-items: center;
-        font-weight: 700;
-        letter-spacing: 0.08em;
+      .brand:hover {
+        opacity: 0.9;
+      }
+
+      .brand-logo {
+        height: 52px;
+        width: auto;
+        display: block;
       }
 
       .brand strong {
@@ -221,14 +223,48 @@
         display: flex;
         flex-direction: column;
         gap: 120px;
-        padding: 40px 0 0;
+        padding: 80px 0 0;
       }
 
       section.hero {
         position: relative;
       }
 
+      .hero-background {
+        position: absolute;
+        inset: -140px -80px -160px;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
+      }
+
+      .hero-logo {
+        position: absolute;
+        display: block;
+        max-width: none;
+      }
+
+      .hero-logo--primary {
+        width: 520px;
+        top: -40px;
+        left: -160px;
+        opacity: 0.16;
+        transform: rotate(-8deg);
+        filter: drop-shadow(0 35px 60px rgba(15, 23, 42, 0.35));
+      }
+
+      .hero-logo--secondary {
+        width: 380px;
+        bottom: -140px;
+        right: -120px;
+        opacity: 0.12;
+        transform: rotate(10deg);
+        filter: blur(2px);
+      }
+
       .hero-wrapper {
+        position: relative;
+        z-index: 1;
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 64px;
@@ -818,6 +854,22 @@
           display: none;
         }
 
+        .hero-background {
+          inset: -120px -120px -200px;
+        }
+
+        .hero-logo--primary {
+          width: 440px;
+          left: -140px;
+          top: -80px;
+        }
+
+        .hero-logo--secondary {
+          width: 320px;
+          right: -140px;
+          bottom: -180px;
+        }
+
         .hero-wrapper {
           grid-template-columns: 1fr;
           gap: 48px;
@@ -834,6 +886,24 @@
       }
 
       @media (max-width: 720px) {
+        .hero-background {
+          inset: -100px -140px -220px;
+        }
+
+        .hero-logo--primary {
+          width: 360px;
+          left: -120px;
+          top: -70px;
+          opacity: 0.18;
+        }
+
+        .hero-logo--secondary {
+          width: 280px;
+          right: -160px;
+          bottom: -200px;
+          opacity: 0.16;
+        }
+
         .nav-wrapper {
           gap: 18px;
         }
@@ -883,6 +953,22 @@
           position: static;
         }
 
+        .hero-background {
+          inset: -60px -60px -140px;
+        }
+
+        .hero-logo--primary {
+          width: 280px;
+          left: -80px;
+          top: -40px;
+        }
+
+        .hero-logo--secondary {
+          width: 220px;
+          right: -90px;
+          bottom: -140px;
+        }
+
         .hero-wrapper {
           padding-top: 20px;
         }
@@ -897,13 +983,41 @@
     <div class="landing">
       <header class="top-nav">
         <div class="wrapper nav-wrapper">
-          <div class="brand">
-            <span class="brand-mark">CF</span>
+          <a class="brand" href="#inicio" aria-label="Pina — CoreoForm Pina Beta">
+            <svg class="brand-logo" viewBox="0 0 240 80" role="img" aria-label="Logotipo Pina colorido">
+              <title>Logotipo Pina colorido</title>
+              <defs>
+                <linearGradient id="grad-nav-mark" x1="12" y1="8" x2="80" y2="72" gradientUnits="userSpaceOnUse">
+                  <stop offset="0" stop-color="#38BDF8" />
+                  <stop offset="1" stop-color="#F472B6" />
+                </linearGradient>
+                <linearGradient id="grad-nav-letter" x1="82" y1="26" x2="226" y2="74" gradientUnits="userSpaceOnUse">
+                  <stop offset="0" stop-color="#22D3EE" />
+                  <stop offset="1" stop-color="#EC4899" />
+                </linearGradient>
+              </defs>
+              <path
+                fill="url(#grad-nav-mark)"
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M18 8h32c18 0 34 16 34 34s-16 34-34 34H18c-3.866 0-6-2.134-6-6V14c0-3.866 2.134-6 6-6Zm10 18c-3.314 0-6 2.686-6 6v20c0 3.314 2.686 6 6 6h18c9.941 0 18-8.059 18-18s-8.059-18-18-18H28Z"
+              />
+              <text
+                x="82"
+                y="54"
+                fill="url(#grad-nav-letter)"
+                font-size="44"
+                letter-spacing="0.04em"
+                style="font-family: 'Pacifico', 'Brush Script MT', 'Comic Sans MS', cursive; font-weight: 400;"
+              >
+                ina
+              </text>
+            </svg>
             <div>
               <strong>CoreoForm</strong>
               <small>Pina Beta</small>
             </div>
-          </div>
+          </a>
           <nav class="nav-links">
             <a href="#recursos">Recursos</a>
             <a href="#fluxo">Fluxo</a>
@@ -921,6 +1035,56 @@
 
       <main>
         <section class="hero" id="inicio">
+          <div class="hero-background" aria-hidden="true">
+            <svg class="hero-logo hero-logo--primary" viewBox="0 0 240 80" role="presentation">
+              <defs>
+                <linearGradient id="grad-hero-mark" x1="12" y1="8" x2="80" y2="72" gradientUnits="userSpaceOnUse">
+                  <stop offset="0" stop-color="#38BDF8" />
+                  <stop offset="1" stop-color="#F472B6" />
+                </linearGradient>
+                <linearGradient id="grad-hero-letter" x1="82" y1="26" x2="226" y2="74" gradientUnits="userSpaceOnUse">
+                  <stop offset="0" stop-color="#22D3EE" />
+                  <stop offset="1" stop-color="#EC4899" />
+                </linearGradient>
+              </defs>
+              <path
+                fill="url(#grad-hero-mark)"
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M18 8h32c18 0 34 16 34 34s-16 34-34 34H18c-3.866 0-6-2.134-6-6V14c0-3.866 2.134-6 6-6Zm10 18c-3.314 0-6 2.686-6 6v20c0 3.314 2.686 6 6 6h18c9.941 0 18-8.059 18-18s-8.059-18-18-18H28Z"
+              />
+              <text
+                x="82"
+                y="54"
+                fill="url(#grad-hero-letter)"
+                font-size="44"
+                letter-spacing="0.04em"
+                style="font-family: 'Pacifico', 'Brush Script MT', 'Comic Sans MS', cursive; font-weight: 400;"
+              >
+                ina
+              </text>
+            </svg>
+            <svg class="hero-logo hero-logo--secondary" viewBox="0 0 220 72" role="presentation">
+              <path
+                fill="#ffffff"
+                fill-opacity="0.85"
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M16 6h30c17.673 0 32 14.327 32 32S63.673 70 46 70H16c-3.866 0-6-2.134-6-6V12c0-3.866 2.134-6 6-6Zm9 18c-3.314 0-6 2.686-6 6v18c0 3.314 2.686 6 6 6h16c8.837 0 16-7.163 16-16s-7.163-16-16-16H25Z"
+              />
+              <text
+                x="78"
+                y="50"
+                fill="#ffffff"
+                fill-opacity="0.85"
+                font-size="40"
+                letter-spacing="0.04em"
+                style="font-family: 'Pacifico', 'Brush Script MT', 'Comic Sans MS', cursive; font-weight: 400;"
+              >
+                ina
+              </text>
+            </svg>
+          </div>
           <div class="wrapper hero-wrapper">
             <div class="hero-content">
               <span class="hero-badge">Novo beta fechado</span>

@@ -1,0 +1,15 @@
+<svg width="220" height="72" viewBox="0 0 220 72" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Pina logotipo monocromático</title>
+  <desc id="desc">Versão linear do logotipo Pina em uma única cor clara.</desc>
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+    </style>
+  </defs>
+  <path fill="#F8FAFC" fill-rule="evenodd" clip-rule="evenodd"
+    d="M16 6h30c17.673 0 32 14.327 32 32S63.673 70 46 70H16c-3.866 0-6-2.134-6-6V12c0-3.866 2.134-6 6-6Zm9 18c-3.314 0-6 2.686-6 6v18c0 3.314 2.686 6 6 6h16c8.837 0 16-7.163 16-16s-7.163-16-16-16H25Z" />
+  <text x="78" y="50" fill="#F8FAFC" font-size="40" letter-spacing="0.04em"
+    style="font-family: 'Pacifico', 'Brush Script MT', 'Comic Sans MS', cursive; font-weight: 400;">
+    ina
+  </text>
+</svg>
