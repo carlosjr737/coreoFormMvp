@@ -1,13 +1,25 @@
 import { auth, provider, signInWithPopup, onAuthStateChanged } from './firebase';
 
-const btn = document.getElementById('btn-login') as HTMLButtonElement | null;
+const selectors = ['#btn-login', '[data-login-button]'];
+const loginTargets = new Set<HTMLElement>();
 
-btn?.addEventListener('click', async () => {
+for (const selector of selectors) {
+  document.querySelectorAll<HTMLElement>(selector).forEach((element) => {
+    loginTargets.add(element);
+  });
+}
+
+const handleLoginClick = async (event: Event) => {
+  event.preventDefault();
   try {
     await signInWithPopup(auth, provider);
   } catch (e) {
     console.error(e);
   }
+};
+
+loginTargets.forEach((element) => {
+  element.addEventListener('click', handleLoginClick);
 });
 
 onAuthStateChanged(auth, (user) => {
