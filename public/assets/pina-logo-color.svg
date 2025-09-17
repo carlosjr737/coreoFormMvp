@@ -1,0 +1,31 @@
+<svg width="240" height="80" viewBox="0 0 240 80" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Pina logotipo colorido</title>
+  <desc id="desc">Marca tipográfica com P geométrico em gradiente azul e rosa e o lettering manuscrito “ina”.</desc>
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+    </style>
+    <linearGradient id="grad-brand" x1="12" y1="8" x2="80" y2="72" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#38BDF8" />
+      <stop offset="1" stop-color="#F472B6" />
+    </linearGradient>
+    <linearGradient id="grad-letter" x1="80" y1="26" x2="224" y2="74" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#22D3EE" />
+      <stop offset="1" stop-color="#EC4899" />
+    </linearGradient>
+    <filter id="shadow" x="0" y="0" width="120" height="96" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feOffset dy="4" />
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0   0 0 0 0.18 0" />
+      <feBlend in="SourceGraphic" result="shape" />
+    </filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <path fill="url(#grad-brand)" fill-rule="evenodd" clip-rule="evenodd"
+      d="M18 8h32c18 0 34 16 34 34s-16 34-34 34H18c-3.866 0-6-2.134-6-6V14c0-3.866 2.134-6 6-6Zm10 18c-3.314 0-6 2.686-6 6v20c0 3.314 2.686 6 6 6h18c9.941 0 18-8.059 18-18s-8.059-18-18-18H28Z" />
+  </g>
+  <text x="82" y="54" fill="url(#grad-letter)" font-size="44" letter-spacing="0.04em"
+    style="font-family: 'Pacifico', 'Brush Script MT', 'Comic Sans MS', cursive; font-weight: 400;">
+    ina
+  </text>
+</svg>
