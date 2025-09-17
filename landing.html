@@ -3,18 +3,1201 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CoreoMVP - Organize suas coreografias</title>
+    <title>CoreoForm — Pina Beta</title>
+    <meta
+      name="description"
+      content="Experimente a nova landing CoreoForm Pina Beta: crie e sincronize coreografias com áudio, notas e formações visuais."
+    />
     <style>
-      body { font-family: Arial, sans-serif; text-align: center; margin-top: 20vh; }
-      h1 { margin-bottom: 1rem; }
-      p { margin-bottom: 2rem; }
-      button { padding: 10px 20px; font-size: 1rem; cursor: pointer; }
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@400;600&display=swap');
+
+      :root {
+        --color-night: #04060f;
+        --color-deep: #080c1d;
+        --color-glass: rgba(15, 23, 42, 0.58);
+        --color-glass-strong: rgba(15, 23, 42, 0.72);
+        --color-border: rgba(148, 163, 184, 0.25);
+        --color-border-strong: rgba(148, 163, 184, 0.35);
+        --color-primary: #f472b6;
+        --color-primary-strong: #ec4899;
+        --color-secondary: #38bdf8;
+        --color-secondary-soft: rgba(56, 189, 248, 0.2);
+        --color-tertiary: #a855f7;
+        --color-text: #f8fafc;
+        --color-muted: rgba(226, 232, 240, 0.72);
+        --shadow-xl: 0 35px 60px -28px rgba(15, 23, 42, 0.8);
+        --shadow-card: 0 18px 35px -20px rgba(15, 23, 42, 0.75);
+        --radius-lg: 28px;
+        --radius-md: 20px;
+        --radius-sm: 12px;
+        --blur-heavy: saturate(140%) blur(28px);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: 'Inter', 'Manrope', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        background: radial-gradient(circle at top left, rgba(168, 85, 247, 0.22), transparent 45%),
+          radial-gradient(circle at top right, rgba(56, 189, 248, 0.18), transparent 50%),
+          radial-gradient(circle at 20% 80%, rgba(236, 72, 153, 0.18), transparent 55%),
+          var(--color-night);
+        color: var(--color-text);
+        line-height: 1.6;
+        letter-spacing: 0.01em;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .landing {
+        position: relative;
+        min-height: 100vh;
+        overflow: hidden;
+        padding-bottom: 120px;
+      }
+
+      .landing::before,
+      .landing::after {
+        content: '';
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(110px);
+        opacity: 0.75;
+        z-index: -1;
+      }
+
+      .landing::before {
+        top: -160px;
+        right: -180px;
+        width: 520px;
+        height: 520px;
+        background: radial-gradient(circle, rgba(56, 189, 248, 0.45), transparent 60%);
+      }
+
+      .landing::after {
+        bottom: -220px;
+        left: -160px;
+        width: 480px;
+        height: 480px;
+        background: radial-gradient(circle, rgba(244, 114, 182, 0.42), transparent 65%);
+      }
+
+      .wrapper {
+        width: min(1120px, 92vw);
+        margin: 0 auto;
+      }
+
+      header.top-nav {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        backdrop-filter: blur(16px);
+        background: linear-gradient(180deg, rgba(8, 12, 29, 0.85), rgba(8, 12, 29, 0));
+      }
+
+      .nav-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 26px 0;
+        gap: 32px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .brand-mark {
+        width: 48px;
+        height: 48px;
+        border-radius: 16px;
+        background: linear-gradient(145deg, rgba(244, 114, 182, 0.28), rgba(168, 85, 247, 0.35));
+        border: 1px solid rgba(244, 114, 182, 0.45);
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+      }
+
+      .brand strong {
+        display: block;
+        font-weight: 600;
+        font-size: 1.15rem;
+      }
+
+      .brand small {
+        display: block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.28em;
+        opacity: 0.65;
+      }
+
+      nav.nav-links {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        font-size: 0.98rem;
+      }
+
+      nav.nav-links a {
+        opacity: 0.78;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+      }
+
+      nav.nav-links a:hover {
+        opacity: 1;
+        transform: translateY(-1px);
+      }
+
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .nav-link-light {
+        opacity: 0.72;
+        font-size: 0.94rem;
+      }
+
+      .btn {
+        border: none;
+        border-radius: 999px;
+        padding: 14px 26px;
+        font-weight: 600;
+        font-size: 0.98rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease, border 0.22s ease;
+        position: relative;
+        isolation: isolate;
+      }
+
+      .btn .btn-icon {
+        display: grid;
+        place-items: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.38);
+        font-size: 0.85rem;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, rgba(244, 114, 182, 0.92), rgba(168, 85, 247, 0.9));
+        color: #0b1020;
+        box-shadow: 0 18px 32px -22px rgba(236, 72, 153, 0.9);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 24px 38px -18px rgba(236, 72, 153, 0.55);
+      }
+
+      .btn-ghost {
+        background: rgba(15, 23, 42, 0.45);
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        color: var(--color-text);
+      }
+
+      .btn-ghost:hover {
+        border-color: rgba(148, 163, 184, 0.58);
+        transform: translateY(-2px);
+      }
+
+      main {
+        display: flex;
+        flex-direction: column;
+        gap: 120px;
+        padding: 40px 0 0;
+      }
+
+      section.hero {
+        position: relative;
+      }
+
+      .hero-wrapper {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 64px;
+        align-items: center;
+        padding-top: 40px;
+      }
+
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 999px;
+        background: rgba(56, 189, 248, 0.16);
+        border: 1px solid rgba(56, 189, 248, 0.32);
+        color: rgba(224, 242, 254, 0.92);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.22em;
+      }
+
+      h1.hero-title {
+        font-size: clamp(2.5rem, 3.2vw + 1rem, 3.9rem);
+        font-weight: 700;
+        line-height: 1.1;
+        margin: 26px 0 18px;
+      }
+
+      .hero-description {
+        font-size: 1.05rem;
+        color: var(--color-muted);
+        max-width: 540px;
+        margin-bottom: 28px;
+      }
+
+      .hero-buttons {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 26px;
+      }
+
+      .hero-checklist {
+        display: grid;
+        gap: 10px;
+        color: rgba(226, 232, 240, 0.8);
+        font-size: 0.92rem;
+      }
+
+      .hero-checklist span {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .hero-checklist span::before {
+        content: '✦';
+        color: var(--color-primary);
+        font-size: 0.95rem;
+      }
+
+      .hero-visual {
+        position: relative;
+        width: min(460px, 90%);
+        justify-self: center;
+      }
+
+      .visual-glow {
+        position: absolute;
+        inset: -12%;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.55), rgba(8, 12, 29, 0));
+        filter: blur(80px);
+        opacity: 0.55;
+        z-index: 0;
+      }
+
+      .visual-frame {
+        position: relative;
+        padding: 26px;
+        background: rgba(15, 23, 42, 0.68);
+        border: 1px solid rgba(148, 163, 184, 0.32);
+        border-radius: var(--radius-lg);
+        backdrop-filter: blur(16px);
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        z-index: 1;
+      }
+
+      .visual-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 22px;
+        font-size: 0.88rem;
+        color: rgba(226, 232, 240, 0.75);
+      }
+
+      .visual-header .pill {
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(244, 114, 182, 0.16);
+        border: 1px solid rgba(244, 114, 182, 0.3);
+        color: rgba(248, 250, 252, 0.9);
+        font-size: 0.72rem;
+        letter-spacing: 0.1em;
+      }
+
+      .visual-stage {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 11;
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(8, 12, 29, 0.75));
+        overflow: hidden;
+        padding: 18px;
+      }
+
+      .visual-stage::before {
+        content: '';
+        position: absolute;
+        inset: 14px;
+        border-radius: 18px;
+        border: 1px dashed rgba(148, 163, 184, 0.25);
+        opacity: 0.6;
+      }
+
+      .visual-grid {
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+        background-size: 48px 48px;
+        opacity: 0.35;
+      }
+
+      .dancer-dot {
+        position: absolute;
+        width: 42px;
+        height: 42px;
+        border-radius: 999px;
+        display: grid;
+        place-items: center;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        color: var(--dot-border, rgba(248, 250, 252, 0.85));
+        background: var(--dot-bg, rgba(56, 189, 248, 0.22));
+        border: 1px solid var(--dot-border, rgba(56, 189, 248, 0.6));
+        box-shadow: 0 16px 32px -18px var(--dot-border, rgba(56, 189, 248, 0.6));
+        left: var(--x);
+        top: var(--y);
+        transform: translate(-50%, -50%);
+      }
+
+      .visual-timeline {
+        margin-top: 26px;
+        background: rgba(8, 12, 29, 0.78);
+        padding: 16px;
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(148, 163, 184, 0.28);
+      }
+
+      .timeline-track {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: rgba(226, 232, 240, 0.6);
+      }
+
+      .timeline-block {
+        position: relative;
+        background: rgba(148, 163, 184, 0.08);
+        border-radius: 12px;
+        padding: 14px;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .timeline-block strong {
+        font-size: 0.78rem;
+        color: rgba(248, 250, 252, 0.85);
+      }
+
+      .timeline-meter {
+        position: relative;
+        margin-top: 18px;
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.16);
+        overflow: hidden;
+      }
+
+      .timeline-progress {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, rgba(168, 85, 247, 0.9), rgba(244, 114, 182, 0.85));
+        width: 54%;
+      }
+
+      .timeline-playhead {
+        position: absolute;
+        top: -10px;
+        left: 54%;
+        transform: translateX(-50%);
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--color-secondary);
+        box-shadow: 0 0 0 8px rgba(56, 189, 248, 0.12);
+      }
+
+      .visual-floating-card {
+        position: absolute;
+        right: -26px;
+        top: 14%;
+        padding: 18px 20px;
+        border-radius: var(--radius-md);
+        background: rgba(8, 12, 29, 0.82);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        width: 200px;
+        box-shadow: var(--shadow-card);
+        backdrop-filter: blur(12px);
+        animation: float 8s ease-in-out infinite;
+      }
+
+      .visual-floating-card.secondary {
+        top: auto;
+        bottom: -32px;
+        left: -40px;
+        right: auto;
+        width: 220px;
+        animation-delay: 1.8s;
+      }
+
+      .floating-title {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: rgba(148, 163, 184, 0.78);
+        margin-bottom: 8px;
+      }
+
+      .floating-content {
+        font-size: 0.9rem;
+        color: rgba(248, 250, 252, 0.86);
+        display: grid;
+        gap: 8px;
+      }
+
+      .floating-content strong {
+        font-size: 1.15rem;
+        color: var(--color-primary);
+      }
+
+      .floating-wave {
+        display: flex;
+        gap: 4px;
+        align-items: flex-end;
+        height: 40px;
+      }
+
+      .floating-wave span {
+        flex: 1;
+        border-radius: 6px;
+        background: linear-gradient(180deg, rgba(56, 189, 248, 0.85), rgba(56, 189, 248, 0.32));
+        animation: pulse 1.8s ease-in-out infinite;
+      }
+
+      .floating-wave span:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      .floating-wave span:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+
+      .floating-wave span:nth-child(4) {
+        animation-delay: 0.6s;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          height: 8px;
+        }
+        40% {
+          height: 40px;
+        }
+        60% {
+          height: 22px;
+        }
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-12px);
+        }
+      }
+
+      section.metrics {
+        position: relative;
+      }
+
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 26px;
+      }
+
+      .metric-card {
+        background: rgba(15, 23, 42, 0.62);
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        padding: 28px;
+        display: grid;
+        gap: 8px;
+        text-align: center;
+        box-shadow: var(--shadow-card);
+      }
+
+      .metric-card strong {
+        font-size: 2rem;
+        font-weight: 600;
+      }
+
+      .metric-card span {
+        font-size: 0.9rem;
+        color: rgba(226, 232, 240, 0.76);
+      }
+
+      section.features::before {
+        content: '';
+        position: absolute;
+        top: -80px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 70%;
+        height: 1px;
+        background: linear-gradient(90deg, rgba(168, 85, 247, 0), rgba(168, 85, 247, 0.6), rgba(168, 85, 247, 0));
+        opacity: 0.5;
+      }
+
+      .section-header {
+        display: grid;
+        gap: 12px;
+        margin-bottom: 48px;
+      }
+
+      .section-header span.label {
+        letter-spacing: 0.2em;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        color: rgba(148, 163, 184, 0.72);
+      }
+
+      .section-header h2 {
+        font-size: clamp(2rem, 2vw + 1.2rem, 2.8rem);
+        margin: 0;
+        font-weight: 600;
+      }
+
+      .section-header p {
+        max-width: 640px;
+        color: rgba(226, 232, 240, 0.78);
+        font-size: 1.02rem;
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 28px;
+      }
+
+      .feature-card {
+        position: relative;
+        padding: 28px;
+        background: rgba(8, 12, 29, 0.82);
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        display: grid;
+        gap: 18px;
+        box-shadow: var(--shadow-card);
+        overflow: hidden;
+      }
+
+      .feature-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(244, 114, 182, 0.14), transparent 65%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+      }
+
+      .feature-card:hover::after {
+        opacity: 1;
+      }
+
+      .feature-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        background: rgba(56, 189, 248, 0.18);
+        display: grid;
+        place-items: center;
+        border: 1px solid rgba(56, 189, 248, 0.32);
+      }
+
+      .feature-icon svg {
+        width: 24px;
+        height: 24px;
+        fill: rgba(226, 232, 240, 0.9);
+      }
+
+      .feature-card h3 {
+        font-size: 1.2rem;
+        margin: 0;
+      }
+
+      .feature-card p {
+        font-size: 0.98rem;
+        color: rgba(226, 232, 240, 0.78);
+        margin: 0;
+      }
+
+      .feature-footer {
+        font-size: 0.82rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: rgba(148, 163, 184, 0.8);
+      }
+
+      section.workflow {
+        position: relative;
+      }
+
+      .workflow-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 24px;
+      }
+
+      .workflow-step {
+        padding: 26px;
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        background: rgba(15, 23, 42, 0.66);
+        display: grid;
+        gap: 14px;
+        position: relative;
+      }
+
+      .workflow-step::before {
+        content: attr(data-step);
+        position: absolute;
+        top: 22px;
+        right: 26px;
+        font-size: 0.74rem;
+        letter-spacing: 0.2em;
+        opacity: 0.45;
+      }
+
+      .workflow-step strong {
+        font-size: 1.08rem;
+      }
+
+      .workflow-step p {
+        margin: 0;
+        color: rgba(226, 232, 240, 0.78);
+        font-size: 0.95rem;
+      }
+
+      section.quote {
+        position: relative;
+      }
+
+      .quote-card {
+        padding: 46px;
+        border-radius: var(--radius-lg);
+        background: rgba(8, 12, 29, 0.78);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        box-shadow: 0 22px 48px -32px rgba(15, 23, 42, 0.9);
+        display: grid;
+        gap: 22px;
+        position: relative;
+      }
+
+      .quote-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(236, 72, 153, 0.08));
+        opacity: 0.6;
+        pointer-events: none;
+      }
+
+      .quote-symbol {
+        font-size: 3rem;
+        color: rgba(236, 72, 153, 0.65);
+      }
+
+      .quote-card p {
+        margin: 0;
+        font-size: 1.15rem;
+        color: rgba(248, 250, 252, 0.88);
+      }
+
+      .quote-author {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .quote-author .avatar {
+        width: 54px;
+        height: 54px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, rgba(244, 114, 182, 0.35), rgba(56, 189, 248, 0.32));
+        display: grid;
+        place-items: center;
+        font-weight: 600;
+        color: rgba(8, 12, 29, 0.9);
+      }
+
+      section.cta {
+        padding-bottom: 0;
+      }
+
+      .cta-card {
+        position: relative;
+        padding: 48px;
+        border-radius: var(--radius-lg);
+        background: linear-gradient(135deg, rgba(56, 189, 248, 0.28), rgba(236, 72, 153, 0.35));
+        border: 1px solid rgba(244, 114, 182, 0.35);
+        display: grid;
+        gap: 16px;
+        overflow: hidden;
+        box-shadow: 0 35px 68px -38px rgba(15, 23, 42, 0.95);
+      }
+
+      .cta-card::after {
+        content: '';
+        position: absolute;
+        inset: -40% 42% auto -10%;
+        height: 110%;
+        border-radius: 999px;
+        background: rgba(248, 250, 252, 0.15);
+        filter: blur(40px);
+        opacity: 0.45;
+      }
+
+      .cta-card h3 {
+        font-size: clamp(2rem, 1.6vw + 1.4rem, 2.6rem);
+        margin: 0;
+      }
+
+      .cta-card p {
+        margin: 0;
+        color: rgba(15, 23, 42, 0.78);
+        font-size: 1.05rem;
+        max-width: 520px;
+      }
+
+      footer {
+        margin-top: 96px;
+        padding: 32px 0 12px;
+        border-top: 1px solid rgba(148, 163, 184, 0.16);
+        color: rgba(226, 232, 240, 0.62);
+        font-size: 0.9rem;
+        text-align: center;
+      }
+
+      @media (max-width: 1024px) {
+        nav.nav-links {
+          display: none;
+        }
+
+        .hero-wrapper {
+          grid-template-columns: 1fr;
+          gap: 48px;
+        }
+
+        .hero-visual {
+          order: -1;
+          width: min(520px, 96%);
+        }
+
+        .nav-wrapper {
+          padding: 20px 0;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .nav-wrapper {
+          gap: 18px;
+        }
+
+        .nav-actions {
+          gap: 10px;
+        }
+
+        .nav-link-light {
+          display: none;
+        }
+
+        .hero-buttons {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .hero-buttons .btn {
+          width: 100%;
+          justify-content: center;
+        }
+
+        .visual-floating-card {
+          position: static;
+          width: auto;
+          margin-top: 22px;
+          animation: none;
+        }
+
+        .visual-floating-card.secondary {
+          margin-top: 18px;
+        }
+
+        .metrics-grid,
+        .feature-grid,
+        .workflow-grid {
+          gap: 18px;
+        }
+
+        .cta-card {
+          padding: 36px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        header.top-nav {
+          position: static;
+        }
+
+        .hero-wrapper {
+          padding-top: 20px;
+        }
+
+        .cta-card {
+          padding: 32px;
+        }
+      }
     </style>
   </head>
   <body>
-    <h1>CoreoMVP</h1>
-    <p>Crie, edite e compartilhe suas coreografias de forma simples.</p>
-    <button id="btn-login">Entrar com Google</button>
+    <div class="landing">
+      <header class="top-nav">
+        <div class="wrapper nav-wrapper">
+          <div class="brand">
+            <span class="brand-mark">CF</span>
+            <div>
+              <strong>CoreoForm</strong>
+              <small>Pina Beta</small>
+            </div>
+          </div>
+          <nav class="nav-links">
+            <a href="#recursos">Recursos</a>
+            <a href="#fluxo">Fluxo</a>
+            <a href="#depoimentos">Feedback</a>
+          </nav>
+          <div class="nav-actions">
+            <span class="nav-link-light">Convide o elenco para testar</span>
+            <button class="btn btn-primary" type="button" data-login-button>
+              <span>Entrar agora</span>
+              <span class="btn-icon">→</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero" id="inicio">
+          <div class="wrapper hero-wrapper">
+            <div class="hero-content">
+              <span class="hero-badge">Novo beta fechado</span>
+              <h1 class="hero-title">Sincronize áudio, formações e notas de cada ensaio.</h1>
+              <p class="hero-description">
+                A experiência CoreoForm Pina Beta combina visualização espacial do palco, linha do tempo inteligente e registro de
+                notas para que diretores e coreógrafos conduzam o elenco com segurança – mesmo em processos acelerados.
+              </p>
+              <div class="hero-buttons">
+                <button class="btn btn-primary" type="button" data-login-button>
+                  <span>Entrar com Google</span>
+                  <span class="btn-icon">⟶</span>
+                </button>
+                <a class="btn btn-ghost" href="#recursos">
+                  <span class="btn-icon">◎</span>
+                  <span>Explorar recursos</span>
+                </a>
+              </div>
+              <div class="hero-checklist">
+                <span>Mapa visual da formação com playhead dinâmico</span>
+                <span>Exportação de marcações para compartilhar com o elenco</span>
+                <span>Notas rápidas por contagem e sincronização com áudio</span>
+              </div>
+            </div>
+
+            <div class="hero-visual">
+              <div class="visual-glow" aria-hidden="true"></div>
+              <div class="visual-frame">
+                <div class="visual-header">
+                  <span>Formação • Bloco "Virada Final"</span>
+                  <span class="pill">Sincronia ativa</span>
+                </div>
+                <div class="visual-stage">
+                  <span class="visual-grid" aria-hidden="true"></span>
+                  <span
+                    class="dancer-dot"
+                    style="--x: 18%; --y: 68%; --dot-bg: rgba(56, 189, 248, 0.24); --dot-border: rgba(56, 189, 248, 0.65);"
+                    >A1</span
+                  >
+                  <span
+                    class="dancer-dot"
+                    style="--x: 38%; --y: 38%; --dot-bg: rgba(244, 114, 182, 0.22); --dot-border: rgba(244, 114, 182, 0.6);"
+                    >B2</span
+                  >
+                  <span
+                    class="dancer-dot"
+                    style="--x: 58%; --y: 60%; --dot-bg: rgba(168, 85, 247, 0.22); --dot-border: rgba(168, 85, 247, 0.6);"
+                    >C3</span
+                  >
+                  <span
+                    class="dancer-dot"
+                    style="--x: 74%; --y: 32%; --dot-bg: rgba(129, 140, 248, 0.25); --dot-border: rgba(129, 140, 248, 0.65);"
+                    >D4</span
+                  >
+                </div>
+                <div class="visual-timeline">
+                  <div class="timeline-track">
+                    <div class="timeline-block">
+                      <strong>Intro</strong>
+                      <span>4 tempos</span>
+                    </div>
+                    <div class="timeline-block">
+                      <strong>Travessia</strong>
+                      <span>8 tempos</span>
+                    </div>
+                    <div class="timeline-block">
+                      <strong>Clímax</strong>
+                      <span>8 tempos</span>
+                    </div>
+                    <div class="timeline-block">
+                      <strong>Encerramento</strong>
+                      <span>4 tempos</span>
+                    </div>
+                  </div>
+                  <div class="timeline-meter">
+                    <span class="timeline-progress"></span>
+                    <span class="timeline-playhead"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="visual-floating-card" aria-hidden="true">
+                <span class="floating-title">Notas do ensaio</span>
+                <div class="floating-content">
+                  <strong>5 marcações</strong>
+                  <span>Registrar transição de B2 para centro na contagem 5.</span>
+                </div>
+              </div>
+              <div class="visual-floating-card secondary" aria-hidden="true">
+                <span class="floating-title">Áudio conectado</span>
+                <div class="floating-wave">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+                <div class="floating-content">
+                  <span>Trecho atual • 01:42</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="metrics" aria-label="Indicadores">
+          <div class="wrapper metrics-grid">
+            <div class="metric-card">
+              <strong>120+</strong>
+              <span>Formações criadas durante os testes fechados</span>
+            </div>
+            <div class="metric-card">
+              <strong>18</strong>
+              <span>Companhias participando do beta</span>
+            </div>
+            <div class="metric-card">
+              <strong>92%</strong>
+              <span>Dos usuários relatam ensaios mais seguros</span>
+            </div>
+            <div class="metric-card">
+              <strong>24h</strong>
+              <span>Suporte técnico dedicado durante o Pina Beta</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="features" id="recursos">
+          <div class="wrapper">
+            <div class="section-header">
+              <span class="label">Recursos do beta</span>
+              <h2>Painéis coreográficos desenhados para o ritmo das companhias.</h2>
+              <p>
+                Explore a combinação de ferramentas visuais e colaborativas que tornam a nova versão do CoreoForm o ambiente
+                favorito de diretores e ensaiadores.
+              </p>
+            </div>
+            <div class="feature-grid">
+              <article class="feature-card">
+                <div class="feature-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M5 4h14a1 1 0 0 1 1 1v14l-4-3-4 3-4-3-4 3V5a1 1 0 0 1 1-1zm1 2v10.382l2.553-1.915a1 1 0 0 1 1.118 0L12 16.118l2.329-1.651a1 1 0 0 1 1.118 0L18 16.382V6H6z"
+                    />
+                  </svg>
+                </div>
+                <h3>Biblioteca de formações</h3>
+                <p>
+                  Organize cada quadro da coreografia com nomes personalizados, cores por elenco e duplicação instantânea para
+                  variações.
+                </p>
+                <span class="feature-footer">Salve, versione e compartilhe</span>
+              </article>
+              <article class="feature-card">
+                <div class="feature-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M12 3c5.523 0 10 3.358 10 7.5S17.523 18 12 18a9.93 9.93 0 0 1-4.9-1.255L2 21l2.197-5.128C2.828 14.287 2 12.474 2 10.5 2 6.358 6.477 3 12 3zm0 2C7.589 5 4 7.467 4 10.5c0 1.588.88 3.064 2.49 4.232l.69.496-.942 2.2 2.257-1.327.527.301A7.93 7.93 0 0 0 12 16c4.411 0 8-2.467 8-5.5S16.411 5 12 5z"
+                    />
+                  </svg>
+                </div>
+                <h3>Feedback integrado</h3>
+                <p>
+                  Compartilhe links seguros do ensaio com comentários em tempo real, sem depender de planilhas ou mensagens
+                  dispersas.
+                </p>
+                <span class="feature-footer">Centralize o diálogo</span>
+              </article>
+              <article class="feature-card">
+                <div class="feature-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M12 4a8 8 0 0 1 7.938 7.046l.054.708L22 12l-3 3-3-3 1.994-.246A6 6 0 1 0 12 18H5.414l1.293 1.293-1.414 1.414L2 18.414 5.293 15.12l1.414 1.415L5.414 17H12a8 8 0 0 1 0-16z"
+                    />
+                  </svg>
+                </div>
+                <h3>Sincronização com áudio</h3>
+                <p>
+                  Faça upload de trilhas, ajuste o playhead em tempo real e sincronize movimentos com contagens marcadas no palco
+                  visual.
+                </p>
+                <span class="feature-footer">Timing impecável</span>
+              </article>
+              <article class="feature-card">
+                <div class="feature-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M4 5a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v11a3 3 0 0 1-3 3h-3.586l-2.707 2.707a1 1 0 0 1-1.414 0L7.586 19H7a3 3 0 0 1-3-3V5zm3-1a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h1.414a1 1 0 0 1 .707.293L12 19.586l2.879-2.879a1 1 0 0 1 .707-.293H16a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H7z"
+                    />
+                  </svg>
+                </div>
+                <h3>Notas por contagem</h3>
+                <p>
+                  Adicione insights táticos por marcação e gere PDFs organizados por blocos para distribuir entre assistentes e
+                  bailarinos.
+                </p>
+                <span class="feature-footer">Documente cada detalhe</span>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="workflow" id="fluxo">
+          <div class="wrapper">
+            <div class="section-header">
+              <span class="label">Fluxo coreográfico</span>
+              <h2>Do ensaio ao palco com uma cadência transparente.</h2>
+              <p>
+                O CoreoForm Pina Beta acompanha o ciclo completo de criação, permitindo previsibilidade e controle sobre cada
+                repetição do elenco.
+              </p>
+            </div>
+            <div class="workflow-grid">
+              <article class="workflow-step" data-step="1/4">
+                <strong>Capture sua trilha</strong>
+                <p>Importe o áudio, defina cortes e marque as contagens-chave diretamente no palco visual.</p>
+              </article>
+              <article class="workflow-step" data-step="2/4">
+                <strong>Monte formações</strong>
+                <p>Arraste bailarinos, nomeie padrões e utilize duplicação inteligente para criar variações em segundos.</p>
+              </article>
+              <article class="workflow-step" data-step="3/4">
+                <strong>Oriente o elenco</strong>
+                <p>Compartilhe links comentados ou exporte PDFs, mantendo cada bailarino alinhado com o plano coreográfico.</p>
+              </article>
+              <article class="workflow-step" data-step="4/4">
+                <strong>Acompanhe evoluções</strong>
+                <p>Reveja históricos, registre ajustes por ensaio e compare versões para decisões mais rápidas.</p>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="quote" id="depoimentos">
+          <div class="wrapper">
+            <div class="quote-card">
+              <span class="quote-symbol" aria-hidden="true">“</span>
+              <p>
+                "Com o Pina Beta conseguimos experimentar novas formações sem perder o controle do tempo musical. O elenco recebeu
+                orientações claras e o registro das transições facilitou ajustes de última hora."
+              </p>
+              <div class="quote-author">
+                <span class="avatar">LD</span>
+                <div>
+                  <strong>Lia Diniz</strong>
+                  <div>Diretora artística — Companhia Movimento Vivo</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="cta" aria-label="Convite para o beta">
+          <div class="wrapper">
+            <div class="cta-card">
+              <h3>Experimente o CoreoForm Pina Beta com seu elenco.</h3>
+              <p>
+                O acesso é liberado para equipes convidadas. Entre com sua conta Google para sincronizar projetos, importar áudio e
+                compartilhar formações com o time em segundos.
+              </p>
+              <button class="btn btn-primary" type="button" data-login-button>
+                <span>Entrar e começar agora</span>
+                <span class="btn-icon">→</span>
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        © <span id="year">2024</span> CoreoForm Pina Beta • Construído para diretores, ensaiadores e bailarinos.
+      </footer>
+    </div>
+
+    <script>
+      const yearEl = document.getElementById('year');
+      if (yearEl) {
+        yearEl.textContent = new Date().getFullYear().toString();
+      }
+    </script>
     <script type="module" src="/src/landing.ts"></script>
   </body>
 </html>
