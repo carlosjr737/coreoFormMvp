@@ -1275,6 +1275,21 @@
         }
       }
 
+      /* Modo apresentação */
+      body.presentation {
+        padding: 0;
+      }
+
+      body.presentation header,
+      body.presentation .sidebar,
+      body.presentation .controles,
+      body.presentation .painel-projetos,
+      body.presentation .topbar,
+      body.presentation .footer-controles {
+        display: none !important;
+      }
+
+      /* Gravação */
       body.recording .rec-indicator {
         display: inline !important;
       }
@@ -1326,25 +1341,26 @@
         <button id="btn-panel-formacoes" class="rail-btn active" title="Formações" aria-label="Formações">
           <span class="ico" aria-hidden="true">
             <svg viewBox="0 0 24 24" role="presentation" focusable="false">
-              <rect x="3.2" y="4.2" width="17.6" height="15.6" rx="3.4" />
-              <line x1="7.4" y1="8.8" x2="16.6" y2="8.8" />
-              <line x1="7.4" y1="12" x2="16.6" y2="12" />
-              <line x1="7.4" y1="15.2" x2="16.6" y2="15.2" />
-              <circle class="filled" cx="14.8" cy="8.8" r="1.3" />
-              <circle class="filled" cx="9.1" cy="12" r="1.2" />
-              <circle class="filled" cx="12.8" cy="15.2" r="1.2" />
+              <circle class="node" cx="12" cy="5.5" r="2.3" />
+              <circle class="node" cx="6.4" cy="12" r="2.1" />
+              <circle class="node" cx="17.6" cy="12" r="2.1" />
+              <circle class="node" cx="12" cy="18.5" r="2.3" />
+              <path d="M12 7.8V17.2" />
+              <path d="M12 12l-5.6-4.2" />
+              <path d="M12 12l5.6-4.2" />
+              <path d="M12 12l-5.6 4.2" />
+              <path d="M12 12l5.6 4.2" />
             </svg>
           </span>
         </button>
         <button id="btn-panel-bailarinos" class="rail-btn" title="Bailarinos" aria-label="Bailarinos">
           <span class="ico" aria-hidden="true">
             <svg viewBox="0 0 24 24" role="presentation" focusable="false">
-              <circle class="filled" cx="12" cy="7.2" r="2.2" />
-              <circle class="filled" cx="7.2" cy="11" r="1.9" />
-              <circle class="filled" cx="16.8" cy="11" r="1.9" />
-              <path d="M6 18A6 6 0 0 0 18 18" />
-              <path d="M3.5 18.4A3.6 3.6 0 0 0 9.1 18.4" />
-              <path d="M14.9 18.4A3.6 3.6 0 0 0 20.5 18.4" />
+              <circle class="node" cx="12" cy="6" r="2.2" />
+              <path d="M7.6 11.4L12 8.9l4.4 2.5" />
+              <path d="M12 9.8v7.2" />
+              <path d="M12 15.6l-3.4 4.4" />
+              <path d="M12 15.6l3.4 4.4" />
             </svg>
           </span>
         </button>
