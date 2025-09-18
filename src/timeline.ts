@@ -561,7 +561,7 @@ export function initZoomControls(onZoomChange: (z:number)=>void) {
     ensurePlayheadInView(); renderizarFaixaAudio();
     updateAddTile();
   });
-    setZoomUI(zoom);
+  setZoomUI(zoom);
 }
 
 export function initScrubHandlers() {

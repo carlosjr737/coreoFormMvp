@@ -171,6 +171,7 @@
         color: var(--color-muted);
       }
 
+      /* REC bar agora é inline (dentro do header) */
       #present-rec-bar {
         display: inline-flex;
         align-items: center;
@@ -184,8 +185,8 @@
         isolation: isolate;
         overflow: hidden;
         margin-left: 6px;
+        position: relative;
       }
-
       #present-rec-bar::before {
         content: '';
         position: absolute;
@@ -227,7 +228,6 @@
         z-index: 0;
         min-height: 68px;
       }
-
       header.barra-superior::before {
         content: '';
         position: absolute;
@@ -674,7 +674,6 @@
         z-index: 0;
         flex-shrink: 0;
       }
-
       footer.linha-do-tempo::before {
         content: '';
         position: absolute;
