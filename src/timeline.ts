@@ -8,8 +8,8 @@ import { renderizarPalco } from './stage';
 import { renderizarPainelBailarinos } from './bailarinos';
 import { getAudioBuffer, renderizarFaixaAudio } from './audio';
 
-const ADD_TILE_TOP_PX = 12;
-const ADD_TILE_HEIGHT = 'calc(100% - 24px)';
+const ADD_TILE_TOP_PX = 6;
+const ADD_TILE_HEIGHT = 'calc(100% - 12px)';
 
 function deepClone<T>(x: T): T {
   return JSON.parse(JSON.stringify(x));
@@ -561,7 +561,7 @@ export function initZoomControls(onZoomChange: (z:number)=>void) {
     ensurePlayheadInView(); renderizarFaixaAudio();
     updateAddTile();
   });
-    setZoomUI(zoom);
+  setZoomUI(zoom);
 }
 
 export function initScrubHandlers() {

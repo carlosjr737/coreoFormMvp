@@ -67,13 +67,18 @@ export function initAudioUI() {
     if (file) carregarArquivoDeAudio(file);
   });
   audioTrackEl.addEventListener('mousedown', (e) => {
-  if (e.button !== 0) return;
-  const onMove = (ev: MouseEvent) => audioTrackEl.dispatchEvent(new CustomEvent('scrub-request', { detail: { clientX: ev.clientX } }));
-  const onUp = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
-  document.addEventListener('mousemove', onMove);
-  document.addEventListener('mouseup', onUp);
-  audioTrackEl.dispatchEvent(new CustomEvent('scrub-request', { detail: { clientX: e.clientX } }));
-});
+    if (e.button !== 0) return;
+    if ((e.target as HTMLElement)?.closest('#btn-carregar-audio')) return;
+    const onMove = (ev: MouseEvent) =>
+      audioTrackEl.dispatchEvent(new CustomEvent('scrub-request', { detail: { clientX: ev.clientX } }));
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    audioTrackEl.dispatchEvent(new CustomEvent('scrub-request', { detail: { clientX: e.clientX } }));
+  });
 }
 
 export function carregarArquivoDeAudio(file: File) {
