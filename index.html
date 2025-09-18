@@ -145,6 +145,151 @@
         transform: none;
       }
 
+      .report-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, rgba(56, 189, 248, 0.16), rgba(15, 23, 42, 0.88));
+        border-color: rgba(56, 189, 248, 0.48);
+        box-shadow: 0 18px 46px -24px rgba(56, 189, 248, 0.6);
+        color: var(--color-text);
+      }
+
+      .report-button .ico {
+        font-size: 1.05rem;
+        line-height: 1;
+      }
+
+      .report-button:hover {
+        border-color: rgba(56, 189, 248, 0.75);
+        box-shadow: 0 20px 52px -24px rgba(56, 189, 248, 0.72);
+        background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(15, 23, 42, 0.9));
+      }
+
+      .report-button:focus-visible {
+        outline: 2px solid rgba(56, 189, 248, 0.7);
+        outline-offset: 2px;
+      }
+
+      body.report-modal-open {
+        overflow: hidden;
+      }
+
+      .report-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(4, 6, 15, 0.72);
+        backdrop-filter: blur(8px);
+        z-index: 80;
+      }
+
+      .report-modal {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        z-index: 90;
+      }
+
+      .report-modal[hidden],
+      .report-backdrop[hidden] {
+        display: none;
+      }
+
+      .report-card {
+        width: min(520px, 94vw);
+        background: var(--color-panel-strong);
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-card);
+        padding: clamp(20px, 4vw, 32px);
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .report-card header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .report-card header h2 {
+        margin: 0;
+        font-size: 1.35rem;
+      }
+
+      .report-card header button {
+        background: transparent;
+        border: none;
+        color: var(--color-muted);
+        padding: 6px;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: grid;
+        place-items: center;
+      }
+
+      .report-card header button:hover {
+        background: rgba(15, 23, 42, 0.45);
+        color: var(--color-text);
+        box-shadow: none;
+        transform: translateY(-1px);
+      }
+
+      .report-card header button:focus-visible {
+        outline: 2px solid var(--color-secondary);
+        outline-offset: 2px;
+      }
+
+      .report-card p {
+        margin: 0;
+        color: var(--color-muted);
+        font-size: 0.95rem;
+      }
+
+      .report-textarea {
+        width: 100%;
+        min-height: 168px;
+        resize: vertical;
+        background: rgba(15, 23, 42, 0.78);
+        border: 1px solid rgba(148, 163, 184, 0.38);
+        border-radius: var(--radius-sm);
+        padding: 14px 16px;
+        color: var(--color-text);
+        font-size: 0.98rem;
+        line-height: 1.6;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      }
+
+      .report-textarea::placeholder {
+        color: rgba(148, 163, 184, 0.58);
+      }
+
+      .report-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .report-status {
+        font-size: 0.9rem;
+        color: var(--color-muted);
+        min-height: 1.2em;
+      }
+
+      .report-status[data-status='error'] {
+        color: #fca5a5;
+      }
+
+      .report-status[data-status='success'] {
+        color: #86efac;
+      }
+
       input[type='file'] {
         display: none;
       }
@@ -1311,6 +1456,15 @@
           </select>
           <button id="btn-novo-projeto" title="Criar novo projeto">Novo</button>
           <button id="btn-salvar-projeto" title="Salvar o projeto">Salvar</button>
+          <button
+            id="btn-open-report"
+            class="report-button"
+            type="button"
+            title="Enviar feedback e sugestões"
+          >
+            <span class="ico" aria-hidden="true">✶</span>
+            <span>Reportar feedback</span>
+          </button>
           <button id="btn-logout" style="display: none">Sair</button>
           <div id="present-rec-bar">
             <button id="btn-start-present-rec" title="Gravar apresentação">🎥 Gravar</button>
@@ -1402,6 +1556,42 @@
         <input id="audio-file-input" type="file" accept="audio/*" />
       </div>
     </footer>
+
+    <div class="report-backdrop" data-report-backdrop hidden></div>
+    <section
+      class="report-modal"
+      data-report-modal
+      role="dialog"
+      aria-modal="true"
+      aria-hidden="true"
+      aria-labelledby="report-modal-title"
+      hidden
+    >
+      <form class="report-card" data-report-form>
+        <header>
+          <h2 id="report-modal-title">Conte pra gente o que encontrou</h2>
+          <button type="button" data-close-report-modal aria-label="Fechar formulário de feedback">✕</button>
+        </header>
+        <p>
+          Ajude a construir a plataforma descrevendo sugestões, bugs ou qualquer detalhe que tenha percebido durante os testes.
+        </p>
+        <label class="sr-only" for="report-message">Mensagem</label>
+        <textarea
+          id="report-message"
+          class="report-textarea"
+          name="report-message"
+          data-report-input
+          placeholder="Compartilhe ideias, bugs, sugestões ou melhorias que podem fortalecer o CoreoForm. Quanto mais detalhes, melhor!"
+          aria-describedby="report-status"
+          required
+        ></textarea>
+        <p id="report-status" class="report-status" data-report-status aria-live="polite"></p>
+        <div class="report-actions">
+          <button type="button" data-close-report-modal>Cancelar</button>
+          <button type="submit">Enviar contribuição</button>
+        </div>
+      </form>
+    </section>
 
     <script type="module" src="/src/main.ts"></script>
     <script>
