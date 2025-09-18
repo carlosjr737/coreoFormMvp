@@ -1275,21 +1275,6 @@
         }
       }
 
-      /* Modo apresentação */
-      body.presentation {
-        padding: 0;
-      }
-
-      body.presentation header,
-      body.presentation .sidebar,
-      body.presentation .controles,
-      body.presentation .painel-projetos,
-      body.presentation .topbar,
-      body.presentation .footer-controles {
-        display: none !important;
-      }
-
-      /* Gravação */
       body.recording .rec-indicator {
         display: inline !important;
       }
@@ -1341,26 +1326,16 @@
         <button id="btn-panel-formacoes" class="rail-btn active" title="Formações" aria-label="Formações">
           <span class="ico" aria-hidden="true">
             <svg viewBox="0 0 24 24" role="presentation" focusable="false">
-              <circle class="node" cx="12" cy="5.5" r="2.3" />
-              <circle class="node" cx="6.4" cy="12" r="2.1" />
-              <circle class="node" cx="17.6" cy="12" r="2.1" />
-              <circle class="node" cx="12" cy="18.5" r="2.3" />
-              <path d="M12 7.8V17.2" />
-              <path d="M12 12l-5.6-4.2" />
-              <path d="M12 12l5.6-4.2" />
-              <path d="M12 12l-5.6 4.2" />
-              <path d="M12 12l5.6 4.2" />
+
+              <use href="/assets/hierarchy-3.svg#hierarchy-3" />
+
             </svg>
           </span>
         </button>
         <button id="btn-panel-bailarinos" class="rail-btn" title="Bailarinos" aria-label="Bailarinos">
           <span class="ico" aria-hidden="true">
             <svg viewBox="0 0 24 24" role="presentation" focusable="false">
-              <circle class="node" cx="12" cy="6" r="2.2" />
-              <path d="M7.6 11.4L12 8.9l4.4 2.5" />
-              <path d="M12 9.8v7.2" />
-              <path d="M12 15.6l-3.4 4.4" />
-              <path d="M12 15.6l3.4 4.4" />
+              <use href="/assets/users-group.svg#users-group" />
             </svg>
           </span>
         </button>
