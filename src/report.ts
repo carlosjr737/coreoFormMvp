@@ -1,6 +1,7 @@
 import { db, collection, addDoc, serverTimestamp } from './firebase';
 import { getUser } from './auth';
 
+
 const offlineStatusMessage =
   'Parece que você está offline. Conecte-se à internet e tente novamente.';
 
@@ -8,6 +9,7 @@ const encouragementMessage =
   'Compartilhe ideias, bugs, sugestões ou melhorias que podem fortalecer o CoreoForm. Quanto mais detalhes, melhor!';
 
 type StatusType = 'idle' | 'error' | 'success';
+
 
 const mapReportError = (error: unknown): string => {
   if (error && typeof error === 'object') {
@@ -29,6 +31,7 @@ const mapReportError = (error: unknown): string => {
   return 'Não foi possível enviar agora. Tente novamente em instantes.';
 };
 
+
 export function initReportUI() {
   const reportButton = document.getElementById('btn-open-report') as HTMLButtonElement | null;
   const modal = document.querySelector<HTMLElement>('[data-report-modal]');
@@ -42,6 +45,7 @@ export function initReportUI() {
   }
 
   const submitButton = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+
   let previousBodyOverflow: string | null = null;
 
   const lockBodyScroll = (shouldLock: boolean) => {
@@ -70,6 +74,7 @@ export function initReportUI() {
     }
   };
 
+
   const setStatus = (message: string, type: StatusType = 'idle') => {
     statusEl.textContent = message;
     if (type === 'idle') {
@@ -94,7 +99,9 @@ export function initReportUI() {
     modal.setAttribute('aria-hidden', 'false');
     backdrop.hidden = false;
     backdrop.setAttribute('aria-hidden', 'false');
+
     lockBodyScroll(true);
+
     setStatus('');
     if (!textarea.placeholder) {
       textarea.placeholder = encouragementMessage;
@@ -107,7 +114,9 @@ export function initReportUI() {
     modal.setAttribute('aria-hidden', 'true');
     backdrop.hidden = true;
     backdrop.setAttribute('aria-hidden', 'true');
+
     lockBodyScroll(false);
+
     form.reset();
     setStatus('');
   };
@@ -151,6 +160,7 @@ export function initReportUI() {
       return;
     }
 
+
     if (typeof navigator !== 'undefined' && navigator && navigator.onLine === false) {
       setStatus(offlineStatusMessage, 'error');
       return;
@@ -175,7 +185,9 @@ export function initReportUI() {
       }, 900);
     } catch (error) {
       console.error('Erro ao enviar report', error);
+
       setStatus(mapReportError(error), 'error');
+
     } finally {
       setLoading(false);
     }
