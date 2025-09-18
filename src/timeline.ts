@@ -129,7 +129,6 @@ function updateAddTile() {
   timelineBlocosEl.style.width = needWidth + 'px';
 }
 
-
 function iniciarEdicaoFormacao(li: HTMLLIElement, id: string, nomeAtual: string) {
   const nomeSpan = li.querySelector('.nome-formacao') as HTMLElement | null;
   if (!nomeSpan) return;
@@ -458,7 +457,6 @@ export function adicionarFormacao() {
   mudarFormacaoAtiva(nova.id);
 }
 
-
 export function adicionarFormacaoDepois(id: string) {
   const idx = db.formacoes.findIndex(f => f.id === id);
   const ref = idx >= 0 ? db.formacoes[idx] : null;
@@ -486,7 +484,6 @@ export function adicionarFormacaoDepois(id: string) {
   db.formacoes.sort((a,b)=> a.ordem - b.ordem);
   mudarFormacaoAtiva(nova.id);
 }
-
 
 export function mudarFormacaoAtiva(id: string) {
   setFormacaoAtiva(id);
@@ -561,7 +558,7 @@ export function initZoomControls(onZoomChange: (z:number)=>void) {
     ensurePlayheadInView(); renderizarFaixaAudio();
     updateAddTile();
   });
-    setZoomUI(zoom);
+  setZoomUI(zoom);
 }
 
 export function initScrubHandlers() {
