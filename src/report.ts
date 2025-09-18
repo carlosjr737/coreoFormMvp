@@ -1,10 +1,36 @@
 import { db, collection, addDoc, serverTimestamp } from './firebase';
 import { getUser } from './auth';
 
+
+const offlineStatusMessage =
+  'Parece que você está offline. Conecte-se à internet e tente novamente.';
+
 const encouragementMessage =
   'Compartilhe ideias, bugs, sugestões ou melhorias que podem fortalecer o CoreoForm. Quanto mais detalhes, melhor!';
 
 type StatusType = 'idle' | 'error' | 'success';
+
+
+const mapReportError = (error: unknown): string => {
+  if (error && typeof error === 'object') {
+    const { code, message } = error as { code?: string; message?: string };
+    if (code === 'permission-denied' || code === 'unauthenticated') {
+      return 'Sua sessão expirou. Faça login novamente para enviar seu feedback.';
+    }
+    if (code === 'failed-precondition' || code === 'unavailable') {
+      return offlineStatusMessage;
+    }
+    if (typeof message === 'string') {
+      const normalized = message.toLowerCase();
+      if (normalized.includes('offline') || normalized.includes('unavailable')) {
+        return offlineStatusMessage;
+      }
+    }
+  }
+
+  return 'Não foi possível enviar agora. Tente novamente em instantes.';
+};
+
 
 export function initReportUI() {
   const reportButton = document.getElementById('btn-open-report') as HTMLButtonElement | null;
@@ -19,6 +45,35 @@ export function initReportUI() {
   }
 
   const submitButton = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+
+  let previousBodyOverflow: string | null = null;
+
+  const lockBodyScroll = (shouldLock: boolean) => {
+    const body = document.body;
+    if (!body) return;
+
+    if (shouldLock) {
+      if (previousBodyOverflow === null) {
+        previousBodyOverflow = body.style.overflow;
+      }
+      body.dataset.reportModalOpen = 'true';
+      body.style.overflow = 'hidden';
+      return;
+    }
+
+    delete body.dataset.reportModalOpen;
+    if (previousBodyOverflow !== null) {
+      if (previousBodyOverflow) {
+        body.style.overflow = previousBodyOverflow;
+      } else {
+        body.style.removeProperty('overflow');
+      }
+      previousBodyOverflow = null;
+    } else {
+      body.style.removeProperty('overflow');
+    }
+  };
+
 
   const setStatus = (message: string, type: StatusType = 'idle') => {
     statusEl.textContent = message;
@@ -44,7 +99,9 @@ export function initReportUI() {
     modal.setAttribute('aria-hidden', 'false');
     backdrop.hidden = false;
     backdrop.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('report-modal-open');
+
+    lockBodyScroll(true);
+
     setStatus('');
     if (!textarea.placeholder) {
       textarea.placeholder = encouragementMessage;
@@ -57,7 +114,9 @@ export function initReportUI() {
     modal.setAttribute('aria-hidden', 'true');
     backdrop.hidden = true;
     backdrop.setAttribute('aria-hidden', 'true');
-    document.body.classList.remove('report-modal-open');
+
+    lockBodyScroll(false);
+
     form.reset();
     setStatus('');
   };
@@ -101,6 +160,12 @@ export function initReportUI() {
       return;
     }
 
+
+    if (typeof navigator !== 'undefined' && navigator && navigator.onLine === false) {
+      setStatus(offlineStatusMessage, 'error');
+      return;
+    }
+
     const payload = {
       uid: user.uid,
       message,
@@ -120,7 +185,9 @@ export function initReportUI() {
       }, 900);
     } catch (error) {
       console.error('Erro ao enviar report', error);
-      setStatus('Não foi possível enviar agora. Tente novamente em instantes.', 'error');
+
+      setStatus(mapReportError(error), 'error');
+
     } finally {
       setLoading(false);
     }

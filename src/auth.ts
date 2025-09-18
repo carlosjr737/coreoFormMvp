@@ -10,8 +10,10 @@ import {
 } from './firebase';
 import type { User } from 'firebase/auth';
 
-let _user: User | null = null;
-export function getUser(){ return _user; }
+let _user: User | null = auth.currentUser;
+export function getUser() {
+  return _user ?? auth.currentUser ?? null;
+}
 
 export async function loginWithGoogle() {
   return signInWithPopup(auth, provider);
