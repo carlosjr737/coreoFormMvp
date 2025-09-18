@@ -1,5 +1,5 @@
 
-import { audioCanvas, audioFileInput, audioInfoEl, audioTrackEl, btnCarregarAudio, timelineContainerEl } from './dom';
+import { audioCanvas, audioFileInput, audioStatusEl, audioTrackEl, btnCarregarAudio, timelineContainerEl } from './dom';
 import { getTotalTimelinePx, getTimelineTotalSegundos, renderizarTudo } from './timeline';
 import { globalMsAtual } from './state';
 
@@ -67,30 +67,38 @@ export function initAudioUI() {
     if (file) carregarArquivoDeAudio(file);
   });
   audioTrackEl.addEventListener('mousedown', (e) => {
-  if (e.button !== 0) return;
-  const onMove = (ev: MouseEvent) => audioTrackEl.dispatchEvent(new CustomEvent('scrub-request', { detail: { clientX: ev.clientX } }));
-  const onUp = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
-  document.addEventListener('mousemove', onMove);
-  document.addEventListener('mouseup', onUp);
-  audioTrackEl.dispatchEvent(new CustomEvent('scrub-request', { detail: { clientX: e.clientX } }));
-});
+    if (e.button !== 0) return;
+    if ((e.target as HTMLElement)?.closest('#btn-carregar-audio')) return;
+    const onMove = (ev: MouseEvent) =>
+      audioTrackEl.dispatchEvent(new CustomEvent('scrub-request', { detail: { clientX: ev.clientX } }));
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    audioTrackEl.dispatchEvent(new CustomEvent('scrub-request', { detail: { clientX: e.clientX } }));
+  });
 }
 
 export function carregarArquivoDeAudio(file: File) {
   ensureAudioContext();
   if (!audioContext) return;
-  audioInfoEl.innerHTML = `<span class="hint">Processando áudio...</span>`;
+  if (audioStatusEl) audioStatusEl.textContent = 'Processando áudio...';
 
   const reader = new FileReader();
   reader.onload = (e) => {
     const arrayBuffer = e.target?.result as ArrayBuffer;
     audioContext!.decodeAudioData(arrayBuffer).then((decoded) => {
       audioBuffer = decoded;
-      audioInfoEl.textContent = `Áudio: ${file.name.substring(0,25)}... (${audioBuffer.duration.toFixed(1)}s)`;
+      if (audioStatusEl) {
+        const trimmedName = file.name.length > 32 ? `${file.name.slice(0, 29)}…` : file.name;
+        audioStatusEl.textContent = `Áudio: ${trimmedName} (${audioBuffer.duration.toFixed(1)}s)`;
+      }
 
       processarAudioParaVisualizacao();
     }).catch((err) => {
-      audioInfoEl.innerHTML = `<span class="hint">Erro ao carregar áudio</span>`;
+      if (audioStatusEl) audioStatusEl.textContent = 'Erro ao carregar áudio';
       alert('Não foi possível processar este arquivo de áudio. ' + err?.message);
     });
   };
