@@ -55,9 +55,9 @@
         margin: 0;
         min-height: 100vh;
         height: 100vh;
-        display: flex;
-        flex-direction: column;
-        gap: clamp(16px, 3vh, 28px);
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: clamp(6px, 1.4vh, 12px);
         background: radial-gradient(circle at top left, rgba(168, 85, 247, 0.18), transparent 45%),
           radial-gradient(circle at top right, rgba(56, 189, 248, 0.16), transparent 52%),
           radial-gradient(circle at 18% 80%, rgba(236, 72, 153, 0.18), transparent 58%),
@@ -71,7 +71,7 @@
         overflow-y: hidden;
         position: relative;
         isolation: isolate;
-        padding: clamp(18px, 3vh, 28px) clamp(18px, 4vw, 44px);
+        padding: 0;
       }
 
       body::before,
@@ -185,6 +185,8 @@
         isolation: isolate;
         overflow: hidden;
         margin-left: 6px;
+        position: relative;
+        transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
       }
 
       #present-rec-bar::before {
@@ -195,6 +197,39 @@
         background: var(--gradient-highlight);
         opacity: 0.6;
         pointer-events: none;
+      }
+
+      #present-rec-bar.is-recording {
+        background: rgba(39, 12, 28, 0.82);
+        border-color: rgba(248, 113, 113, 0.58);
+        box-shadow: 0 18px 34px -18px rgba(244, 114, 182, 0.72);
+      }
+
+      #present-rec-bar.is-recording::before {
+        opacity: 0.95;
+        background: linear-gradient(135deg, rgba(248, 113, 113, 0.35), rgba(236, 72, 153, 0.28));
+      }
+
+      #present-rec-bar.is-recording #btn-start-present-rec:disabled {
+        background: rgba(239, 68, 68, 0.22);
+        border-color: rgba(248, 113, 113, 0.4);
+        color: #ffe4e6;
+        opacity: 1;
+        cursor: default;
+      }
+
+      #present-rec-bar.is-recording #btn-stop-present-rec {
+        background: linear-gradient(135deg, rgba(244, 63, 94, 0.96), rgba(248, 113, 113, 0.9));
+        border-color: rgba(248, 113, 113, 0.75);
+        box-shadow: 0 16px 30px -16px rgba(244, 63, 94, 0.75);
+      }
+
+      #present-rec-bar.is-recording #btn-stop-present-rec:hover {
+        transform: translateY(-1px);
+      }
+
+      #present-rec-bar.is-recording .rec-indicator {
+        color: #f87171;
       }
 
       #present-rec-bar button {
@@ -212,21 +247,21 @@
       }
 
       header.barra-superior {
-        padding: 6px 16px;
+        padding: 10px 24px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 12px;
         background: var(--color-panel-strong);
         border: 1px solid var(--color-border);
-        border-radius: var(--radius-lg);
+        border-radius: 0;
         backdrop-filter: blur(22px);
         box-shadow: var(--shadow-lg);
         position: relative;
         isolation: isolate;
         overflow: hidden;
         z-index: 0;
-        min-height: 42px;
+        min-height: 48px;
       }
 
       header.barra-superior::before {
@@ -287,18 +322,10 @@
         letter-spacing: 0.04em;
       }
 
-      .title-block {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-      }
-
+      .title-block,
+      #titulo-projeto,
       .header-subtitle {
-        font-size: 0.62rem;
-        text-transform: uppercase;
-        letter-spacing: 0.24em;
-        color: var(--color-muted);
-        opacity: 0.8;
+        display: none;
       }
 
       #user-badge {
@@ -323,11 +350,10 @@
       }
 
       .container-principal {
-        flex: 1;
         display: flex;
         min-height: 0;
-        padding: 8px 0 0;
-        gap: 24px;
+        padding: 0 24px;
+        gap: 20px;
         overflow: hidden;
       }
 
@@ -373,7 +399,37 @@
       }
 
       .rail-btn .ico {
-        font-size: 1.1rem;
+        display: grid;
+        place-items: center;
+        width: 100%;
+        height: 100%;
+        color: var(--color-muted);
+        transition: color 0.18s ease;
+      }
+
+      .rail-btn .ico svg {
+        width: 24px;
+        height: 24px;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        fill: none;
+      }
+
+      .rail-btn .ico .node {
+        fill: currentColor;
+        fill-opacity: 0.26;
+        stroke: currentColor;
+      }
+
+      .rail-btn .ico .filled {
+        fill: currentColor;
+        stroke: none;
+      }
+
+      .rail-btn:hover .ico {
+        color: var(--color-text);
       }
 
       .rail-btn:hover {
@@ -388,6 +444,11 @@
         box-shadow: 0 0 0 2px rgba(244, 114, 182, 0.28), 0 14px 24px -14px rgba(244, 114, 182, 0.65);
         opacity: 1;
         background: rgba(244, 114, 182, 0.2);
+      }
+
+      .rail-btn.active .ico,
+      .rail-btn.active:hover .ico {
+        color: var(--color-primary);
       }
 
       .side-dock {
@@ -510,25 +571,17 @@
         flex: 1;
         display: flex;
         flex-direction: column;
-        gap: 18px;
-        min-height: clamp(380px, 58vh, 760px);
-        position: relative;
-        overflow: hidden;
-      }
-
-      .palco-controles {
-        display: flex;
         align-items: center;
-        gap: 12px;
-        color: var(--color-muted);
-        font-size: 0.78rem;
-        padding: 0 6px;
+        min-height: 0;
+        position: relative;
       }
 
       .palco-container {
         position: relative;
         flex: 1;
         width: 100%;
+        max-width: 100%;
+        max-height: 100%;
         border-radius: var(--radius-lg);
         border: 1px solid var(--color-border);
         background: linear-gradient(160deg, rgba(15, 23, 42, 0.94), rgba(8, 12, 29, 0.92));
@@ -539,7 +592,7 @@
           linear-gradient(90deg, rgba(148, 163, 184, 0.16) 1px, transparent 1px);
         background-size: 56px 56px, 56px 56px;
         background-position: 0 0, 0 0;
-        min-height: clamp(380px, 58vh, 640px);
+        min-height: 0;
         isolation: isolate;
         z-index: 0;
       }
@@ -662,11 +715,11 @@
       footer.linha-do-tempo {
         background: var(--color-panel-strong);
         border: 1px solid var(--color-border);
-        border-radius: var(--radius-lg);
-        padding: 10px 18px 14px;
+        border-radius: 0;
+        padding: 12px 24px 18px;
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 12px;
         box-shadow: var(--shadow-lg);
         backdrop-filter: blur(22px);
         position: relative;
@@ -788,11 +841,11 @@
 
       .time-ruler {
         position: relative;
-        height: 12px;
+        height: 20px;
         background: linear-gradient(135deg, rgba(15, 23, 42, 0.68), rgba(8, 12, 29, 0.56));
         border: 1px solid var(--color-border);
         border-bottom: none;
-        border-radius: var(--radius-md) var(--radius-md) 0 0;
+        border-radius: 0;
         overflow-x: auto;
         scrollbar-width: none;
         backdrop-filter: blur(16px);
@@ -811,30 +864,30 @@
       }
 
       .time-ruler .tick.minor {
-        height: 5px;
+        height: 7px;
       }
 
       .time-ruler .tick.major {
-        height: 8px;
+        height: 12px;
         background: var(--color-text);
         opacity: 0.9;
       }
 
       .time-ruler .tick-label {
         position: absolute;
-        bottom: 6px;
+        bottom: 8px;
         transform: translateX(-50%);
-        font-size: 0.6rem;
+        font-size: 0.68rem;
         opacity: 0.85;
         white-space: nowrap;
       }
 
       .timeline-container {
         position: relative;
-        height: 24px;
+        height: 64px;
         border: 1px solid var(--color-border);
         border-top: none;
-        border-radius: 0 0 var(--radius-md) var(--radius-md);
+        border-radius: 0;
         overflow-x: auto;
         overflow-y: hidden;
         background: linear-gradient(135deg, rgba(8, 12, 29, 0.84), rgba(15, 23, 42, 0.7));
@@ -855,7 +908,7 @@
 
       .timeline-blocos {
         display: flex;
-        align-items: stretch;
+        align-items: center;
         height: 100%;
         width: 100%;
         position: relative;
@@ -866,13 +919,13 @@
         display: flex;
         align-items: center;
         justify-content: flex-start;
-        padding-left: 12px;
-        height: calc(100% - 8px);
-        margin-block: 4px;
+        padding: 0 16px;
+        height: calc(100% - 20px);
+        margin-block: 10px;
         background: linear-gradient(135deg, rgba(15, 23, 42, 0.82), rgba(30, 41, 59, 0.68));
         border-right: 1px solid rgba(148, 163, 184, 0.24);
-        border-radius: 10px;
-        font-size: 0.78rem;
+        border-radius: 14px;
+        font-size: 0.86rem;
         color: var(--color-text);
         white-space: nowrap;
         overflow: hidden;
@@ -905,7 +958,7 @@
         height: 100%;
         background: rgba(236, 72, 153, 0.88);
         opacity: 0.85;
-        border-radius: 10px 0 0 10px;
+        border-radius: 14px 0 0 14px;
       }
 
       .bloco-formacao span {
@@ -915,9 +968,9 @@
 
       .handle {
         position: absolute;
-        top: 3px;
-        bottom: 3px;
-        width: 8px;
+        top: 6px;
+        bottom: 6px;
+        width: 10px;
         border-radius: 999px;
         cursor: ew-resize;
         opacity: 0;
@@ -947,8 +1000,8 @@
 
       .playhead {
         position: absolute;
-        top: -10px;
-        bottom: -10px;
+        top: -20px;
+        bottom: -40px;
         left: 0;
         width: 2px;
         background: var(--cor-playhead);
@@ -967,16 +1020,16 @@
         height: 0;
         border-left: 5px solid transparent;
         border-right: 5px solid transparent;
-        border-top: 6px solid var(--cor-playhead);
+        border-top: 8px solid var(--cor-playhead);
       }
 
       .audio-track {
         position: relative;
-        height: 22px;
+        height: 40px;
         background: linear-gradient(135deg, rgba(8, 12, 29, 0.9), rgba(15, 23, 42, 0.72));
         border: 1px solid var(--color-border);
         border-top: none;
-        border-radius: 0 0 var(--radius-md) var(--radius-md);
+        border-radius: 0;
         display: block;
         cursor: pointer;
         overflow: hidden;
@@ -1004,7 +1057,7 @@
       .audio-track-status {
         position: absolute;
         left: 12px;
-        bottom: 4px;
+        bottom: 8px;
         pointer-events: none;
         background: rgba(8, 12, 29, 0.55);
         padding: 3px 8px;
@@ -1019,7 +1072,7 @@
       .audio-upload-btn {
         position: absolute;
         right: 12px;
-        top: 2px;
+        top: 6px;
         pointer-events: auto;
         width: 28px;
         height: 28px;
@@ -1181,15 +1234,12 @@
 
       @media (max-width: 1180px) {
         .container-principal {
-          padding-inline: 20px;
+          padding-inline: clamp(16px, 4vw, 24px);
         }
 
-        header.barra-superior {
-          padding-inline: 24px;
-        }
-
+        header.barra-superior,
         footer.linha-do-tempo {
-          padding-inline: 24px;
+          padding-inline: clamp(16px, 4vw, 24px);
         }
       }
 
@@ -1197,13 +1247,14 @@
         body {
           height: auto;
           overflow-y: auto;
+          grid-template-rows: auto auto auto;
         }
 
         .container-principal {
           flex-direction: column;
-          padding-inline: 20px;
+          padding-inline: clamp(16px, 5vw, 24px);
           padding-bottom: 24px;
-          overflow-y: auto;
+          overflow: visible;
         }
 
         .side-rail {
@@ -1220,33 +1271,15 @@
         }
 
         .palco-wrapper {
-          min-height: clamp(360px, 58vh, 560px);
+          padding-top: 12px;
         }
-
-        .palco-container {
-          min-height: clamp(320px, 56vh, 520px);
-        }
-      }
-
-      body.presentation {
-        padding: 0;
-      }
-
-      body.presentation header,
-      body.presentation .sidebar,
-      body.presentation .controles,
-      body.presentation .painel-projetos,
-      body.presentation .topbar,
-      body.presentation .footer-controles {
-        display: none !important;
       }
 
       body.recording .rec-indicator {
-        display: inline;
+        display: inline !important;
       }
 
       body.recording #btn-start-present-rec {
-        opacity: 0.5;
         pointer-events: none;
       }
 
@@ -1291,10 +1324,29 @@
     <div class="container-principal">
       <nav id="side-rail" class="side-rail">
         <button id="btn-panel-formacoes" class="rail-btn active" title="Formações" aria-label="Formações">
-          <span class="ico">🧩</span>
+          <span class="ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+              <rect x="3.2" y="4.2" width="17.6" height="15.6" rx="3.4" />
+              <line x1="7.4" y1="8.8" x2="16.6" y2="8.8" />
+              <line x1="7.4" y1="12" x2="16.6" y2="12" />
+              <line x1="7.4" y1="15.2" x2="16.6" y2="15.2" />
+              <circle class="filled" cx="14.8" cy="8.8" r="1.3" />
+              <circle class="filled" cx="9.1" cy="12" r="1.2" />
+              <circle class="filled" cx="12.8" cy="15.2" r="1.2" />
+            </svg>
+          </span>
         </button>
         <button id="btn-panel-bailarinos" class="rail-btn" title="Bailarinos" aria-label="Bailarinos">
-          <span class="ico">🕺</span>
+          <span class="ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+              <circle class="filled" cx="12" cy="7.2" r="2.2" />
+              <circle class="filled" cx="7.2" cy="11" r="1.9" />
+              <circle class="filled" cx="16.8" cy="11" r="1.9" />
+              <path d="M6 18A6 6 0 0 0 18 18" />
+              <path d="M3.5 18.4A3.6 3.6 0 0 0 9.1 18.4" />
+              <path d="M14.9 18.4A3.6 3.6 0 0 0 20.5 18.4" />
+            </svg>
+          </span>
         </button>
       </nav>
 
@@ -1321,9 +1373,6 @@
       </aside>
 
       <div class="palco-wrapper">
-        <div class="palco-controles">
-          <span class="hint">Use o painel de Bailarinos para adicionar novos dançarinos. SHIFT+arrastar para grade. Duplo clique para renomear.</span>
-        </div>
         <main id="palco" class="palco-container"></main>
       </div>
     </div>

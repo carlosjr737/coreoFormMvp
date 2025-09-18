@@ -91,11 +91,12 @@ export function renderizarBarraLateral() {
   });
 }
 function updateAddTile() {
-  const ativaEl = timelineBlocosEl.querySelector('.bloco-formacao.ativa') as HTMLElement | null;
-  if (!ativaEl) return;
+  const GAP = 16;           // espaço horizontal entre o último card e o "+"
+  const TILE_W = 140;       // largura do tile
 
-  const GAP = 8;           // espaço horizontal entre o card e o "+"
-  const TILE_W = 140;      // largura do tile
+  const blocos = Array.from(
+    timelineBlocosEl.querySelectorAll<HTMLElement>('.bloco-formacao')
+  );
 
   // cria o tile se ainda não existir
   let addTile = timelineBlocosEl.querySelector('.add-formation-tile') as HTMLButtonElement | null;
@@ -108,25 +109,39 @@ function updateAddTile() {
     addTile.style.height = ADD_TILE_HEIGHT;                // fica dentro da faixa, sem encostar
     addTile.style.zIndex = '0';                            // SEMPRE por baixo dos cards
     addTile.innerHTML = '<span class="plus">＋</span>';
-    addTile.title = 'Nova formação após a atual';
+    addTile.title = 'Adicionar formação ao final';
     addTile.addEventListener('click', (e) => {
       e.stopPropagation();
-      adicionarFormacaoDepois(formacaoAtivaId!);
+      adicionarFormacaoNoFim();
     });
     addTile.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); addTile!.click(); }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); adicionarFormacaoNoFim(); }
     });
     (timelineBlocosEl as HTMLElement).style.position = 'relative';
     timelineBlocosEl.appendChild(addTile);
   }
 
-  // ancora depois do fim da ativa (sem jamais “entrar” no card)
-  const left = ativaEl.offsetLeft + ativaEl.offsetWidth + GAP;
+  const ultimoBloco = blocos.length ? blocos[blocos.length - 1] : null;
+  const left = ultimoBloco
+    ? ultimoBloco.offsetLeft + ultimoBloco.offsetWidth + GAP
+    : GAP;
   addTile.style.left = `${left}px`;
 
   // garante largura suficiente para o tile (sem quebrar layout)
-  const needWidth = Math.max(getTotalTimelinePx(), left + TILE_W + 16);
+  const needWidth = Math.max(getTotalTimelinePx(), left + TILE_W + GAP);
   timelineBlocosEl.style.width = needWidth + 'px';
+}
+
+function adicionarFormacaoNoFim() {
+  if (db.formacoes.length) {
+    const ordenadas = [...db.formacoes].sort((a, b) => a.ordem - b.ordem);
+    const ultima = ordenadas[ordenadas.length - 1];
+    if (ultima) {
+      adicionarFormacaoDepois(ultima.id);
+      return;
+    }
+  }
+  adicionarFormacao();
 }
 
 function iniciarEdicaoFormacao(li: HTMLLIElement, id: string, nomeAtual: string) {
