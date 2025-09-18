@@ -8,6 +8,9 @@ import { renderizarPalco } from './stage';
 import { renderizarPainelBailarinos } from './bailarinos';
 import { getAudioBuffer, renderizarFaixaAudio } from './audio';
 
+const ADD_TILE_TOP_PX = 6;
+const ADD_TILE_HEIGHT = 'calc(100% - 12px)';
+
 function deepClone<T>(x: T): T {
   return JSON.parse(JSON.stringify(x));
 }
@@ -101,8 +104,8 @@ function updateAddTile() {
     addTile.type = 'button';
     addTile.className = 'add-formation-tile';
     addTile.style.position = 'absolute';
-    addTile.style.top = '6px';                              // não “pega” a borda do card
-    addTile.style.height = 'calc(100% - 12px)';            // fica dentro da faixa, sem encostar
+    addTile.style.top = `${ADD_TILE_TOP_PX}px`;            // não “pega” a borda do card
+    addTile.style.height = ADD_TILE_HEIGHT;                // fica dentro da faixa, sem encostar
     addTile.style.zIndex = '0';                            // SEMPRE por baixo dos cards
     addTile.innerHTML = '<span class="plus">＋</span>';
     addTile.title = 'Nova formação após a atual';
@@ -284,8 +287,8 @@ export function renderizarLinhaDoTempo() {
   addTile.className = 'add-formation-tile';
   addTile.style.position = 'absolute';
   addTile.style.left = `${tileLeft}px`;
-  addTile.style.top = '0';
-  addTile.style.height = '100%';
+  addTile.style.top = `${ADD_TILE_TOP_PX}px`;
+  addTile.style.height = ADD_TILE_HEIGHT;
   addTile.innerHTML = '<span class="plus">＋</span>';
   addTile.title = 'Nova formação após a atual';
 
