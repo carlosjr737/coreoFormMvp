@@ -1,9 +1,8 @@
 
-import { btnAnterior, btnPlayPause, btnProxima, importFile, btnExportar, btnImportar, btnAddFormacao, btnAddBailarino, playheadEl, buscaBailarinosInput } from './dom';
+import { btnAnterior, btnPlayPause, btnProxima, btnAddFormacao, playheadEl, buscaBailarinosInput } from './dom';
 import { adicionarFormacao, calcularTempoAcumuladoAteFormacao, getTimelineTotalMs, mudarFormacaoAtiva, renderAtGlobalMs, renderizarTudo, ensurePlayheadInView } from './timeline';
 import { db, formacaoAtivaId, globalMsAtual, isPlaying, playbackLoopId, tempoInicioPlayback, tempoPausadoAcumulado } from './state';
 import { renderizarPalco, renderizarPalcoEmTransicao, renderizarPalcoComFormacao } from './stage';
-import { exportarJSON, importarJSON } from './io';
 import { ensureAudioContext, getAudioBuffer, getAudioContext, getAudioSource, setAudioSource, wireSourceToGraph } from './audio';
 
 let _isPlaying = isPlaying;
@@ -39,21 +38,6 @@ export function initPlaybackAndIO() {
   });
 
   btnAddFormacao.addEventListener('click', adicionarFormacao);
-  btnAddBailarino.addEventListener('click', ()=> {
-    if (!db.formacoes.length) { alert('Crie uma formação antes.'); return; }
-    const total = db.formacoes[0].marcadores.length;
-    const novo = { id: `m${Date.now()}`, rotulo: `D${total + 1}`, x: 50 + Math.random()*100, y: 50 + Math.random()*100, cor: ['#ef4444','#3b82f6','#22c55e','#f97316','#8b5cf6','#eab308','#14b8a6'][total % 7] };
-    db.formacoes.forEach(f => f.marcadores.push(JSON.parse(JSON.stringify(novo))));
-    renderizarTudo(true);
-  });
-
-  btnExportar.addEventListener('click', exportarJSON);
-  btnImportar.addEventListener('click', ()=> importFile.click());
-  importFile.addEventListener('change', (e) => {
-    const file = (e.target as HTMLInputElement).files?.[0];
-    if (file) importarJSON(file, () => renderizarTudo(true));
-    (e.target as HTMLInputElement).value = '';
-  });
 
   window.addEventListener('keydown', (e) => {
     const tag = (e.target as HTMLElement).tagName;
