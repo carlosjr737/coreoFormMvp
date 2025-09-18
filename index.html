@@ -63,10 +63,11 @@
         line-height: 1.6;
         letter-spacing: 0.01em;
         -webkit-font-smoothing: antialiased;
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: auto;
         position: relative;
         isolation: isolate;
-        padding: clamp(24px, 5vh, 36px) clamp(20px, 4vw, 52px);
+        padding: clamp(20px, 4vh, 32px) clamp(18px, 4vw, 44px);
       }
 
       body::before,
@@ -97,17 +98,25 @@
         background: radial-gradient(circle, rgba(244, 114, 182, 0.45), transparent 65%);
       }
 
-      a { color: inherit; text-decoration: none; }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
 
-      button, select, input { font-family: inherit; color: var(--color-text); }
+      button,
+      select,
+      input {
+        font-family: inherit;
+        color: var(--color-text);
+      }
 
       button {
         background: linear-gradient(135deg, rgba(17, 24, 39, 0.92), rgba(15, 23, 42, 0.88));
         border: 1px solid var(--color-border);
         border-radius: var(--radius-sm);
-        padding: 10px 16px;
+        padding: 8px 14px;
         font-weight: 600;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         cursor: pointer;
         transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border 0.18s ease;
         backdrop-filter: blur(14px);
@@ -120,11 +129,23 @@
         background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(17, 24, 39, 0.92));
       }
 
-      button:focus-visible { outline: 2px solid var(--color-secondary); outline-offset: 2px; }
-      button:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; transform: none; }
+      button:focus-visible {
+        outline: 2px solid var(--color-secondary);
+        outline-offset: 2px;
+      }
+
+      button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+      }
+
       input[type='file'] { display: none; }
 
-      select, .busca-input, input.edit-input {
+      select,
+      .busca-input,
+      input.edit-input {
         background: var(--color-panel-strong);
         border: 1px solid var(--color-border);
         border-radius: var(--radius-sm);
@@ -132,48 +153,51 @@
         font-size: 0.92rem;
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
       }
-      select:focus, .busca-input:focus, input.edit-input:focus {
-        outline: none; border-color: var(--color-secondary); box-shadow: 0 0 0 2px var(--color-secondary-soft);
+
+      select:focus,
+      .busca-input:focus,
+      input.edit-input:focus {
+        outline: none;
+        border-color: var(--color-secondary);
+        box-shadow: 0 0 0 2px var(--color-secondary-soft);
       }
+
       .busca-input::placeholder { color: var(--color-muted); }
 
+      /* REC bar agora é inline (dentro do header) */
       #present-rec-bar {
-        position: fixed;
-        top: clamp(20px, 4vh, 40px);
-        right: clamp(20px, 4vw, 52px);
-        z-index: 30;
-        display: flex;
-        gap: 10px;
+        display: inline-flex;
         align-items: center;
-        padding: 12px 18px;
+        gap: 8px;
+        padding: 6px 10px;
         border-radius: 999px;
-        background: var(--color-panel-strong);
-        border: 1px solid var(--color-border);
-        box-shadow: var(--shadow-lg);
-        backdrop-filter: blur(22px);
+        background: rgba(15, 23, 42, 0.68);
+        border: 1px solid rgba(148, 163, 184, 0.32);
+        box-shadow: 0 10px 22px -18px rgba(8, 12, 29, 0.8);
+        backdrop-filter: blur(14px);
         isolation: isolate;
         overflow: hidden;
+        margin-left: 6px;
+        position: relative;
       }
-
       #present-rec-bar::before {
         content: '';
         position: absolute;
         inset: 0;
         border-radius: inherit;
         background: var(--gradient-highlight);
-        opacity: 0.8;
+        opacity: 0.6;
         pointer-events: none;
       }
-
-      #present-rec-bar button { padding: 8px 18px; border-radius: 999px; font-size: 0.85rem; }
+      #present-rec-bar button { padding: 6px 12px; border-radius: 999px; font-size: 0.8rem; }
       #present-rec-bar .rec-indicator { color: var(--color-primary); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; }
 
       header.barra-superior {
-        padding: 24px 32px;
+        padding: 18px 28px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 24px;
+        gap: 20px;
         background: var(--color-panel-strong);
         border: 1px solid var(--color-border);
         border-radius: var(--radius-lg);
@@ -184,7 +208,6 @@
         overflow: hidden;
         z-index: 0;
       }
-
       header.barra-superior::before {
         content: '';
         position: absolute;
@@ -194,45 +217,126 @@
         pointer-events: none;
       }
 
-      .barra-superior .left, .barra-superior .right, #audio-info { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
-      .barra-superior .left { gap: 16px; }
-      .logo-pina { height: 44px; width: auto; display: block; filter: drop-shadow(0 8px 18px rgba(8, 12, 29, 0.75)); }
-      #titulo-projeto { margin: 0; font-size: 1.18rem; font-weight: 600; letter-spacing: 0.04em; }
+      .barra-superior .left,
+      .barra-superior .right,
+      #audio-info {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .barra-superior .left { gap: 14px; }
+      .barra-superior .right { margin-left: auto; justify-content: flex-end; }
+
+      .header-actions,
+      .project-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .project-controls { justify-content: flex-end; }
+
+      #audio-status { font-size: 0.82rem; color: var(--color-muted); }
+      .logo-pina { height: 36px; width: auto; display: block; filter: drop-shadow(0 8px 18px rgba(8, 12, 29, 0.75)); }
+      #titulo-projeto { margin: 0; font-size: 1.08rem; font-weight: 600; letter-spacing: 0.04em; }
 
       .title-block { display: flex; flex-direction: column; gap: 2px; }
-      .header-subtitle { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.28em; color: var(--color-muted); opacity: 0.75; }
+      .header-subtitle { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.24em; color: var(--color-muted); opacity: 0.8; }
 
-      #user-badge { padding: 6px 12px; border-radius: 999px; background: rgba(56, 189, 248, 0.14); border: 1px solid rgba(56, 189, 248, 0.32); color: var(--color-secondary); font-weight: 600; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; }
+      #user-badge {
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: rgba(56, 189, 248, 0.14);
+        border: 1px solid rgba(56, 189, 248, 0.32);
+        color: var(--color-secondary);
+        font-weight: 600;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
       #sel-projeto { min-width: 180px; }
       .hint { color: var(--color-muted); font-size: 0.85rem; }
 
-      .container-principal { flex: 1; display: flex; min-height: 0; padding: 24px 0 0; gap: 24px; }
+      .container-principal {
+        flex: 1;
+        display: flex;
+        min-height: 0;
+        padding: 20px 0 0;
+        gap: 20px;
+      }
 
       .side-rail {
         width: 64px;
         background: var(--color-panel);
         border: 1px solid var(--color-border);
         border-radius: var(--radius-md);
-        display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 16px 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 10px;
         backdrop-filter: blur(18px);
         box-shadow: var(--shadow-card);
-        position: relative; isolation: isolate; overflow: hidden; z-index: 0;
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        z-index: 0;
+      }
+      .side-rail::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: var(--gradient-highlight);
+        opacity: 0.6;
+        pointer-events: none;
       }
 
-      .side-rail::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: var(--gradient-highlight); opacity: 0.6; pointer-events: none; }
-
-      .rail-btn { width: 44px; height: 44px; border-radius: 14px; border: 1px solid transparent; background: rgba(15, 23, 42, 0.58); display: grid; place-items: center; cursor: pointer; opacity: 0.82; transition: transform 0.18s ease, opacity 0.18s ease, border 0.18s ease, box-shadow 0.18s ease, background 0.18s ease; }
+      .rail-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        border: 1px solid transparent;
+        background: rgba(15, 23, 42, 0.58);
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        opacity: 0.82;
+        transition: transform 0.18s ease, opacity 0.18s ease, border 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      }
       .rail-btn .ico { font-size: 1.1rem; }
       .rail-btn:hover { opacity: 1; transform: translateY(-2px); background: rgba(15, 23, 42, 0.78); box-shadow: 0 12px 22px -14px rgba(8, 12, 29, 0.85); }
       .rail-btn.active { border-color: var(--color-primary); box-shadow: 0 0 0 2px rgba(244, 114, 182, 0.28), 0 14px 24px -14px rgba(244, 114, 182, 0.65); opacity: 1; background: rgba(244, 114, 182, 0.2); }
 
       .side-dock {
-        width: 320px; min-width: 320px; background: var(--color-panel); border: 1px solid var(--color-border); border-radius: var(--radius-lg);
-        display: flex; flex-direction: column; gap: 18px; min-height: 0; padding: 20px; box-shadow: var(--shadow-card); backdrop-filter: blur(18px);
-        position: relative; isolation: isolate; overflow: hidden; z-index: 0;
+        width: 320px;
+        min-width: 320px;
+        background: var(--color-panel);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        min-height: 0;
+        padding: 20px;
+        box-shadow: var(--shadow-card);
+        backdrop-filter: blur(18px);
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        z-index: 0;
       }
-
-      .side-dock::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: var(--gradient-highlight); opacity: 0.6; pointer-events: none; }
+      .side-dock::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: var(--gradient-highlight);
+        opacity: 0.6;
+        pointer-events: none;
+      }
 
       .side-panel { display: flex; flex-direction: column; gap: 16px; min-height: 0; }
       .side-panel.hidden { display: none; }
@@ -240,11 +344,26 @@
       .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
       .panel-head h2 { margin: 0; font-size: 1.05rem; font-weight: 600; letter-spacing: 0.03em; }
 
-      .lista-formacoes, .lista-bailarinos { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; overflow: auto; }
+      #btn-add-bailarino { width: 100%; text-align: center; }
+
+      .lista-formacoes,
+      .lista-bailarinos {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        overflow: auto;
+      }
       .lista-formacoes { flex: 1; }
 
       .lista-formacoes li {
-        display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 10px; padding: 10px 12px;
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
         border-radius: var(--radius-sm);
         background: linear-gradient(135deg, rgba(15, 23, 42, 0.7), rgba(8, 12, 29, 0.58));
         border: 1px solid rgba(148, 163, 184, 0.14);
@@ -252,34 +371,39 @@
         transition: transform 0.15s ease, border 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
       }
-
       .lista-formacoes li:not(.ativa):hover { background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(8, 12, 29, 0.68)); border-color: rgba(148, 163, 184, 0.28); transform: translateY(-1px); }
       .lista-formacoes li.ativa { background: linear-gradient(135deg, rgba(244, 114, 182, 0.95), rgba(168, 85, 247, 0.92)); color: #fff; box-shadow: 0 18px 35px -22px rgba(236, 72, 153, 0.85); }
       .lista-formacoes button.icon { font-size: 0.8rem; padding: 6px 10px; border-radius: 999px; background: rgba(8, 12, 29, 0.4); }
-
       .lista-formacoes input.edit-input { width: 100%; padding: 8px 10px; }
 
-      .palco-wrapper { flex: 1; display: flex; flex-direction: column; gap: 18px; min-height: clamp(520px, 68vh, 780px); }
+      .palco-wrapper { flex: 1; display: flex; flex-direction: column; gap: 16px; min-height: clamp(440px, 64vh, 760px); position: relative; }
 
       .palco-controles {
-        background: var(--color-panel); border: 1px solid var(--color-border); border-radius: var(--radius-lg);
-        padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
-        box-shadow: var(--shadow-card); backdrop-filter: blur(18px);
-        position: relative; isolation: isolate; overflow: hidden; z-index: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--color-muted);
+        font-size: 0.82rem;
+        padding: 0 4px;
       }
 
-      .palco-controles::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: var(--gradient-highlight); opacity: 0.6; pointer-events: none; }
-
       .palco-container {
-        position: relative; flex: 1; width: 100%; border-radius: var(--radius-lg); border: 1px solid var(--color-border);
-        background: linear-gradient(160deg, rgba(15, 23, 42, 0.92), rgba(8, 12, 29, 0.95));
-        overflow: hidden; box-shadow: var(--shadow-lg);
-        background-image: linear-gradient(rgba(148, 163, 184, 0.12) 1px, transparent 1px),
-                          linear-gradient(90deg, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
-        background-size: 72px 72px, 72px 72px;
+        position: relative;
+        flex: 1;
+        width: 100%;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--color-border);
+        background: linear-gradient(160deg, rgba(15, 23, 42, 0.94), rgba(8, 12, 29, 0.92));
+        overflow: hidden;
+        box-shadow: var(--shadow-lg);
+        background-image:
+          linear-gradient(rgba(148, 163, 184, 0.16) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(148, 163, 184, 0.16) 1px, transparent 1px);
+        background-size: 64px 64px, 64px 64px;
         background-position: 0 0, 0 0;
-        min-height: clamp(420px, 62vh, 640px);
-        isolation: isolate; z-index: 0;
+        min-height: clamp(380px, 58vh, 640px);
+        isolation: isolate;
+        z-index: 0;
       }
 
       #palco::before {
@@ -291,16 +415,22 @@
         pointer-events: none;
         box-shadow: 0 0 0 1px rgba(244, 114, 182, 0.25);
       }
-
       #palco::after {
         content: 'BACKSTAGE';
-        position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-        font-size: 0.72rem; letter-spacing: 0.32em; color: rgba(244, 114, 182, 0.65); pointer-events: none;
+        position: absolute;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.72rem;
+        letter-spacing: 0.32em;
+        color: rgba(244, 114, 182, 0.65);
+        pointer-events: none;
       }
 
       .palco-container::after {
         content: '';
-        position: absolute; inset: 0;
+        position: absolute;
+        inset: 0;
         background: radial-gradient(circle at 24% 18%, rgba(168, 85, 247, 0.22), transparent 62%),
           radial-gradient(circle at 78% 86%, rgba(56, 189, 248, 0.18), transparent 64%),
           linear-gradient(160deg, rgba(244, 114, 182, 0.12), rgba(56, 189, 248, 0));
@@ -308,22 +438,29 @@
       }
 
       .marcador {
-        position: absolute; width: 48px; height: 48px; border-radius: 16px;
-        display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 0.95rem;
-        cursor: grab; user-select: none; border: 1px solid rgba(255, 255, 255, 0.12);
-        background: linear-gradient(135deg, rgba(244, 114, 182, 0.95), rgba(168, 85, 247, 0.92));
-        box-shadow: 0 18px 32px -20px rgba(8, 12, 29, 0.95);
+        position: absolute;
+        width: 48px;
+        height: 48px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: grab;
+        user-select: none;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background-color: rgba(244, 114, 182, 0.92);
+        box-shadow: 0 14px 28px -18px rgba(8, 12, 29, 0.9);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
       }
       .marcador:active { cursor: grabbing; z-index: 1000; }
       .marcador.selecionado { outline: 3px solid rgba(56, 189, 248, 0.55); box-shadow: 0 0 0 6px rgba(56, 189, 248, 0.22), 0 20px 34px -18px rgba(8, 12, 29, 0.9); }
 
       .marquee-select { position: absolute; border: 1px dashed rgba(56, 189, 248, 0.8); background: rgba(56, 189, 248, 0.18); pointer-events: none; z-index: 999; }
 
-      .bailarino-item {
-        display: grid; grid-template-columns: 18px 1fr auto auto; align-items: center; gap: 10px; padding: 8px 12px;
-        border-radius: var(--radius-sm); background: rgba(15, 23, 42, 0.5); border: 1px solid transparent; cursor: pointer;
-        transition: transform 0.15s ease, border 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
-      }
+      .bailarino-item { display: grid; grid-template-columns: 18px 1fr auto auto; align-items: center; gap: 10px; padding: 8px 12px; border-radius: var(--radius-sm); background: rgba(15, 23, 42, 0.5); border: 1px solid transparent; cursor: pointer; transition: transform 0.15s ease, border 0.15s ease, background 0.15s ease, box-shadow 0.15s ease; }
       .bailarino-item:hover { background: rgba(30, 41, 59, 0.76); border-color: var(--color-border); transform: translateY(-1px); }
       .bailarino-item.selected { background: rgba(56, 189, 248, 0.18); border-color: rgba(56, 189, 248, 0.45); box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25); }
       .bailarino-item .cor-dot { width: 12px; height: 12px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.3); cursor: pointer; }
@@ -334,20 +471,37 @@
         background: var(--color-panel-strong);
         border: 1px solid var(--color-border);
         border-radius: var(--radius-lg);
-        padding: 24px 32px 28px;
-        display: flex; flex-direction: column; gap: 18px;
-        box-shadow: var(--shadow-lg); backdrop-filter: blur(22px);
-        position: relative; isolation: isolate; overflow: hidden; z-index: 0;
+        padding: 20px 28px 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        box-shadow: var(--shadow-lg);
+        backdrop-filter: blur(22px);
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        z-index: 0;
       }
-
-      footer.linha-do-tempo::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: var(--gradient-highlight); opacity: 0.85; pointer-events: none; }
+      footer.linha-do-tempo::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: var(--gradient-highlight);
+        opacity: 0.85;
+        pointer-events: none;
+      }
 
       .timeline-toolbar { position: relative; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
       .timeline-toolbar .tl-left { justify-self: start; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.78rem; color: var(--color-muted); }
       .timeline-toolbar .tl-right { justify-self: end; display: inline-flex; align-items: center; gap: 12px; }
 
       #zoom-controls {
-        display: inline-flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 10px;
+        border-radius: 999px;
         background: linear-gradient(135deg, rgba(15, 23, 42, 0.68), rgba(8, 12, 29, 0.56));
         border: 1px solid var(--color-border);
         box-shadow: 0 10px 20px -16px rgba(8, 12, 29, 0.8);
@@ -372,23 +526,39 @@
       .time-ruler .tick-label { position: absolute; bottom: 14px; transform: translateX(-50%); font-size: 0.72rem; opacity: 0.85; white-space: nowrap; }
 
       .timeline-container {
-        position: relative; height: 96px; border: 1px solid var(--color-border); border-top: none; border-radius: 0 0 var(--radius-md) var(--radius-md);
-        overflow-x: auto; overflow-y: hidden; background: linear-gradient(135deg, rgba(8, 12, 29, 0.84), rgba(15, 23, 42, 0.7));
+        position: relative;
+        height: 128px;
+        border: 1px solid var(--color-border);
+        border-top: none;
+        border-radius: 0 0 var(--radius-md) var(--radius-md);
+        overflow-x: auto;
+        overflow-y: hidden;
+        background: linear-gradient(135deg, rgba(8, 12, 29, 0.84), rgba(15, 23, 42, 0.7));
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-        isolation: isolate; z-index: 0;
+        isolation: isolate;
+        z-index: 0;
       }
-
       .timeline-container::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(circle at 30% 20%, rgba(168, 85, 247, 0.22), transparent 65%), radial-gradient(circle at 75% 82%, rgba(56, 189, 248, 0.18), transparent 68%); pointer-events: none; }
 
       .timeline-blocos { display: flex; align-items: stretch; height: 100%; width: 100%; position: relative; }
 
       .bloco-formacao {
-        position: relative; display: flex; align-items: center; justify-content: flex-start; padding-left: 16px;
-        height: calc(100% - 24px); margin-block: 12px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        padding-left: 16px;
+        height: calc(100% - 24px);
+        margin-block: 12px;
         background: linear-gradient(135deg, rgba(15, 23, 42, 0.82), rgba(30, 41, 59, 0.68));
         border-right: 1px solid rgba(148, 163, 184, 0.24);
-        border-radius: 14px; font-size: 0.86rem; color: var(--color-text);
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
+        border-radius: 14px;
+        font-size: 0.86rem;
+        color: var(--color-text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        cursor: pointer;
         transition: box-shadow 0.12s ease, transform 0.12s ease, border 0.12s ease, background 0.15s ease;
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
       }
@@ -409,17 +579,38 @@
       .playhead::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 8px solid var(--cor-playhead); }
 
       .audio-track {
-        position: relative; height: 64px;
+        position: relative;
+        height: 72px;
         background: linear-gradient(135deg, rgba(8, 12, 29, 0.9), rgba(15, 23, 42, 0.72));
-        border: 1px solid var(--color-border); border-top: none; border-radius: 0 0 var(--radius-md) var(--radius-md);
-        display: block; cursor: pointer; overflow: hidden; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-        isolation: isolate; z-index: 0;
+        border: 1px solid var(--color-border);
+        border-top: none;
+        border-radius: 0 0 var(--radius-md) var(--radius-md);
+        display: block;
+        cursor: pointer;
+        overflow: hidden;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        isolation: isolate;
+        z-index: 0;
       }
-
       .audio-track::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(circle at 15% 30%, rgba(244, 114, 182, 0.22), transparent 65%), radial-gradient(circle at 85% 70%, rgba(56, 189, 248, 0.2), transparent 60%); pointer-events: none; }
       .audio-track canvas { width: 100%; height: 100%; display: block; }
 
-      .add-formation-tile { position: absolute; top: 12px; width: 140px; height: calc(100% - 24px); border-radius: var(--radius-sm); border: 1px dashed var(--color-border); background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0.85; transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease, background 0.15s ease; z-index: 0; }
+      .add-formation-tile {
+        position: absolute;
+        top: 12px;
+        width: 140px;
+        height: calc(100% - 24px);
+        border-radius: var(--radius-sm);
+        border: 1px dashed var(--color-border);
+        background: rgba(15, 23, 42, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        opacity: 0.85;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+        z-index: 0;
+      }
       .add-formation-tile:hover { opacity: 1; transform: translateY(-1px); background: rgba(30, 41, 59, 0.76); box-shadow: 0 12px 26px -18px rgba(8, 12, 29, 0.82); }
       .add-formation-tile .plus { font-size: 1.4rem; line-height: 1; opacity: 0.9; }
 
@@ -431,6 +622,7 @@
       .context-toolbar .swatches { display: flex; gap: 6px; align-items: center; }
       .context-toolbar .swatch { width: 18px; height: 18px; border-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.35); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2); cursor: pointer; transition: transform 0.12s ease, box-shadow 0.12s ease; }
       .context-toolbar .swatch:hover { transform: translateY(-1px) scale(1.05); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(0, 0, 0, 0.2); }
+
       .btn-mini { font-size: 0.8rem; padding: 6px 10px; border-radius: 8px; background: rgba(8, 12, 29, 0.45); border: 1px solid var(--color-border); }
 
       ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -469,12 +661,6 @@
     </style>
   </head>
   <body>
-    <div id="present-rec-bar">
-      <button id="btn-start-present-rec">🎥 Gravar (apresentação)</button>
-      <button id="btn-stop-present-rec" disabled>■ Parar</button>
-      <span class="rec-indicator" aria-live="polite" style="display: none">● gravando…</span>
-    </div>
-
     <header class="barra-superior">
       <div class="left">
         <img src="/assets/pina-logo-mono.svg" alt="Pina" class="logo-pina" />
@@ -482,20 +668,27 @@
           <h1 id="titulo-projeto">Coreografia</h1>
           <span class="header-subtitle">Pina Beta · Sequenciador visual</span>
         </div>
-        <button id="btn-exportar">Exportar JSON</button>
-        <button id="btn-importar">Importar JSON</button>
-        <input id="import-file" type="file" accept="application/json" />
-        <button id="btn-carregar-audio">Carregar Áudio</button>
-        <input id="audio-file-input" type="file" accept="audio/*" />
       </div>
-      <div class="right" id="audio-info">
-        <span id="user-badge" class="hint">offline</span>
-        <select id="sel-projeto">
-          <option value="">(sem projetos)</option>
-        </select>
-        <button id="btn-novo-projeto" title="Criar novo projeto">Novo</button>
-        <button id="btn-salvar-projeto" title="Salvar o projeto">Salvar</button>
-        <button id="btn-logout" style="display: none">Sair</button>
+      <div class="right">
+        <div class="header-actions">
+          <button id="btn-carregar-audio">Carregar Áudio</button>
+          <input id="audio-file-input" type="file" accept="audio/*" />
+          <span id="audio-status" class="hint">Nenhum áudio carregado</span>
+        </div>
+        <div class="project-controls" id="audio-info">
+          <span id="user-badge" class="hint">offline</span>
+          <select id="sel-projeto">
+            <option value="">(sem projetos)</option>
+          </select>
+          <button id="btn-novo-projeto" title="Criar novo projeto">Novo</button>
+          <button id="btn-salvar-projeto" title="Salvar o projeto">Salvar</button>
+          <button id="btn-logout" style="display: none">Sair</button>
+          <div id="present-rec-bar">
+            <button id="btn-start-present-rec" title="Gravar apresentação">🎥 Gravar</button>
+            <button id="btn-stop-present-rec" disabled title="Parar gravação">■ Parar</button>
+            <span class="rec-indicator" aria-live="polite" style="display: none">● gravando…</span>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -526,16 +719,14 @@
             <h2>Bailarinos</h2>
           </div>
           <input id="busca-bailarinos" class="busca-input" placeholder="Buscar bailarino..." />
+          <button id="btn-add-bailarino">+ Adicionar Bailarino</button>
           <ul id="lista-bailarinos" class="lista-bailarinos"></ul>
         </section>
       </aside>
 
       <div class="palco-wrapper">
         <div class="palco-controles">
-          <div style="display: flex; gap: 10px; align-items: center;">
-            <button id="btn-add-bailarino">+ Adicionar Bailarino</button>
-            <span class="hint">SHIFT+arrastar para grade. Duplo clique para renomear.</span>
-          </div>
+          <span class="hint">Use o painel de Bailarinos para adicionar novos dançarinos. SHIFT+arrastar para grade. Duplo clique para renomear.</span>
         </div>
         <main id="palco" class="palco-container"></main>
       </div>
@@ -573,9 +764,7 @@
     <script type="module" src="/src/main.ts"></script>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('#audio-file-name,[data-role="audio-name"],.audio-file-label,.now-playing').forEach((el) =>
-          el.remove()
-        );
+        document.querySelectorAll('#audio-file-name,[data-role="audio-name"],.audio-file-label,.now-playing').forEach((el) => el.remove());
       });
     </script>
   </body>
