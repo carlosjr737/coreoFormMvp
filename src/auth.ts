@@ -1,16 +1,32 @@
 // src/auth.ts
-import { auth, provider, signInWithPopup, signOut, onAuthStateChanged } from './firebase';
+import {
+  auth,
+  provider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from './firebase';
 import type { User } from 'firebase/auth';
 
-let _user: User | null = null;
-export function getUser(){ return _user; }
+let _user: User | null = auth.currentUser;
+export function getUser() {
+  return _user ?? auth.currentUser ?? null;
+}
 
-export async function login() {
-  try {
-    await signInWithPopup(auth, provider);
-  } catch (e) {
-    console.error(e);
-  }
+export async function loginWithGoogle() {
+  return signInWithPopup(auth, provider);
+}
+
+export const login = loginWithGoogle;
+
+export async function loginWithEmail(email: string, password: string) {
+  return signInWithEmailAndPassword(auth, email, password);
+}
+
+export async function registerWithEmail(email: string, password: string) {
+  return createUserWithEmailAndPassword(auth, email, password);
 }
 
 export async function logout() {

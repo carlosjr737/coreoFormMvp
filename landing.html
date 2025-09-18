@@ -814,6 +814,245 @@
         text-align: center;
       }
 
+      body.auth-modal-open {
+        overflow: hidden;
+      }
+
+      .auth-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(4, 6, 15, 0.72);
+        backdrop-filter: blur(14px);
+        z-index: 50;
+      }
+
+      .auth-backdrop[hidden] {
+        display: none;
+      }
+
+      .auth-modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: min(420px, 92vw);
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(8, 12, 29, 0.95));
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        border-radius: var(--radius-lg);
+        padding: 36px;
+        box-shadow: 0 40px 90px -48px rgba(4, 6, 15, 0.9);
+        z-index: 60;
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+        color: var(--color-text);
+        backdrop-filter: blur(20px);
+        isolation: isolate;
+      }
+
+      .auth-modal[hidden] {
+        display: none;
+      }
+
+      .auth-modal::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: radial-gradient(circle at top, rgba(244, 114, 182, 0.18), transparent 65%);
+        opacity: 0.6;
+        pointer-events: none;
+      }
+
+      .auth-modal > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .auth-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 36px;
+        height: 36px;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.32);
+        background: rgba(15, 23, 42, 0.82);
+        color: var(--color-text);
+        font-size: 1.1rem;
+        line-height: 1;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        transition: background 0.2s ease, border 0.2s ease, transform 0.2s ease;
+      }
+
+      .auth-close:hover {
+        border-color: rgba(148, 163, 184, 0.55);
+        background: rgba(30, 41, 59, 0.9);
+        transform: translateY(-1px);
+      }
+
+      .auth-header h2 {
+        margin: 0 0 6px;
+        font-size: 1.6rem;
+      }
+
+      .auth-header p {
+        margin: 0;
+        color: var(--color-muted);
+        font-size: 0.98rem;
+      }
+
+      .auth-tabs {
+        display: inline-flex;
+        gap: 8px;
+        padding: 6px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.72);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+      }
+
+      .auth-tab {
+        border: none;
+        background: transparent;
+        color: var(--color-muted);
+        padding: 10px 18px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+      }
+
+      .auth-tab:hover {
+        color: var(--color-text);
+      }
+
+      .auth-tab.is-active {
+        background: linear-gradient(135deg, rgba(244, 114, 182, 0.28), rgba(56, 189, 248, 0.28));
+        color: var(--color-text);
+        transform: translateY(-1px);
+      }
+
+      .auth-body {
+        display: grid;
+        gap: 18px;
+      }
+
+      .auth-section[hidden] {
+        display: none !important;
+      }
+
+      .auth-form {
+        display: grid;
+        gap: 18px;
+      }
+
+      .auth-field {
+        display: grid;
+        gap: 6px;
+      }
+
+      .auth-field span {
+        font-weight: 600;
+        font-size: 0.92rem;
+        color: var(--color-muted);
+      }
+
+      .auth-field input {
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        border-radius: var(--radius-sm);
+        padding: 12px 14px;
+        font-size: 0.95rem;
+        color: var(--color-text);
+        transition: border 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .auth-field input::placeholder {
+        color: rgba(226, 232, 240, 0.5);
+      }
+
+      .auth-field input:focus {
+        outline: none;
+        border-color: rgba(56, 189, 248, 0.6);
+        box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25);
+      }
+
+      .auth-helper {
+        font-size: 0.78rem;
+        color: rgba(226, 232, 240, 0.65);
+      }
+
+      .auth-error {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #fca5a5;
+        min-height: 1.1em;
+      }
+
+      .auth-error[hidden] {
+        display: none;
+      }
+
+      .auth-divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.85rem;
+        color: var(--color-muted);
+      }
+
+      .auth-divider::before,
+      .auth-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: rgba(148, 163, 184, 0.28);
+      }
+
+      .auth-modal .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .auth-modal .btn .btn-icon {
+        background: rgba(15, 23, 42, 0.55);
+      }
+
+      .btn-google {
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(148, 163, 184, 0.32);
+      }
+
+      .btn-google:hover {
+        border-color: rgba(148, 163, 184, 0.55);
+        background: rgba(30, 41, 59, 0.9);
+      }
+
+      .auth-modal .btn[data-loading='true'] {
+        opacity: 0.72;
+        cursor: progress;
+      }
+
+      .auth-footer {
+        margin: 0;
+        font-size: 0.75rem;
+        color: rgba(226, 232, 240, 0.6);
+        text-align: center;
+      }
+
+      @media (max-width: 520px) {
+        .auth-modal {
+          padding: 28px 24px;
+        }
+
+        .auth-header h2 {
+          font-size: 1.4rem;
+        }
+      }
+
       @media (max-width: 1024px) {
         nav.nav-links {
           display: none;
@@ -913,7 +1152,7 @@
           <div class="nav-actions">
             <span class="nav-link-light">Convide o elenco para testar</span>
             <button class="btn btn-primary" type="button" data-login-button>
-              <span>Entrar agora</span>
+              <span>Entrar ou criar conta</span>
               <span class="btn-icon">→</span>
             </button>
           </div>
@@ -932,7 +1171,7 @@
               </p>
               <div class="hero-buttons">
                 <button class="btn btn-primary" type="button" data-login-button>
-                  <span>Entrar com Google</span>
+                  <span>Entrar ou criar conta</span>
                   <span class="btn-icon">⟶</span>
                 </button>
                 <a class="btn btn-ghost" href="#recursos">
@@ -1176,11 +1415,11 @@
             <div class="cta-card">
               <h3>Experimente o CoreoForm Pina Beta com seu elenco.</h3>
               <p>
-                O acesso é liberado para equipes convidadas. Entre com sua conta Google para sincronizar projetos, importar áudio e
-                compartilhar formações com o time em segundos.
+                O acesso é liberado para equipes convidadas. Use sua conta Google ou crie um cadastro com email e senha para
+                sincronizar projetos, importar áudio e compartilhar formações com o time em segundos.
               </p>
               <button class="btn btn-primary" type="button" data-login-button>
-                <span>Entrar e começar agora</span>
+                <span>Entrar ou criar conta</span>
                 <span class="btn-icon">→</span>
               </button>
             </div>
@@ -1191,6 +1430,118 @@
       <footer>
         © <span id="year">2024</span> CoreoForm Pina Beta • Construído para diretores, ensaiadores e bailarinos.
       </footer>
+    </div>
+
+    <div class="auth-backdrop" data-login-backdrop hidden></div>
+    <div
+      class="auth-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="auth-modal-title"
+      aria-hidden="true"
+      data-login-modal
+      hidden
+    >
+      <button class="auth-close" type="button" aria-label="Fechar modal de autenticação" data-close-login-modal>
+        &times;
+      </button>
+      <div class="auth-header">
+        <h2 id="auth-modal-title">Acesse o CoreoForm</h2>
+        <p>Use sua conta Google ou crie um cadastro com email e senha para começar.</p>
+      </div>
+      <div class="auth-tabs" role="tablist">
+        <button
+          class="auth-tab is-active"
+          type="button"
+          role="tab"
+          aria-selected="true"
+          id="auth-tab-login"
+          aria-controls="auth-panel-login"
+          data-auth-mode="login"
+        >
+          Entrar
+        </button>
+        <button
+          class="auth-tab"
+          type="button"
+          role="tab"
+          aria-selected="false"
+          id="auth-tab-register"
+          aria-controls="auth-panel-register"
+          data-auth-mode="register"
+        >
+          Criar conta
+        </button>
+      </div>
+      <div class="auth-body">
+        <div
+          class="auth-section"
+          data-auth-section="login"
+          role="tabpanel"
+          id="auth-panel-login"
+          aria-labelledby="auth-tab-login"
+        >
+          <form class="auth-form" data-auth-form="login">
+            <label class="auth-field">
+              <span>Email</span>
+              <input type="email" name="email" autocomplete="email" placeholder="nome@exemplo.com" required />
+            </label>
+            <label class="auth-field">
+              <span>Senha</span>
+              <input
+                type="password"
+                name="password"
+                autocomplete="current-password"
+                minlength="6"
+                required
+                placeholder="Sua senha"
+              />
+            </label>
+            <button class="btn btn-primary" type="submit">
+              <span>Entrar</span>
+            </button>
+          </form>
+          <p class="auth-error" data-auth-error="login" role="alert" aria-live="polite" hidden></p>
+        </div>
+        <div
+          class="auth-section"
+          data-auth-section="register"
+          role="tabpanel"
+          id="auth-panel-register"
+          aria-labelledby="auth-tab-register"
+          aria-hidden="true"
+          hidden
+        >
+          <form class="auth-form" data-auth-form="register">
+            <label class="auth-field">
+              <span>Email</span>
+              <input type="email" name="email" autocomplete="email" placeholder="nome@exemplo.com" required />
+            </label>
+            <label class="auth-field">
+              <span>Senha</span>
+              <input
+                type="password"
+                name="password"
+                autocomplete="new-password"
+                minlength="6"
+                required
+                placeholder="Crie uma senha segura"
+              />
+              <small class="auth-helper">Mínimo de 6 caracteres.</small>
+            </label>
+            <button class="btn btn-primary" type="submit">
+              <span>Criar conta</span>
+            </button>
+          </form>
+          <p class="auth-error" data-auth-error="register" role="alert" aria-live="polite" hidden></p>
+        </div>
+      </div>
+      <div class="auth-divider"><span>ou</span></div>
+      <button class="btn btn-google" type="button" data-google-login>
+        <span class="btn-icon">G</span>
+        <span>Entrar com Google</span>
+      </button>
+      <p class="auth-footer">Ao continuar você concorda com a sincronização dos seus projetos no Firebase.</p>
     </div>
 
     <script>
