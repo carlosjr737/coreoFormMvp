@@ -9,6 +9,7 @@ import { initUI } from './ui';
 import { startRecording, stopRecording } from './record';
 import { startPresentationRecording, stopPresentationRecording } from './record_canvas';
 import { btnLogout, userBadgeEl } from './dom';
+import { initReportUI } from './report';
 
 document.addEventListener('DOMContentLoaded', () => initUI());
 
@@ -16,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => initUI());
 // logo após sua inicialização atual:
 requireAuth();
 initPersistenceUI();
+initReportUI();
 // tenta preencher a combo de projetos quando possível
 setTimeout(refreshProjectListUI, 600);
 

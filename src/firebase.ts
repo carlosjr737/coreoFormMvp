@@ -1,7 +1,14 @@
 // src/firebase.ts
 import { initializeApp, type FirebaseApp } from 'firebase/app';
 import {
-  getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, type Auth
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  type Auth
 } from 'firebase/auth';
 import {
   getFirestore, type Firestore,
@@ -37,7 +44,12 @@ export { storageRef as ref, storageRef as sRef };
 
 // Re-exports (pra importar tudo só de './firebase')
 export {
-  GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
   collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp,
   uploadBytes, getDownloadURL, deleteObject,
 };
