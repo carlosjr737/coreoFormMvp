@@ -182,7 +182,6 @@ export async function startPresentationRecording() {
   if (rec && rec.state !== 'inactive') return; // já está gravando
 
   freezePalcoSize();
-  document.body.classList.add('presentation');
 
   ensureCanvas();
   layoutCanvasOverPalco();
@@ -230,6 +229,7 @@ export async function startPresentationRecording() {
   rec.start(500);
   reqInt = window.setInterval(() => { try { rec?.requestData(); } catch {} }, 1000);
   document.body.classList.add('recording');
+  document.dispatchEvent(new CustomEvent('present-recording-started'));
 }
 
 export function stopPresentationRecording() {
@@ -262,8 +262,9 @@ function fallbackFinalize() {
 }
 
 function cleanupRecordingUI() {
-  document.body.classList.remove('presentation','recording');
-  unfreezePalcoSize();   
+  document.body.classList.remove('recording');
+  document.dispatchEvent(new CustomEvent('present-recording-stopped'));
+  unfreezePalcoSize();
   stopMirror();
   rec = null;
   composedStream = null;
