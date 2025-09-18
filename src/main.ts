@@ -44,22 +44,50 @@ updateAuthUI();
 document.addEventListener('DOMContentLoaded', () => {
   const btnStart = document.getElementById('btn-start-present-rec') as HTMLButtonElement | null;
   const btnStop  = document.getElementById('btn-stop-present-rec')  as HTMLButtonElement | null;
+  const recBar   = document.getElementById('present-rec-bar') as HTMLDivElement | null;
+  const startIdleLabel = btnStart?.textContent?.trim() || '🎥 Gravar';
+  const stopIdleLabel  = btnStop?.textContent?.trim() || '■ Parar';
 
   btnStart?.addEventListener('click', async () => {
     try {
-      await startPresentationRecording();
       if (btnStart) btnStart.disabled = true;
-      if (btnStop)  btnStop.disabled  = false;
+      await startPresentationRecording();
     } catch (e) {
       console.error(e);
       alert('Falha ao iniciar gravação.');
+      if (btnStart) btnStart.disabled = false;
     }
   });
 
   btnStop?.addEventListener('click', () => {
     stopPresentationRecording();
-    if (btnStart) btnStart.disabled = false;
-    if (btnStop)  btnStop.disabled  = true;
+  });
+
+  document.addEventListener('present-recording-started', () => {
+    recBar?.classList.add('is-recording');
+    if (btnStart) {
+      btnStart.disabled = true;
+      btnStart.textContent = '● Gravando…';
+      btnStart.setAttribute('aria-pressed', 'true');
+    }
+    if (btnStop) {
+      btnStop.disabled = false;
+      btnStop.textContent = '■ Encerrar';
+      btnStop.focus();
+    }
+  });
+
+  document.addEventListener('present-recording-stopped', () => {
+    recBar?.classList.remove('is-recording');
+    if (btnStart) {
+      btnStart.disabled = false;
+      btnStart.textContent = startIdleLabel;
+      btnStart.removeAttribute('aria-pressed');
+    }
+    if (btnStop) {
+      btnStop.disabled = true;
+      btnStop.textContent = stopIdleLabel;
+    }
   });
 });
 
