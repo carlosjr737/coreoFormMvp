@@ -8,8 +8,8 @@ import { renderizarPalco } from './stage';
 import { renderizarPainelBailarinos } from './bailarinos';
 import { getAudioBuffer, renderizarFaixaAudio } from './audio';
 
-const ADD_TILE_TOP_PX = 6;
-const ADD_TILE_HEIGHT = 'calc(100% - 12px)';
+const ADD_TILE_TOP_PX = 3;
+const ADD_TILE_HEIGHT = 'calc(100% - 6px)';
 
 function deepClone<T>(x: T): T {
   return JSON.parse(JSON.stringify(x));
@@ -128,7 +128,6 @@ function updateAddTile() {
   const needWidth = Math.max(getTotalTimelinePx(), left + TILE_W + 16);
   timelineBlocosEl.style.width = needWidth + 'px';
 }
-
 
 function iniciarEdicaoFormacao(li: HTMLLIElement, id: string, nomeAtual: string) {
   const nomeSpan = li.querySelector('.nome-formacao') as HTMLElement | null;
@@ -458,7 +457,6 @@ export function adicionarFormacao() {
   mudarFormacaoAtiva(nova.id);
 }
 
-
 export function adicionarFormacaoDepois(id: string) {
   const idx = db.formacoes.findIndex(f => f.id === id);
   const ref = idx >= 0 ? db.formacoes[idx] : null;
@@ -486,7 +484,6 @@ export function adicionarFormacaoDepois(id: string) {
   db.formacoes.sort((a,b)=> a.ordem - b.ordem);
   mudarFormacaoAtiva(nova.id);
 }
-
 
 export function mudarFormacaoAtiva(id: string) {
   setFormacaoAtiva(id);

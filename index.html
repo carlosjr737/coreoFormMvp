@@ -57,6 +57,7 @@
         height: 100vh;
         display: flex;
         flex-direction: column;
+        gap: clamp(16px, 3vh, 28px);
         background: radial-gradient(circle at top left, rgba(168, 85, 247, 0.18), transparent 45%),
           radial-gradient(circle at top right, rgba(56, 189, 248, 0.16), transparent 52%),
           radial-gradient(circle at 18% 80%, rgba(236, 72, 153, 0.18), transparent 58%),
@@ -70,7 +71,7 @@
         overflow-y: hidden;
         position: relative;
         isolation: isolate;
-        padding: clamp(20px, 4vh, 32px) clamp(18px, 4vw, 44px);
+        padding: clamp(18px, 3vh, 28px) clamp(18px, 4vw, 44px);
       }
 
       body::before,
@@ -171,12 +172,11 @@
         color: var(--color-muted);
       }
 
-      /* REC bar agora é inline (dentro do header) */
       #present-rec-bar {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        padding: 6px 10px;
+        gap: 6px;
+        padding: 4px 8px;
         border-radius: 999px;
         background: rgba(15, 23, 42, 0.68);
         border: 1px solid rgba(148, 163, 184, 0.32);
@@ -185,8 +185,8 @@
         isolation: isolate;
         overflow: hidden;
         margin-left: 6px;
-        position: relative;
       }
+
       #present-rec-bar::before {
         content: '';
         position: absolute;
@@ -198,9 +198,9 @@
       }
 
       #present-rec-bar button {
-        padding: 6px 12px;
+        padding: 4px 10px;
         border-radius: 999px;
-        font-size: 0.8rem;
+        font-size: 0.72rem;
       }
 
       #present-rec-bar .rec-indicator {
@@ -208,15 +208,15 @@
         font-weight: 600;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        font-size: 0.75rem;
+        font-size: 0.68rem;
       }
 
       header.barra-superior {
-        padding: 10px 20px;
+        padding: 6px 16px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 14px;
+        gap: 12px;
         background: var(--color-panel-strong);
         border: 1px solid var(--color-border);
         border-radius: var(--radius-lg);
@@ -226,8 +226,9 @@
         isolation: isolate;
         overflow: hidden;
         z-index: 0;
-        min-height: 68px;
+        min-height: 42px;
       }
+
       header.barra-superior::before {
         content: '';
         position: absolute;
@@ -241,13 +242,13 @@
       .barra-superior .right,
       #audio-info {
         display: flex;
-        gap: 12px;
+        gap: 10px;
         align-items: center;
         flex-wrap: wrap;
       }
 
       .barra-superior .left {
-        gap: 12px;
+        gap: 10px;
       }
 
       .barra-superior .right {
@@ -258,7 +259,7 @@
       .project-controls {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         flex-wrap: wrap;
       }
 
@@ -267,13 +268,13 @@
       }
 
       #audio-status {
-        font-size: 0.68rem;
+        font-size: 0.62rem;
         color: var(--color-muted);
         letter-spacing: 0.05em;
       }
 
       .logo-pina {
-        height: 28px;
+        height: 24px;
         width: auto;
         display: block;
         filter: drop-shadow(0 8px 18px rgba(8, 12, 29, 0.75));
@@ -281,7 +282,7 @@
 
       #titulo-projeto {
         margin: 0;
-        font-size: 1.08rem;
+        font-size: 1rem;
         font-weight: 600;
         letter-spacing: 0.04em;
       }
@@ -293,7 +294,7 @@
       }
 
       .header-subtitle {
-        font-size: 0.7rem;
+        font-size: 0.62rem;
         text-transform: uppercase;
         letter-spacing: 0.24em;
         color: var(--color-muted);
@@ -301,19 +302,19 @@
       }
 
       #user-badge {
-        padding: 5px 10px;
+        padding: 4px 9px;
         border-radius: 999px;
         background: rgba(56, 189, 248, 0.14);
         border: 1px solid rgba(56, 189, 248, 0.32);
         color: var(--color-secondary);
         font-weight: 600;
-        font-size: 0.78rem;
+        font-size: 0.7rem;
         text-transform: uppercase;
         letter-spacing: 0.08em;
       }
 
       #sel-projeto {
-        min-width: 180px;
+        min-width: 160px;
       }
 
       .hint {
@@ -325,8 +326,8 @@
         flex: 1;
         display: flex;
         min-height: 0;
-        padding: 16px 0 0;
-        gap: 20px;
+        padding: 8px 0 0;
+        gap: 24px;
         overflow: hidden;
       }
 
@@ -509,7 +510,7 @@
         flex: 1;
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: 18px;
         min-height: clamp(380px, 58vh, 760px);
         position: relative;
         overflow: hidden;
@@ -518,10 +519,10 @@
       .palco-controles {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
         color: var(--color-muted);
-        font-size: 0.82rem;
-        padding: 0 4px;
+        font-size: 0.78rem;
+        padding: 0 6px;
       }
 
       .palco-container {
@@ -536,7 +537,7 @@
         background-image:
           linear-gradient(rgba(148, 163, 184, 0.16) 1px, transparent 1px),
           linear-gradient(90deg, rgba(148, 163, 184, 0.16) 1px, transparent 1px);
-        background-size: 64px 64px, 64px 64px;
+        background-size: 56px 56px, 56px 56px;
         background-position: 0 0, 0 0;
         min-height: clamp(380px, 58vh, 640px);
         isolation: isolate;
@@ -546,9 +547,9 @@
       #palco::before {
         content: '';
         position: absolute;
-        inset: 16px;
+        inset: 14px;
         border: 2px solid rgba(244, 114, 182, 0.8);
-        border-radius: 18px;
+        border-radius: 16px;
         pointer-events: none;
         box-shadow: 0 0 0 1px rgba(244, 114, 182, 0.25);
       }
@@ -556,10 +557,10 @@
       #palco::after {
         content: 'BACKSTAGE';
         position: absolute;
-        top: 12px;
+        top: 8px;
         left: 50%;
         transform: translateX(-50%);
-        font-size: 0.72rem;
+        font-size: 0.68rem;
         letter-spacing: 0.32em;
         color: rgba(244, 114, 182, 0.65);
         pointer-events: none;
@@ -577,20 +578,20 @@
 
       .marcador {
         position: absolute;
-        width: 48px;
-        height: 48px;
-        border-radius: 16px;
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
         color: #fff;
-        font-weight: 700;
-        font-size: 0.95rem;
+        font-weight: 600;
+        font-size: 0.8rem;
         cursor: grab;
         user-select: none;
         border: 1px solid rgba(255, 255, 255, 0.12);
         background-color: rgba(244, 114, 182, 0.92);
-        box-shadow: 0 14px 28px -18px rgba(8, 12, 29, 0.9);
+        box-shadow: 0 12px 24px -18px rgba(8, 12, 29, 0.85);
         transition: transform 0.15s ease, box-shadow 0.15s ease;
       }
 
@@ -600,8 +601,8 @@
       }
 
       .marcador.selecionado {
-        outline: 3px solid rgba(56, 189, 248, 0.55);
-        box-shadow: 0 0 0 6px rgba(56, 189, 248, 0.22), 0 20px 34px -18px rgba(8, 12, 29, 0.9);
+        outline: 2px solid rgba(56, 189, 248, 0.55);
+        box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.22), 0 18px 30px -20px rgba(8, 12, 29, 0.85);
       }
 
       .marquee-select {
@@ -662,10 +663,10 @@
         background: var(--color-panel-strong);
         border: 1px solid var(--color-border);
         border-radius: var(--radius-lg);
-        padding: 14px 22px 18px;
+        padding: 10px 18px 14px;
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
         box-shadow: var(--shadow-lg);
         backdrop-filter: blur(22px);
         position: relative;
@@ -674,6 +675,7 @@
         z-index: 0;
         flex-shrink: 0;
       }
+
       footer.linha-do-tempo::before {
         content: '';
         position: absolute;
@@ -689,7 +691,7 @@
         display: grid;
         grid-template-columns: 1fr auto 1fr;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
       }
 
       .timeline-toolbar .tl-left {
@@ -697,7 +699,7 @@
         font-weight: 600;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        font-size: 0.78rem;
+        font-size: 0.7rem;
         color: var(--color-muted);
       }
 
@@ -705,14 +707,14 @@
         justify-self: end;
         display: inline-flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
       }
 
       #zoom-controls {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        padding: 4px 8px;
+        gap: 6px;
+        padding: 3px 6px;
         border-radius: 999px;
         background: linear-gradient(135deg, rgba(15, 23, 42, 0.68), rgba(8, 12, 29, 0.56));
         border: 1px solid var(--color-border);
@@ -720,15 +722,15 @@
       }
 
       #zoom-controls button {
-        width: 32px;
-        height: 32px;
+        width: 28px;
+        height: 28px;
         padding: 0;
         border-radius: 10px;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
       }
 
       #zoom-value {
-        min-width: 48px;
+        min-width: 44px;
         text-align: center;
         font-weight: 600;
         color: var(--color-muted);
@@ -737,24 +739,24 @@
       .transport {
         display: inline-flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
         background: linear-gradient(135deg, rgba(15, 23, 42, 0.72), rgba(8, 12, 29, 0.6));
         border: 1px solid var(--color-border);
         border-radius: 999px;
-        padding: 6px 12px;
+        padding: 4px 10px;
         box-shadow: 0 14px 28px -20px rgba(8, 12, 29, 0.85);
       }
 
       .icon-btn {
-        width: 34px;
-        height: 34px;
+        width: 30px;
+        height: 30px;
         border-radius: 50%;
         border: 1px solid var(--color-border);
         background: rgba(8, 12, 29, 0.62);
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.95rem;
+        font-size: 0.88rem;
         line-height: 1;
         cursor: pointer;
         transition: transform 0.12s ease, background-color 0.12s ease, border 0.12s ease;
@@ -786,7 +788,7 @@
 
       .time-ruler {
         position: relative;
-        height: 26px;
+        height: 12px;
         background: linear-gradient(135deg, rgba(15, 23, 42, 0.68), rgba(8, 12, 29, 0.56));
         border: 1px solid var(--color-border);
         border-bottom: none;
@@ -809,27 +811,27 @@
       }
 
       .time-ruler .tick.minor {
-        height: 8px;
+        height: 5px;
       }
 
       .time-ruler .tick.major {
-        height: 14px;
+        height: 8px;
         background: var(--color-text);
         opacity: 0.9;
       }
 
       .time-ruler .tick-label {
         position: absolute;
-        bottom: 10px;
+        bottom: 6px;
         transform: translateX(-50%);
-        font-size: 0.66rem;
+        font-size: 0.6rem;
         opacity: 0.85;
         white-space: nowrap;
       }
 
       .timeline-container {
         position: relative;
-        height: 72px;
+        height: 24px;
         border: 1px solid var(--color-border);
         border-top: none;
         border-radius: 0 0 var(--radius-md) var(--radius-md);
@@ -864,13 +866,13 @@
         display: flex;
         align-items: center;
         justify-content: flex-start;
-        padding-left: 16px;
-        height: calc(100% - 24px);
-        margin-block: 12px;
+        padding-left: 12px;
+        height: calc(100% - 8px);
+        margin-block: 4px;
         background: linear-gradient(135deg, rgba(15, 23, 42, 0.82), rgba(30, 41, 59, 0.68));
         border-right: 1px solid rgba(148, 163, 184, 0.24);
-        border-radius: 14px;
-        font-size: 0.86rem;
+        border-radius: 10px;
+        font-size: 0.78rem;
         color: var(--color-text);
         white-space: nowrap;
         overflow: hidden;
@@ -903,7 +905,7 @@
         height: 100%;
         background: rgba(236, 72, 153, 0.88);
         opacity: 0.85;
-        border-radius: 14px 0 0 14px;
+        border-radius: 10px 0 0 10px;
       }
 
       .bloco-formacao span {
@@ -913,9 +915,9 @@
 
       .handle {
         position: absolute;
-        top: 6px;
-        bottom: 6px;
-        width: 10px;
+        top: 3px;
+        bottom: 3px;
+        width: 8px;
         border-radius: 999px;
         cursor: ew-resize;
         opacity: 0;
@@ -937,7 +939,7 @@
         top: 0;
         bottom: 0;
         right: -2px;
-        width: 12px;
+        width: 10px;
         cursor: ew-resize;
         background: linear-gradient(270deg, rgba(249, 168, 212, 0.65), rgba(236, 72, 153, 0));
         border-radius: 999px;
@@ -945,8 +947,8 @@
 
       .playhead {
         position: absolute;
-        top: -14px;
-        bottom: -14px;
+        top: -10px;
+        bottom: -10px;
         left: 0;
         width: 2px;
         background: var(--cor-playhead);
@@ -963,14 +965,14 @@
         transform: translateX(-50%);
         width: 0;
         height: 0;
-        border-left: 6px solid transparent;
-        border-right: 6px solid transparent;
-        border-top: 8px solid var(--cor-playhead);
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 6px solid var(--cor-playhead);
       }
 
       .audio-track {
         position: relative;
-        height: 40px;
+        height: 22px;
         background: linear-gradient(135deg, rgba(8, 12, 29, 0.9), rgba(15, 23, 42, 0.72));
         border: 1px solid var(--color-border);
         border-top: none;
@@ -1002,14 +1004,14 @@
       .audio-track-status {
         position: absolute;
         left: 12px;
-        bottom: 6px;
+        bottom: 4px;
         pointer-events: none;
         background: rgba(8, 12, 29, 0.55);
-        padding: 4px 10px;
+        padding: 3px 8px;
         border-radius: 999px;
         border: 1px solid rgba(148, 163, 184, 0.22);
         box-shadow: 0 10px 18px -14px rgba(8, 12, 29, 0.85);
-        font-size: 0.68rem;
+        font-size: 0.62rem;
         letter-spacing: 0.05em;
         z-index: 2;
       }
@@ -1017,10 +1019,10 @@
       .audio-upload-btn {
         position: absolute;
         right: 12px;
-        top: 4px;
+        top: 2px;
         pointer-events: auto;
-        width: 34px;
-        height: 34px;
+        width: 28px;
+        height: 28px;
         border-radius: 50%;
         border: 1px solid var(--color-border);
         background: rgba(8, 12, 29, 0.62);
@@ -1059,9 +1061,9 @@
 
       .add-formation-tile {
         position: absolute;
-        top: 6px;
+        top: 3px;
         width: 140px;
-        height: calc(100% - 12px);
+        height: calc(100% - 6px);
         border-radius: var(--radius-sm);
         border: 1px dashed var(--color-border);
         background: rgba(15, 23, 42, 0.6);
@@ -1082,7 +1084,7 @@
       }
 
       .add-formation-tile .plus {
-        font-size: 1.4rem;
+        font-size: 1.2rem;
         line-height: 1;
         opacity: 0.9;
       }
@@ -1350,7 +1352,7 @@
         <div id="timeline-blocos" class="timeline-blocos"></div>
         <div id="playhead" class="playhead"></div>
       </div>
-      <div id="audio-track" class="audio-track" title="Clique ou arraste na régua ou aqui para navegar">
+      <div class="audio-track" id="audio-track" title="Clique ou arraste na régua ou aqui para navegar">
         <canvas id="audio-canvas"></canvas>
         <span id="audio-status" class="audio-track-status hint">Nenhum áudio carregado</span>
         <button id="btn-carregar-audio" class="audio-upload-btn" title="Carregar áudio" type="button">
