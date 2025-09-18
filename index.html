@@ -399,7 +399,32 @@
       }
 
       .rail-btn .ico {
-        font-size: 1.1rem;
+        display: grid;
+        place-items: center;
+        width: 100%;
+        height: 100%;
+        color: var(--color-muted);
+        transition: color 0.18s ease;
+      }
+
+      .rail-btn .ico svg {
+        width: 24px;
+        height: 24px;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        fill: none;
+      }
+
+      .rail-btn .ico .node {
+        fill: currentColor;
+        fill-opacity: 0.26;
+        stroke: currentColor;
+      }
+
+      .rail-btn:hover .ico {
+        color: var(--color-text);
       }
 
       .rail-btn:hover {
@@ -414,6 +439,11 @@
         box-shadow: 0 0 0 2px rgba(244, 114, 182, 0.28), 0 14px 24px -14px rgba(244, 114, 182, 0.65);
         opacity: 1;
         background: rgba(244, 114, 182, 0.2);
+      }
+
+      .rail-btn.active .ico,
+      .rail-btn.active:hover .ico {
+        color: var(--color-primary);
       }
 
       .side-dock {
@@ -1304,10 +1334,30 @@
     <div class="container-principal">
       <nav id="side-rail" class="side-rail">
         <button id="btn-panel-formacoes" class="rail-btn active" title="Formações" aria-label="Formações">
-          <span class="ico">🧩</span>
+          <span class="ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+              <circle class="node" cx="12" cy="5.5" r="2.3" />
+              <circle class="node" cx="6.4" cy="12" r="2.1" />
+              <circle class="node" cx="17.6" cy="12" r="2.1" />
+              <circle class="node" cx="12" cy="18.5" r="2.3" />
+              <path d="M12 7.8V17.2" />
+              <path d="M12 12l-5.6-4.2" />
+              <path d="M12 12l5.6-4.2" />
+              <path d="M12 12l-5.6 4.2" />
+              <path d="M12 12l5.6 4.2" />
+            </svg>
+          </span>
         </button>
         <button id="btn-panel-bailarinos" class="rail-btn" title="Bailarinos" aria-label="Bailarinos">
-          <span class="ico">🕺</span>
+          <span class="ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+              <circle class="node" cx="12" cy="6" r="2.2" />
+              <path d="M7.6 11.4L12 8.9l4.4 2.5" />
+              <path d="M12 9.8v7.2" />
+              <path d="M12 15.6l-3.4 4.4" />
+              <path d="M12 15.6l3.4 4.4" />
+            </svg>
+          </span>
         </button>
       </nav>
 
