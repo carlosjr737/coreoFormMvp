@@ -64,6 +64,14 @@ export function redirectToLanding(mode: AuthLandingMode = 'login') {
   window.location.href = buildLandingUrl(mode);
 }
 
+function redirectToLanding() {
+  const { pathname } = window.location;
+  if (pathname.endsWith('/landing.html') || pathname.endsWith('/landing')) {
+    return;
+  }
+  window.location.href = 'landing.html';
+}
+
 export function requireAuth() {
   let receivedAuthEvent = false;
 
