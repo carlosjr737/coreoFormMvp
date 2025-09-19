@@ -39,6 +39,8 @@ export async function createNewProjectFirebase(titulo = 'Coreografia'): Promise<
 
   setCurrentProjectId(id);
 
+
+
   clearAudio();
   return id;
 }
@@ -48,7 +50,9 @@ export async function saveProjectFirebase(projectId?: string): Promise<string> {
   if (!localDb.projeto) localDb.projeto = { id, titulo: 'Coreografia' };
   localDb.projeto.id = id;
 
+
   setCurrentProjectId(id);
+
 
 
   // 1) estado (JSON) no Storage
@@ -60,7 +64,6 @@ export async function saveProjectFirebase(projectId?: string): Promise<string> {
     alert('Não foi possível salvar o projeto no Firebase Storage. Verifique as regras de acesso e tente novamente.');
     throw err;
   }
-
 
   const projectAudioBuffer = getAudioBuffer();
   const projectAudioBlob = getAudioFileBlob();
