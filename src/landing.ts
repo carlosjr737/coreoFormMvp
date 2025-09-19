@@ -25,6 +25,22 @@ const authForms = new Map<AuthMode, HTMLFormElement>();
 const errorOutputs = new Map<AuthMode, HTMLElement>();
 let currentMode: AuthMode = 'login';
 
+const syncAuthParam = (mode?: AuthMode) => {
+  const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  const url = new URL(window.location.href);
+
+  if (mode) {
+    url.searchParams.set('auth', mode);
+  } else {
+    url.searchParams.delete('auth');
+  }
+
+  const next = `${url.pathname}${url.search}${url.hash}`;
+  if (next !== current) {
+    window.history.replaceState({}, '', next);
+  }
+};
+
 document
   .querySelectorAll<HTMLElement>('[data-auth-section]')
   .forEach((section) => {
@@ -104,6 +120,8 @@ const setAuthMode = (mode: AuthMode, { focusField = true } = {}) => {
   currentMode = mode;
   loginModal?.setAttribute('data-auth-mode', mode);
 
+  syncAuthParam(mode);
+
   modeButtons.forEach((button) => {
     const isActive = button.dataset.authMode === mode;
     button.classList.toggle('is-active', isActive);
@@ -142,6 +160,7 @@ const hideLoginModal = () => {
   document.body.classList.remove('auth-modal-open');
   clearErrors();
   authForms.forEach((form) => form.reset());
+  syncAuthParam();
 };
 
 const formatFirebaseError = (error: unknown) => {
@@ -285,3 +304,9 @@ onAuthStateChanged(auth, (user) => {
     window.location.href = 'index.html';
   }
 });
+
+const urlParams = new URLSearchParams(window.location.search);
+const initialAuthModeParam = urlParams.get('auth') ?? undefined;
+if (isAuthMode(initialAuthModeParam)) {
+  showLoginModal(initialAuthModeParam);
+}
