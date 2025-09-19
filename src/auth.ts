@@ -41,16 +41,8 @@ function buildLandingUrl(mode: AuthLandingMode = 'login') {
   return url.toString();
 }
 
-export async function logout() {
-  try {
-    await signOut(auth);
-  } catch (e) {
-    console.error(e);
-  }
-  redirectToLanding();
-}
 
-export function redirectToLanding(mode: AuthLandingMode = 'login') {
+export const redirectToLanding = (mode: AuthLandingMode = 'login') => {
   if (isLandingPath(window.location.pathname)) {
     const current = new URL(window.location.href);
     current.searchParams.set('auth', mode);
@@ -62,17 +54,20 @@ export function redirectToLanding(mode: AuthLandingMode = 'login') {
   }
 
   window.location.href = buildLandingUrl(mode);
-}
+};
 
-function redirectToLanding() {
-  const { pathname } = window.location;
-  if (pathname.endsWith('/landing.html') || pathname.endsWith('/landing')) {
-    return;
+export async function logout() {
+  try {
+    await signOut(auth);
+  } catch (e) {
+    console.error(e);
   }
-  window.location.href = 'landing.html';
+  redirectToLanding();
+
 }
 
-export function requireAuth() {
+export const requireAuth = () => {
+
   let receivedAuthEvent = false;
 
   onAuthStateChanged(auth, (u) => {
@@ -93,4 +88,6 @@ export function requireAuth() {
       }
     }, 2000);
   }
-}
+
+};
+
