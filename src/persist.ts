@@ -16,7 +16,9 @@ import {
   getAudioFileBlob,
   getAudioFileContentType,
   getAudioFileName,
+
   refreshAudioStatusLabel,
+
   setAudioFromBlob,
   setAudioStatusMessage,
 } from './audio';
@@ -53,6 +55,7 @@ function describeFirebaseError(err: unknown): string {
     return String(err);
   }
 }
+
 
 export async function listProjects(): Promise<{id:string; title:string}[]> {
   const user = getUser();
@@ -100,8 +103,10 @@ export async function loadProject(projectId: string) {
     } catch (err: any) {
       if (getCurrentProjectId() === requestId) {
         console.error('Falha ao carregar áudio do projeto', err);
+
         const detail = describeFirebaseError(err);
         alert(`Não foi possível carregar o áudio deste projeto.\n${detail}\nVerifique as permissões do Firebase Storage e tente novamente.`);
+
         clearAudio();
       }
     }
@@ -141,18 +146,22 @@ export async function saveProject(explicitId?: string) {
   const audioRef = projectAudioRef(user.uid, targetId);
   if (hasAudio && audioBlob) {
     try {
+
       setAudioStatusMessage('Enviando áudio para o Firebase...');
+
       await uploadBytes(
         audioRef,
         audioBlob,
         audioContentType ? { contentType: audioContentType } : undefined,
       );
+
       refreshAudioStatusLabel();
     } catch (err) {
       console.error('Falha ao enviar áudio do projeto', err);
       const detail = describeFirebaseError(err);
       setAudioStatusMessage('Erro ao salvar áudio');
       alert(`Não foi possível salvar o áudio do projeto no Firebase Storage.\n${detail}\nVerifique as regras de acesso e tente novamente.`);
+
       throw err;
     }
   } else {
@@ -160,10 +169,12 @@ export async function saveProject(explicitId?: string) {
       await deleteObject(audioRef);
     } catch (err: any) {
       if (err?.code !== 'storage/object-not-found') {
+
         const detail = describeFirebaseError(err);
         console.warn('Falha ao remover áudio do projeto', err);
         setAudioStatusMessage('Erro ao remover áudio');
         alert(`Não foi possível remover o áudio associado a este projeto.\n${detail}\nVerifique as permissões do Firebase Storage e tente novamente.`);
+
       }
     }
   }
