@@ -1022,13 +1022,41 @@
       }
 
       .btn-google {
-        background: rgba(15, 23, 42, 0.85);
-        border: 1px solid rgba(148, 163, 184, 0.32);
+        background: #ffffff;
+        border: 1px solid #dadce0;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3), 0 1px 2px rgba(60, 64, 67, 0.15);
+        color: #3c4043;
+        font-weight: 500;
+        padding: 10px 24px;
+      }
+
+      .btn-google .btn-icon {
+        align-items: center;
+        background: transparent;
+        border-radius: 0;
+        color: inherit;
+        display: inline-flex;
+        height: 18px;
+        justify-content: center;
+        width: 18px;
+      }
+
+      .btn-google .btn-icon svg {
+        display: block;
+        height: 18px;
+        width: 18px;
       }
 
       .btn-google:hover {
-        border-color: rgba(148, 163, 184, 0.55);
-        background: rgba(30, 41, 59, 0.9);
+        background: #f6f9fe;
+        border-color: #d2e3fc;
+        box-shadow: 0 1px 4px rgba(60, 64, 67, 0.3), 0 2px 4px rgba(60, 64, 67, 0.15);
+      }
+
+      .btn-google:focus-visible {
+        outline: 2px solid #1a73e8;
+        outline-offset: 2px;
       }
 
       .auth-modal .btn[data-loading='true'] {
@@ -1538,7 +1566,26 @@
       </div>
       <div class="auth-divider"><span>ou</span></div>
       <button class="btn btn-google" type="button" data-google-login>
-        <span class="btn-icon">G</span>
+        <span class="btn-icon" aria-hidden="true">
+          <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M17.64 9.2045c0-.638-.057-1.252-.163-1.841H9v3.481h4.844c-.209 1.125-.844 2.081-1.8 2.722v2.258h2.908c1.701-1.566 2.688-3.874 2.688-6.62z"
+              fill="#4285F4"
+            />
+            <path
+              d="M9 18c2.43 0 4.467-.81 5.956-2.176l-2.908-2.258c-.805.54-1.835.863-3.048.863-2.347 0-4.332-1.588-5.042-3.72H.939v2.334C2.417 15.672 5.481 18 9 18z"
+              fill="#34A853"
+            />
+            <path
+              d="M3.958 10.71a5.41 5.41 0 0 1 0-3.42V4.956H.939a9 9 0 0 0 0 8.088l3.019-2.334z"
+              fill="#FBBC05"
+            />
+            <path
+              d="M9 3.579c1.321 0 2.504.454 3.438 1.348l2.579-2.579C13.464.891 11.427 0 9 0 5.481 0 2.417 2.328.939 5.334l3.019 2.334C4.668 5.167 6.653 3.579 9 3.579z"
+              fill="#EA4335"
+            />
+          </svg>
+        </span>
         <span>Entrar com Google</span>
       </button>
       <p class="auth-footer">Ao continuar você concorda com a sincronização dos seus projetos no Firebase.</p>
