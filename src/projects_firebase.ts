@@ -1,6 +1,7 @@
 // src/projects_firebase.ts
 
 import { db as localDb, getCurrentProjectId, setCurrentProjectId } from './state';
+import { getUser } from './auth';
 
 import {
   getAudioBuffer,
@@ -78,6 +79,10 @@ function describeFirebaseError(err: unknown): string {
 }
 
 export async function saveProjectFirebase(projectId?: string): Promise<string> {
+  const user = getUser();
+  if (!user) {
+    throw new Error('Não autenticado.');
+  }
   const id = projectId || localDb.projeto?.id || `p${now()}`;
   if (!localDb.projeto) localDb.projeto = { id, titulo: 'Coreografia' };
   localDb.projeto.id = id;
@@ -159,6 +164,9 @@ export async function saveProjectFirebase(projectId?: string): Promise<string> {
 }
 
 export async function listProjectsFirebase(): Promise<Array<{id:string; titulo:string}>> {
+  if (!getUser()) {
+    return [];
+  }
   const snap = await getDocs(collection(db, 'projects'));
   return snap.docs
     .map(d => d.data() as any)
@@ -167,6 +175,10 @@ export async function listProjectsFirebase(): Promise<Array<{id:string; titulo:s
 }
 
 export async function openProjectFirebase(id: string): Promise<void> {
+  const user = getUser();
+  if (!user) {
+    throw new Error('Não autenticado.');
+  }
   setCurrentProjectId(id);
   const requestId = id;
   clearAudio();
@@ -230,6 +242,10 @@ export async function openProjectFirebase(id: string): Promise<void> {
 }
 
 export async function deleteProjectFirebase(id: string): Promise<void> {
+  const user = getUser();
+  if (!user) {
+    throw new Error('Não autenticado.');
+  }
   await Promise.allSettled([
 
     deleteFromStorage(projectStatePath(id)),
