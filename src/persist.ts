@@ -1,6 +1,15 @@
 // src/persist.ts
 
-import { db, st, sRef, uploadBytes, getDownloadURL, deleteObject } from './firebase';
+
+import {
+  db,
+  uploadToStorage,
+  downloadFromStorage,
+  deleteFromStorage,
+  joinStoragePath,
+  describeFirebaseStorageError,
+} from './firebase';
+
 import { getUser } from './auth';
 import {
   collection, setDoc, getDocs, doc, getDoc,
@@ -36,24 +45,9 @@ type ProjetoDoc = {
 
 const AUDIO_STORAGE_KEY = 'audio.bin';
 
-function projectAudioRef(userId: string, projectId: string) {
-  return sRef(st, `users/${userId}/projects/${projectId}/${AUDIO_STORAGE_KEY}`);
-}
 
-function describeFirebaseError(err: unknown): string {
-  if (!err) return 'Erro desconhecido.';
-  if (typeof err === 'string') return err;
-  const anyErr = err as { code?: string; message?: string };
-  const code = anyErr?.code ? `${anyErr.code}` : '';
-  const msg = anyErr?.message ? `${anyErr.message}` : '';
-  if (code && msg) return `${code} - ${msg}`;
-  if (code) return code;
-  if (msg) return msg;
-  try {
-    return JSON.stringify(err);
-  } catch {
-    return String(err);
-  }
+function projectAudioPath(userId: string, projectId: string) {
+  return joinStoragePath('users', userId, 'projects', projectId, AUDIO_STORAGE_KEY);
 }
 
 
@@ -92,7 +86,9 @@ export async function loadProject(projectId: string) {
   if (data.hasAudio) {
     try {
       setAudioStatusMessage('Carregando áudio...');
-      const audioUrl = await getDownloadURL(projectAudioRef(user.uid, projectId));
+
+      const audioUrl = await downloadFromStorage(projectAudioPath(user.uid, projectId));
+
       if (getCurrentProjectId() !== requestId) return;
       const blob = await (await fetch(audioUrl)).blob();
       if (getCurrentProjectId() !== requestId) return;
@@ -101,14 +97,18 @@ export async function loadProject(projectId: string) {
         contentType: data.audioContentType || blob.type || undefined,
       });
     } catch (err: any) {
-      if (getCurrentProjectId() === requestId) {
-        console.error('Falha ao carregar áudio do projeto', err);
 
-        const detail = describeFirebaseError(err);
-        alert(`Não foi possível carregar o áudio deste projeto.\n${detail}\nVerifique as permissões do Firebase Storage e tente novamente.`);
-
+      if (getCurrentProjectId() !== requestId) return;
+      if (err?.code === 'storage/object-not-found') {
+        console.warn('Áudio do projeto não encontrado no Storage; prosseguindo sem áudio.', err);
         clearAudio();
+        return;
       }
+      console.error('Falha ao carregar áudio do projeto', err);
+      const detail = describeFirebaseStorageError(err);
+      alert(`Não foi possível carregar o áudio deste projeto.\n${detail}\nVerifique as permissões do Firebase Storage e tente novamente.`);
+      clearAudio();
+
     }
   }
 }
@@ -143,22 +143,19 @@ export async function saveProject(explicitId?: string) {
     audioUpdatedAt: hasAudio ? serverTimestamp() : null,
   };
 
-  const audioRef = projectAudioRef(user.uid, targetId);
+  const audioPath = projectAudioPath(user.uid, targetId);
   if (hasAudio && audioBlob) {
     try {
-
       setAudioStatusMessage('Enviando áudio para o Firebase...');
-
-      await uploadBytes(
-        audioRef,
+      await uploadToStorage(
+        audioPath,
         audioBlob,
         audioContentType ? { contentType: audioContentType } : undefined,
       );
-
       refreshAudioStatusLabel();
     } catch (err) {
       console.error('Falha ao enviar áudio do projeto', err);
-      const detail = describeFirebaseError(err);
+      const detail = describeFirebaseStorageError(err);
       setAudioStatusMessage('Erro ao salvar áudio');
       alert(`Não foi possível salvar o áudio do projeto no Firebase Storage.\n${detail}\nVerifique as regras de acesso e tente novamente.`);
 
@@ -166,11 +163,11 @@ export async function saveProject(explicitId?: string) {
     }
   } else {
     try {
-      await deleteObject(audioRef);
+
+      await deleteFromStorage(audioPath);
     } catch (err: any) {
       if (err?.code !== 'storage/object-not-found') {
-
-        const detail = describeFirebaseError(err);
+        const detail = describeFirebaseStorageError(err);
         console.warn('Falha ao remover áudio do projeto', err);
         setAudioStatusMessage('Erro ao remover áudio');
         alert(`Não foi possível remover o áudio associado a este projeto.\n${detail}\nVerifique as permissões do Firebase Storage e tente novamente.`);
