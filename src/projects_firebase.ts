@@ -1,5 +1,7 @@
 // src/projects_firebase.ts
+
 import { db as localDb, getCurrentProjectId, setCurrentProjectId } from './state';
+
 import {
   getAudioBuffer,
   getAudioFileBlob,
@@ -34,7 +36,9 @@ export async function createNewProjectFirebase(titulo = 'Coreografia'): Promise<
   const id = `p${now()}`;
   localDb.projeto   = { id, titulo };
   localDb.formacoes = [];
+
   setCurrentProjectId(id);
+
   clearAudio();
   return id;
 }
@@ -43,7 +47,9 @@ export async function saveProjectFirebase(projectId?: string): Promise<string> {
   const id = projectId || localDb.projeto?.id || `p${now()}`;
   if (!localDb.projeto) localDb.projeto = { id, titulo: 'Coreografia' };
   localDb.projeto.id = id;
+
   setCurrentProjectId(id);
+
 
   // 1) estado (JSON) no Storage
   const stateBlob = new Blob([JSON.stringify(localDb)], { type: 'application/json' });
@@ -69,6 +75,23 @@ export async function saveProjectFirebase(projectId?: string): Promise<string> {
       alert('Não foi possível salvar o áudio do projeto no Firebase Storage. Verifique as regras de acesso e tente novamente.');
       throw err;
     }
+  } else {
+    try {
+      await deleteObject(audioRef);
+    } catch (err: any) {
+      // ignora se não existir
+      if (err?.code !== 'storage/object-not-found') console.warn('Falha ao remover áudio do projeto', err);
+    }
+  }
+
+  const audioBuffer = getAudioBuffer();
+  const audioBlob = getAudioFileBlob();
+  const audioFileName = getAudioFileName();
+  const audioContentType = getAudioFileContentType();
+  const audioRef = sRef(st, `projects/${id}/${AUDIO_STORAGE_KEY}`);
+
+  if (audioBuffer && audioBlob) {
+    await uploadBytes(audioRef, audioBlob, audioContentType ? { contentType: audioContentType } : undefined);
   } else {
     try {
       await deleteObject(audioRef);
@@ -148,6 +171,7 @@ export async function openProjectFirebase(id: string): Promise<void> {
       console.error('Falha ao carregar projeto do Firebase', err);
       alert('Não foi possível carregar o projeto selecionado. Verifique as permissões do Firebase Storage e tente novamente.');
       throw err;
+
     }
   }
 }
