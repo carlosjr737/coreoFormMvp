@@ -2,6 +2,8 @@
 
 import { db as localDb, getCurrentProjectId, setCurrentProjectId } from './state';
 
+
+
 import {
   getAudioBuffer,
   getAudioFileBlob,
@@ -50,9 +52,7 @@ export async function saveProjectFirebase(projectId?: string): Promise<string> {
   if (!localDb.projeto) localDb.projeto = { id, titulo: 'Coreografia' };
   localDb.projeto.id = id;
 
-
   setCurrentProjectId(id);
-
 
 
   // 1) estado (JSON) no Storage
