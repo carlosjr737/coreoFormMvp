@@ -117,6 +117,7 @@ async function decodeAndApplyAudio(arrayBuffer: ArrayBuffer, fileName?: string):
   if (fileName) audioFileName = fileName;
   updateAudioStatus(audioBuffer.duration);
   processarAudioParaVisualizacao();
+
 }
 
 export async function carregarArquivoDeAudio(file: File) {
@@ -134,6 +135,7 @@ export async function carregarArquivoDeAudio(file: File) {
     clearAudio();
     setAudioStatusMessage('Erro ao carregar áudio');
     alert('Não foi possível processar este arquivo de áudio. ' + (err?.message || ''));
+
   }
 }
 
@@ -154,12 +156,11 @@ export async function setAudioFromBlob(blob: Blob, options: { fileName?: string;
   }
 }
 
-
+export function clearAudio() {
   if (audioSourceNode) {
     try { audioSourceNode.stop(); } catch {}
     audioSourceNode = null;
   }
-
   audioBuffer = null;
   waveformData = null;
   audioFileBlob = null;
@@ -173,25 +174,6 @@ export async function setAudioFromBlob(blob: Blob, options: { fileName?: string;
   renderizarTudo(true);
   requestAnimationFrame(renderizarFaixaAudio);
 }
-// src/audio.ts  (ADICIONE ao final do arquivo ou numa seção adequada)
-let _recDest: MediaStreamAudioDestinationNode | null = null;
-
-// src/audio.ts
-export async function ensureRecordingAudioReady(): Promise<void> {
-  const ctx = getAudioContext?.();
-  if (!ctx) return;
-  // Alguns browsers exigem linha abaixo dentro de gesto do usuário
-  await ctx.resume().catch(() => {});
-  // Conecte seu masterGain aqui se existir:
-  // masterGain.connect(_recDest)
-  const node = getAudioSource?.();
-  if (_recDest && node && !(node as any)._connectedToRecDest) {
-    node.connect(_recDest);
-    (node as any)._connectedToRecDest = true;
-  }
-}
-
-
 
 export function processarAudioParaVisualizacao() {
   if (!audioBuffer) return;
