@@ -1,11 +1,15 @@
 // src/projects_firebase.ts
+
 import { db as localDb, getCurrentProjectId, setCurrentProjectId } from './state';
+
 import {
   getAudioBuffer,
   getAudioFileBlob,
   getAudioFileContentType,
   getAudioFileName,
+
   refreshAudioStatusLabel,
+
   setAudioFromBlob,
   clearAudio,
   setAudioStatusMessage,
@@ -35,7 +39,9 @@ export async function createNewProjectFirebase(titulo = 'Coreografia'): Promise<
   const id = `p${now()}`;
   localDb.projeto   = { id, titulo };
   localDb.formacoes = [];
+
   setCurrentProjectId(id);
+
   clearAudio();
   return id;
 }
@@ -60,7 +66,9 @@ export async function saveProjectFirebase(projectId?: string): Promise<string> {
   const id = projectId || localDb.projeto?.id || `p${now()}`;
   if (!localDb.projeto) localDb.projeto = { id, titulo: 'Coreografia' };
   localDb.projeto.id = id;
+
   setCurrentProjectId(id);
+
 
   // 1) estado (JSON) no Storage
   const stateBlob = new Blob([JSON.stringify(localDb)], { type: 'application/json' });
@@ -80,18 +88,22 @@ export async function saveProjectFirebase(projectId?: string): Promise<string> {
 
   if (projectAudioBuffer && projectAudioBlob) {
     try {
+
       setAudioStatusMessage('Enviando áudio para o Firebase...');
+
       await uploadBytes(
         audioRef,
         projectAudioBlob,
         projectAudioContentType ? { contentType: projectAudioContentType } : undefined,
       );
+
       refreshAudioStatusLabel();
     } catch (err) {
       console.error('Falha ao enviar áudio do projeto', err);
       const detail = describeFirebaseError(err);
       setAudioStatusMessage('Erro ao salvar áudio');
       alert(`Não foi possível salvar o áudio do projeto no Firebase Storage.\n${detail}\nVerifique as regras de acesso e tente novamente.`);
+
       throw err;
     }
   } else {
@@ -99,6 +111,7 @@ export async function saveProjectFirebase(projectId?: string): Promise<string> {
       await deleteObject(audioRef);
     } catch (err: any) {
       // ignora se não existir
+
       if (err?.code !== 'storage/object-not-found') {
         const detail = describeFirebaseError(err);
         console.warn('Falha ao remover áudio do projeto', err);
@@ -108,6 +121,7 @@ export async function saveProjectFirebase(projectId?: string): Promise<string> {
     }
   }
 
+
   // 2) metadados no Firestore
   const durationSec = (localDb.formacoes || [])
     .reduce((a,f)=> a + (f.tempoTransicaoEntradaSegundos||0) + (f.duracaoSegundos||0), 0);
@@ -116,10 +130,12 @@ export async function saveProjectFirebase(projectId?: string): Promise<string> {
     id,
     titulo: localDb.projeto.titulo || 'Coreografia',
     updatedAt: now(),
+
     hasAudio: !!projectAudioBuffer,
     durationSec,
     audioFileName: projectAudioBuffer ? (projectAudioFileName || null) : null,
     audioContentType: projectAudioBuffer ? (projectAudioContentType || null) : null,
+
   };
 
   await setDoc(doc(db, 'projects', id), { ...meta, updatedAtTS: serverTimestamp() }, { merge: true });
@@ -170,9 +186,11 @@ export async function openProjectFirebase(id: string): Promise<void> {
         });
       } catch (err) {
         console.error('Falha ao carregar áudio do projeto', err);
+
         setAudioStatusMessage('Erro ao carregar áudio');
         const detail = describeFirebaseError(err);
         alert(`Não foi possível carregar o áudio deste projeto.\n${detail}\nVerifique as permissões do Firebase Storage e tente novamente.`);
+
         clearAudio();
       }
     }
@@ -181,6 +199,7 @@ export async function openProjectFirebase(id: string): Promise<void> {
       console.error('Falha ao carregar projeto do Firebase', err);
       alert('Não foi possível carregar o projeto selecionado. Verifique as permissões do Firebase Storage e tente novamente.');
       throw err;
+
     }
   }
 }
