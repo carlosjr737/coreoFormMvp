@@ -168,6 +168,7 @@ export function initReportUI() {
 
     try {
       setLoading(true);
+
       const userDocRef = doc(db, 'users', user.uid);
       const reportsCollection = collection(userDocRef, 'reports');
       const payload = {
@@ -191,6 +192,7 @@ export function initReportUI() {
       );
 
       await addDoc(reportsCollection, payload);
+
       setStatus('Obrigado! Sua contribuição foi enviada.', 'success');
       form.reset();
       window.setTimeout(() => {
