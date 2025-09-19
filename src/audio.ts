@@ -29,6 +29,12 @@ export function setAudioStatusMessage(msg: string) {
   if (audioStatusEl) audioStatusEl.textContent = msg;
 }
 
+
+export function refreshAudioStatusLabel() {
+  updateAudioStatus(audioBuffer?.duration);
+}
+
+
 function updateAudioStatus(durationSec?: number) {
   if (!audioStatusEl) return;
   if (audioBuffer && audioFileName) {
@@ -148,7 +154,12 @@ export async function setAudioFromBlob(blob: Blob, options: { fileName?: string;
   }
 }
 
-export function clearAudio() {
+
+  if (audioSourceNode) {
+    try { audioSourceNode.stop(); } catch {}
+    audioSourceNode = null;
+  }
+
   audioBuffer = null;
   waveformData = null;
   audioFileBlob = null;
