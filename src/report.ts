@@ -1,4 +1,4 @@
-import { db, collection, addDoc, serverTimestamp } from './firebase';
+import { db, collection, doc, addDoc, setDoc, serverTimestamp } from './firebase';
 import { getUser } from './auth';
 
 
@@ -166,18 +166,33 @@ export function initReportUI() {
       return;
     }
 
-    const payload = {
-      uid: user.uid,
-      message,
-      createdAt: serverTimestamp(),
-      source: 'app-report',
-      userEmail: user.email ?? null,
-      userName: user.displayName ?? null,
-    };
-
     try {
       setLoading(true);
-      await addDoc(collection(db, 'users', user.uid, 'reports'), payload);
+
+      const userDocRef = doc(db, 'users', user.uid);
+      const reportsCollection = collection(userDocRef, 'reports');
+      const payload = {
+        uid: user.uid,
+        message,
+        createdAt: serverTimestamp(),
+        source: 'app-report',
+        userEmail: user.email ?? null,
+        userName: user.displayName ?? null,
+      };
+
+      await setDoc(
+        userDocRef,
+        {
+          uid: user.uid,
+          email: user.email ?? null,
+          displayName: user.displayName ?? null,
+          lastFeedbackAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+
+      await addDoc(reportsCollection, payload);
+
       setStatus('Obrigado! Sua contribuição foi enviada.', 'success');
       form.reset();
       window.setTimeout(() => {
