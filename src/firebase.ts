@@ -37,6 +37,7 @@ const projectId = (envProjectId && `${envProjectId}`.trim()) || DEFAULT_PROJECT_
 
 const envBucket = sanitizeBucketName(import.meta?.env?.VITE_FIREBASE_STORAGE_BUCKET ?? null);
 
+
 const DEFAULT_BUCKET_SUFFIXES = ['appspot.com', 'firebasestorage.app'] as const;
 
 function buildStorageBucketCandidates(project: string, explicit?: string | undefined): string[] {
@@ -51,12 +52,15 @@ function buildStorageBucketCandidates(project: string, explicit?: string | undef
 const storageBucketCandidates = buildStorageBucketCandidates(projectId, envBucket);
 const storageBucket = storageBucketCandidates[0];
 
+
 // Variáveis de ambiente (ou usa os defaults abaixo)
 const cfg = {
   apiKey:            import.meta?.env?.VITE_FIREBASE_API_KEY            ?? "AIzaSyBUd7mOWqTXP3E_dNAs-TXAeF9d_WE5rS4",
+
   authDomain:        import.meta?.env?.VITE_FIREBASE_AUTH_DOMAIN        ?? `${projectId}.firebaseapp.com`,
   projectId,
   storageBucket,
+
   messagingSenderId: import.meta?.env?.VITE_FIREBASE_MESSAGING_SENDER_ID?? "885677342214",
   appId:             import.meta?.env?.VITE_FIREBASE_APP_ID             ?? "1:885677342214:web:fe9f74a1065f0ec9ce4d87",
 };

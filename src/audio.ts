@@ -29,9 +29,11 @@ export function setAudioStatusMessage(msg: string) {
   if (audioStatusEl) audioStatusEl.textContent = msg;
 }
 
+
 export function refreshAudioStatusLabel() {
   updateAudioStatus(audioBuffer?.duration);
 }
+
 
 function updateAudioStatus(durationSec?: number) {
   if (!audioStatusEl) return;
@@ -115,6 +117,7 @@ async function decodeAndApplyAudio(arrayBuffer: ArrayBuffer, fileName?: string):
   if (fileName) audioFileName = fileName;
   updateAudioStatus(audioBuffer.duration);
   processarAudioParaVisualizacao();
+
 }
 
 export async function carregarArquivoDeAudio(file: File) {
@@ -132,6 +135,7 @@ export async function carregarArquivoDeAudio(file: File) {
     clearAudio();
     setAudioStatusMessage('Erro ao carregar áudio');
     alert('Não foi possível processar este arquivo de áudio. ' + (err?.message || ''));
+
   }
 }
 
