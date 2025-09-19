@@ -61,15 +61,21 @@ export async function saveProjectFirebase(projectId?: string): Promise<string> {
     throw err;
   }
 
-  const audioBuffer = getAudioBuffer();
-  const audioBlob = getAudioFileBlob();
-  const audioFileName = getAudioFileName();
-  const audioContentType = getAudioFileContentType();
+
+  const projectAudioBuffer = getAudioBuffer();
+  const projectAudioBlob = getAudioFileBlob();
+  const projectAudioFileName = getAudioFileName();
+  const projectAudioContentType = getAudioFileContentType();
   const audioRef = sRef(st, `projects/${id}/${AUDIO_STORAGE_KEY}`);
 
-  if (audioBuffer && audioBlob) {
+  if (projectAudioBuffer && projectAudioBlob) {
     try {
-      await uploadBytes(audioRef, audioBlob, audioContentType ? { contentType: audioContentType } : undefined);
+      await uploadBytes(
+        audioRef,
+        projectAudioBlob,
+        projectAudioContentType ? { contentType: projectAudioContentType } : undefined,
+      );
+
     } catch (err) {
       console.error('Falha ao enviar áudio do projeto', err);
       alert('Não foi possível salvar o áudio do projeto no Firebase Storage. Verifique as regras de acesso e tente novamente.');
@@ -84,22 +90,6 @@ export async function saveProjectFirebase(projectId?: string): Promise<string> {
     }
   }
 
-  const audioBuffer = getAudioBuffer();
-  const audioBlob = getAudioFileBlob();
-  const audioFileName = getAudioFileName();
-  const audioContentType = getAudioFileContentType();
-  const audioRef = sRef(st, `projects/${id}/${AUDIO_STORAGE_KEY}`);
-
-  if (audioBuffer && audioBlob) {
-    await uploadBytes(audioRef, audioBlob, audioContentType ? { contentType: audioContentType } : undefined);
-  } else {
-    try {
-      await deleteObject(audioRef);
-    } catch (err: any) {
-      // ignora se não existir
-      if (err?.code !== 'storage/object-not-found') console.warn('Falha ao remover áudio do projeto', err);
-    }
-  }
 
   // 2) metadados no Firestore
   const durationSec = (localDb.formacoes || [])
@@ -109,10 +99,12 @@ export async function saveProjectFirebase(projectId?: string): Promise<string> {
     id,
     titulo: localDb.projeto.titulo || 'Coreografia',
     updatedAt: now(),
-    hasAudio: !!audioBuffer,
+
+    hasAudio: !!projectAudioBuffer,
     durationSec,
-    audioFileName: audioBuffer ? (audioFileName || null) : null,
-    audioContentType: audioBuffer ? (audioContentType || null) : null,
+    audioFileName: projectAudioBuffer ? (projectAudioFileName || null) : null,
+    audioContentType: projectAudioBuffer ? (projectAudioContentType || null) : null,
+
   };
 
   await setDoc(doc(db, 'projects', id), { ...meta, updatedAtTS: serverTimestamp() }, { merge: true });
