@@ -24,7 +24,7 @@ const cfg = {
   apiKey:            import.meta?.env?.VITE_FIREBASE_API_KEY            ?? "AIzaSyBUd7mOWqTXP3E_dNAs-TXAeF9d_WE5rS4",
   authDomain:        import.meta?.env?.VITE_FIREBASE_AUTH_DOMAIN        ?? "pinaform-a5fec.firebaseapp.com",
   projectId:         import.meta?.env?.VITE_FIREBASE_PROJECT_ID         ?? "pinaform-a5fec",
-  storageBucket:     import.meta?.env?.VITE_FIREBASE_STORAGE_BUCKET     ?? "pinaform-a5fec.firebasestorage.app",
+  storageBucket:     import.meta?.env?.VITE_FIREBASE_STORAGE_BUCKET     ?? "pinaform-a5fec.appspot.com",
   messagingSenderId: import.meta?.env?.VITE_FIREBASE_MESSAGING_SENDER_ID?? "885677342214",
   appId:             import.meta?.env?.VITE_FIREBASE_APP_ID             ?? "1:885677342214:web:fe9f74a1065f0ec9ce4d87",
 };
