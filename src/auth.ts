@@ -41,6 +41,7 @@ function buildLandingUrl(mode: AuthLandingMode = 'login') {
   return url.toString();
 }
 
+
 export const redirectToLanding = (mode: AuthLandingMode = 'login') => {
   if (isLandingPath(window.location.pathname)) {
     const current = new URL(window.location.href);
@@ -62,9 +63,11 @@ export async function logout() {
     console.error(e);
   }
   redirectToLanding();
+
 }
 
 export const requireAuth = () => {
+
   let receivedAuthEvent = false;
 
   onAuthStateChanged(auth, (u) => {
@@ -85,4 +88,6 @@ export const requireAuth = () => {
       }
     }, 2000);
   }
+
 };
+

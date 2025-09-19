@@ -21,6 +21,7 @@ initReportUI();
 // tenta preencher a combo de projetos quando possível
 setTimeout(refreshProjectListUI, 600);
 
+
 if (btnLogout && !btnLogout.hasAttribute('type')) {
   btnLogout.type = 'button';
 }
@@ -30,7 +31,9 @@ btnLogout?.addEventListener('click', async (event) => {
   const action = btnLogout?.dataset.authAction;
 
   if (action === 'login') {
+
     redirectToLanding();
+
     return;
   }
 
