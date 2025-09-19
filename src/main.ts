@@ -21,7 +21,15 @@ initReportUI();
 // tenta preencher a combo de projetos quando possível
 setTimeout(refreshProjectListUI, 600);
 
-btnLogout?.addEventListener('click', async () => {
+btnLogout?.addEventListener('click', async (event) => {
+  event.preventDefault();
+  const action = btnLogout?.dataset.authAction;
+
+  if (action === 'login') {
+    window.location.href = 'landing.html';
+    return;
+  }
+
   try {
     await logout();
   } catch (e) {
@@ -31,12 +39,21 @@ btnLogout?.addEventListener('click', async () => {
 
 const updateAuthUI = () => {
   const user = getUser();
-  if (user) {
-    if (btnLogout) btnLogout.style.display = '';
-    if (userBadgeEl) userBadgeEl.textContent = user.displayName || user.email || 'logado';
-  } else {
-    if (btnLogout) btnLogout.style.display = 'none';
-    if (userBadgeEl) userBadgeEl.textContent = 'offline';
+  if (btnLogout) {
+    btnLogout.style.display = '';
+    if (user) {
+      btnLogout.textContent = 'Sair';
+      btnLogout.dataset.authAction = 'logout';
+      btnLogout.setAttribute('aria-label', 'Sair da conta e voltar para a landing');
+    } else {
+      btnLogout.textContent = 'Entrar';
+      btnLogout.dataset.authAction = 'login';
+      btnLogout.setAttribute('aria-label', 'Ir para a tela de login');
+    }
+  }
+
+  if (userBadgeEl) {
+    userBadgeEl.textContent = user ? user.displayName || user.email || 'logado' : 'offline';
   }
 };
 
