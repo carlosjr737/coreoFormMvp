@@ -38,14 +38,33 @@ export async function logout() {
   window.location.href = 'landing.html';
 }
 
+function redirectToLanding() {
+  const { pathname } = window.location;
+  if (pathname.endsWith('/landing.html') || pathname.endsWith('/landing')) {
+    return;
+  }
+  window.location.href = 'landing.html';
+}
+
 export function requireAuth() {
+  let receivedAuthEvent = false;
+
   onAuthStateChanged(auth, (u) => {
+    receivedAuthEvent = true;
     _user = u;
     document.dispatchEvent(new CustomEvent('auth-changed', {
       detail: u ? { uid: u.uid } : null
     }));
     if (!u) {
-      window.location.href = 'landing.html';
+      redirectToLanding();
     }
   });
+
+  if (!auth.currentUser) {
+    window.setTimeout(() => {
+      if (!receivedAuthEvent && !getUser()) {
+        redirectToLanding();
+      }
+    }, 2000);
+  }
 }
