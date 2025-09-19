@@ -10,6 +10,9 @@ let recDest: MediaStreamAudioDestinationNode | null = null;
 export let audioBuffer: AudioBuffer | null = null;
 let audioSourceNode: AudioBufferSourceNode | null = null;
 let waveformData: number[] | null = null;
+let audioFileBlob: Blob | null = null;
+let audioFileName: string | null = null;
+let audioFileContentType: string | null = null;
 
 
 
@@ -19,6 +22,27 @@ export function getAudioSource() { return audioSourceNode; }
 export function setAudioSource(n: AudioBufferSourceNode | null) { audioSourceNode = n; }
 export function getWaveformData() { return waveformData; }
 export function setWaveformData(d: number[] | null){ waveformData = d; }
+export function getAudioFileBlob(): Blob | null { return audioFileBlob; }
+export function getAudioFileName(): string | null { return audioFileName; }
+export function getAudioFileContentType(): string | null { return audioFileContentType; }
+export function setAudioStatusMessage(msg: string) {
+  if (audioStatusEl) audioStatusEl.textContent = msg;
+}
+
+export function refreshAudioStatusLabel() {
+  updateAudioStatus(audioBuffer?.duration);
+}
+
+function updateAudioStatus(durationSec?: number) {
+  if (!audioStatusEl) return;
+  if (audioBuffer && audioFileName) {
+    const trimmedName = audioFileName.length > 32 ? `${audioFileName.slice(0, 29)}…` : audioFileName;
+    const durationText = durationSec !== undefined ? ` (${durationSec.toFixed(1)}s)` : '';
+    audioStatusEl.textContent = `Áudio: ${trimmedName}${durationText}`;
+  } else {
+    audioStatusEl.textContent = 'Sem áudio';
+  }
+}
 export function getAudioContext(): AudioContext {
   if (!audioContext) audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
   return audioContext;
@@ -79,30 +103,72 @@ export function initAudioUI() {
     document.addEventListener('mouseup', onUp);
     audioTrackEl.dispatchEvent(new CustomEvent('scrub-request', { detail: { clientX: e.clientX } }));
   });
+
+  updateAudioStatus();
 }
 
-export function carregarArquivoDeAudio(file: File) {
+async function decodeAndApplyAudio(arrayBuffer: ArrayBuffer, fileName?: string): Promise<void> {
   ensureAudioContext();
   if (!audioContext) return;
-  if (audioStatusEl) audioStatusEl.textContent = 'Processando áudio...';
+  const decoded = await audioContext.decodeAudioData(arrayBuffer.slice(0));
+  audioBuffer = decoded;
+  if (fileName) audioFileName = fileName;
+  updateAudioStatus(audioBuffer.duration);
+  processarAudioParaVisualizacao();
+}
 
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const arrayBuffer = e.target?.result as ArrayBuffer;
-    audioContext!.decodeAudioData(arrayBuffer).then((decoded) => {
-      audioBuffer = decoded;
-      if (audioStatusEl) {
-        const trimmedName = file.name.length > 32 ? `${file.name.slice(0, 29)}…` : file.name;
-        audioStatusEl.textContent = `Áudio: ${trimmedName} (${audioBuffer.duration.toFixed(1)}s)`;
-      }
+export async function carregarArquivoDeAudio(file: File) {
+  ensureAudioContext();
+  if (!audioContext) return;
+  setAudioStatusMessage('Processando áudio...');
 
-      processarAudioParaVisualizacao();
-    }).catch((err) => {
-      if (audioStatusEl) audioStatusEl.textContent = 'Erro ao carregar áudio';
-      alert('Não foi possível processar este arquivo de áudio. ' + err?.message);
-    });
-  };
-  reader.readAsArrayBuffer(file);
+  try {
+    audioFileBlob = file;
+    audioFileName = file.name;
+    audioFileContentType = file.type || null;
+    const arrayBuffer = await file.arrayBuffer();
+    await decodeAndApplyAudio(arrayBuffer, file.name);
+  } catch (err: any) {
+    clearAudio();
+    setAudioStatusMessage('Erro ao carregar áudio');
+    alert('Não foi possível processar este arquivo de áudio. ' + (err?.message || ''));
+  }
+}
+
+export async function setAudioFromBlob(blob: Blob, options: { fileName?: string; contentType?: string } = {}): Promise<void> {
+  ensureAudioContext();
+  if (!audioContext) return;
+  audioFileBlob = blob;
+  audioFileName = options.fileName || audioFileName || 'Áudio';
+  audioFileContentType = options.contentType || blob.type || audioFileContentType || null;
+  setAudioStatusMessage('Processando áudio...');
+  try {
+    const arrayBuffer = await blob.arrayBuffer();
+    await decodeAndApplyAudio(arrayBuffer, audioFileName || undefined);
+  } catch (err) {
+    console.error('Falha ao decodificar áudio', err);
+    clearAudio();
+    throw err;
+  }
+}
+
+export function clearAudio() {
+  if (audioSourceNode) {
+    try { audioSourceNode.stop(); } catch {}
+    audioSourceNode = null;
+  }
+  audioBuffer = null;
+  waveformData = null;
+  audioFileBlob = null;
+  audioFileName = null;
+  audioFileContentType = null;
+  updateAudioStatus();
+  const ctx = audioCanvas.getContext('2d');
+  if (ctx) {
+    ctx.clearRect(0, 0, audioCanvas.width, audioCanvas.height);
+  }
+  renderizarTudo(true);
+  requestAnimationFrame(renderizarFaixaAudio);
 }
 // src/audio.ts  (ADICIONE ao final do arquivo ou numa seção adequada)
 let _recDest: MediaStreamAudioDestinationNode | null = null;
