@@ -3,7 +3,7 @@ import { initPlaybackAndIO } from './playback';
 import { renderizarPalco, renderizarPalcoEmTransicao, renderizarPalcoComFormacao, initBailarinoUI } from './stage'; // <-- ADICIONE initBailarinoUI
 import { setZoom } from './state';
 import { initAudioUI } from './audio';
-import { requireAuth, logout, getUser } from './auth';
+import { requireAuth, logout, getUser, redirectToLanding } from './auth';
 import { initPersistenceUI, refreshProjectListUI } from './persist';
 import { initUI } from './ui';
 import { startRecording, stopRecording } from './record';
@@ -21,7 +21,19 @@ initReportUI();
 // tenta preencher a combo de projetos quando possível
 setTimeout(refreshProjectListUI, 600);
 
-btnLogout?.addEventListener('click', async () => {
+if (btnLogout && !btnLogout.hasAttribute('type')) {
+  btnLogout.type = 'button';
+}
+
+btnLogout?.addEventListener('click', async (event) => {
+  event.preventDefault();
+  const action = btnLogout?.dataset.authAction;
+
+  if (action === 'login') {
+    redirectToLanding();
+    return;
+  }
+
   try {
     await logout();
   } catch (e) {
@@ -31,12 +43,21 @@ btnLogout?.addEventListener('click', async () => {
 
 const updateAuthUI = () => {
   const user = getUser();
-  if (user) {
-    if (btnLogout) btnLogout.style.display = '';
-    if (userBadgeEl) userBadgeEl.textContent = user.displayName || user.email || 'logado';
-  } else {
-    if (btnLogout) btnLogout.style.display = 'none';
-    if (userBadgeEl) userBadgeEl.textContent = 'offline';
+  if (btnLogout) {
+    btnLogout.style.display = '';
+    if (user) {
+      btnLogout.textContent = 'Sair';
+      btnLogout.dataset.authAction = 'logout';
+      btnLogout.setAttribute('aria-label', 'Sair da conta e voltar para a landing');
+    } else {
+      btnLogout.textContent = 'Entrar';
+      btnLogout.dataset.authAction = 'login';
+      btnLogout.setAttribute('aria-label', 'Ir para a tela de login');
+    }
+  }
+
+  if (userBadgeEl) {
+    userBadgeEl.textContent = user ? user.displayName || user.email || 'logado' : 'offline';
   }
 };
 
