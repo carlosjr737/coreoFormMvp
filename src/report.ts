@@ -177,7 +177,7 @@ export function initReportUI() {
 
     try {
       setLoading(true);
-      await addDoc(collection(db, 'reports'), payload);
+      await addDoc(collection(db, 'users', user.uid, 'reports'), payload);
       setStatus('Obrigado! Sua contribuição foi enviada.', 'success');
       form.reset();
       window.setTimeout(() => {
