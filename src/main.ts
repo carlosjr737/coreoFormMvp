@@ -3,7 +3,7 @@ import { initPlaybackAndIO } from './playback';
 import { renderizarPalco, renderizarPalcoEmTransicao, renderizarPalcoComFormacao, initBailarinoUI } from './stage'; // <-- ADICIONE initBailarinoUI
 import { setZoom } from './state';
 import { initAudioUI } from './audio';
-import { requireAuth, logout, getUser } from './auth';
+import { requireAuth, logout, getUser, redirectToLanding } from './auth';
 import { initPersistenceUI, refreshProjectListUI } from './persist';
 import { initUI } from './ui';
 import { startRecording, stopRecording } from './record';
@@ -21,12 +21,19 @@ initReportUI();
 // tenta preencher a combo de projetos quando possível
 setTimeout(refreshProjectListUI, 600);
 
+
+if (btnLogout && !btnLogout.hasAttribute('type')) {
+  btnLogout.type = 'button';
+}
+
 btnLogout?.addEventListener('click', async (event) => {
   event.preventDefault();
   const action = btnLogout?.dataset.authAction;
 
   if (action === 'login') {
-    window.location.href = 'landing.html';
+
+    redirectToLanding();
+
     return;
   }
 
