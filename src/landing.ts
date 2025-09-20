@@ -1,10 +1,59 @@
-import { auth, onAuthStateChanged } from './firebase';
-import { loginWithEmail, loginWithGoogle, registerWithEmail } from './auth';
-
 type AuthMode = 'login' | 'register';
+
+type AuthModule = typeof import('./auth');
+type FirebaseModule = typeof import('./firebase');
 
 const isAuthMode = (value: string | undefined): value is AuthMode =>
   value === 'login' || value === 'register';
+
+type LandingAuthDeps = {
+  loginWithEmail: AuthModule['loginWithEmail'];
+  loginWithGoogle: AuthModule['loginWithGoogle'];
+  registerWithEmail: AuthModule['registerWithEmail'];
+  auth: FirebaseModule['auth'];
+  onAuthStateChanged: FirebaseModule['onAuthStateChanged'];
+};
+
+let authDepsPromise: Promise<LandingAuthDeps | null> | null = null;
+
+const loadAuthDeps = async (): Promise<LandingAuthDeps | null> => {
+  if (!authDepsPromise) {
+    authDepsPromise = (async () => {
+      try {
+        const [authModule, firebaseModule] = await Promise.all([
+          import('./auth'),
+          import('./firebase'),
+        ]);
+
+        return {
+          loginWithEmail: authModule.loginWithEmail,
+          loginWithGoogle: authModule.loginWithGoogle,
+          registerWithEmail: authModule.registerWithEmail,
+          auth: firebaseModule.auth,
+          onAuthStateChanged: firebaseModule.onAuthStateChanged,
+        };
+      } catch (error) {
+        console.error('Não foi possível carregar as dependências de autenticação.', error);
+        return null;
+      }
+    })();
+  }
+
+  const deps = await authDepsPromise;
+  if (!deps) {
+    authDepsPromise = null;
+  }
+  return deps;
+};
+
+const prefetchAuthDeps = () => {
+  if (!authDepsPromise) {
+    void loadAuthDeps();
+  }
+};
+
+const authUnavailableMessage =
+  'Não foi possível conectar ao serviço de autenticação. Verifique sua configuração e tente novamente.';
 
 const selectors = ['#btn-login', '[data-login-button]'];
 const loginTargets = new Set<HTMLElement>();
@@ -24,6 +73,22 @@ const authSections = new Map<AuthMode, HTMLElement>();
 const authForms = new Map<AuthMode, HTMLFormElement>();
 const errorOutputs = new Map<AuthMode, HTMLElement>();
 let currentMode: AuthMode = 'login';
+
+const syncAuthParam = (mode?: AuthMode) => {
+  const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  const url = new URL(window.location.href);
+
+  if (mode) {
+    url.searchParams.set('auth', mode);
+  } else {
+    url.searchParams.delete('auth');
+  }
+
+  const next = `${url.pathname}${url.search}${url.hash}`;
+  if (next !== current) {
+    window.history.replaceState({}, '', next);
+  }
+};
 
 document
   .querySelectorAll<HTMLElement>('[data-auth-section]')
@@ -104,6 +169,8 @@ const setAuthMode = (mode: AuthMode, { focusField = true } = {}) => {
   currentMode = mode;
   loginModal?.setAttribute('data-auth-mode', mode);
 
+  syncAuthParam(mode);
+
   modeButtons.forEach((button) => {
     const isActive = button.dataset.authMode === mode;
     button.classList.toggle('is-active', isActive);
@@ -125,6 +192,7 @@ const setAuthMode = (mode: AuthMode, { focusField = true } = {}) => {
 
 const showLoginModal = (mode: AuthMode = 'login') => {
   if (!loginModal || !loginBackdrop) return;
+  prefetchAuthDeps();
   loginModal.hidden = false;
   loginModal.setAttribute('aria-hidden', 'false');
   loginBackdrop.hidden = false;
@@ -142,6 +210,7 @@ const hideLoginModal = () => {
   document.body.classList.remove('auth-modal-open');
   clearErrors();
   authForms.forEach((form) => form.reset());
+  syncAuthParam();
 };
 
 const formatFirebaseError = (error: unknown) => {
@@ -201,10 +270,16 @@ const handleAuthFormSubmit = async (event: SubmitEvent) => {
   setButtonLoading(submitButton, true);
 
   try {
+    const deps = await loadAuthDeps();
+    if (!deps) {
+      showError(mode, authUnavailableMessage);
+      return;
+    }
+
     if (mode === 'login') {
-      await loginWithEmail(email, password);
+      await deps.loginWithEmail(email, password);
     } else {
-      await registerWithEmail(email, password);
+      await deps.registerWithEmail(email, password);
     }
     form.reset();
     hideLoginModal();
@@ -227,11 +302,14 @@ const handleLoginClick = (event: Event) => {
   event.preventDefault();
   const element = event.currentTarget as HTMLElement;
   const mode = element.dataset.authOpenMode;
+  prefetchAuthDeps();
   showLoginModal(isAuthMode(mode) ? mode : 'login');
 };
 
 loginTargets.forEach((element) => {
   element.addEventListener('click', handleLoginClick);
+  element.addEventListener('pointerenter', prefetchAuthDeps, { once: true });
+  element.addEventListener('focus', prefetchAuthDeps, { once: true });
 });
 
 const closeButtons = document.querySelectorAll<HTMLElement>('[data-close-login-modal]');
@@ -267,7 +345,13 @@ googleButton?.addEventListener('click', async (event) => {
   setButtonLoading(googleButton, true);
   clearErrors(currentMode);
   try {
-    await loginWithGoogle();
+    const deps = await loadAuthDeps();
+    if (!deps) {
+      showError(currentMode, authUnavailableMessage);
+      return;
+    }
+
+    await deps.loginWithGoogle();
     hideLoginModal();
   } catch (error) {
     console.error(error);
@@ -280,8 +364,19 @@ googleButton?.addEventListener('click', async (event) => {
   }
 });
 
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    window.location.href = 'index.html';
-  }
+void loadAuthDeps().then((deps) => {
+  if (!deps) return;
+  const { auth, onAuthStateChanged } = deps;
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      window.location.href = 'index.html';
+    }
+  });
 });
+
+const urlParams = new URLSearchParams(window.location.search);
+const initialAuthModeParam = urlParams.get('auth') ?? undefined;
+if (isAuthMode(initialAuthModeParam)) {
+  prefetchAuthDeps();
+  showLoginModal(initialAuthModeParam);
+}
