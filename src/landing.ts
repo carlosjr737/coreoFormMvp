@@ -361,6 +361,6 @@ void loadAuthDeps().then((deps) => {
 const urlParams = new URLSearchParams(window.location.search);
 const initialAuthModeParam = urlParams.get('auth') ?? undefined;
 if (isAuthMode(initialAuthModeParam)) {
+
   void loadAuthDeps();
-  showLoginModal(initialAuthModeParam);
-}
+
