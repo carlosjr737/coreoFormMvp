@@ -29,23 +29,60 @@ export async function registerWithEmail(email: string, password: string) {
   return createUserWithEmailAndPassword(auth, email, password);
 }
 
+type AuthLandingMode = 'login' | 'register';
+
+function isLandingPath(pathname: string) {
+  return pathname.endsWith('/landing.html') || pathname.endsWith('/landing');
+}
+
+function buildLandingUrl(mode: AuthLandingMode = 'login') {
+  const url = new URL('landing.html', window.location.href);
+  url.searchParams.set('auth', mode);
+  return url.toString();
+}
+
+export const redirectToLanding = (mode: AuthLandingMode = 'login') => {
+  if (isLandingPath(window.location.pathname)) {
+    const current = new URL(window.location.href);
+    current.searchParams.set('auth', mode);
+    const target = current.toString();
+    if (target !== window.location.href) {
+      window.location.replace(target);
+    }
+    return;
+  }
+
+  window.location.href = buildLandingUrl(mode);
+};
+
 export async function logout() {
   try {
     await signOut(auth);
   } catch (e) {
     console.error(e);
   }
-  window.location.href = 'landing.html';
+  redirectToLanding();
 }
 
-export function requireAuth() {
+export const requireAuth = () => {
+  let receivedAuthEvent = false;
+
   onAuthStateChanged(auth, (u) => {
+    receivedAuthEvent = true;
     _user = u;
     document.dispatchEvent(new CustomEvent('auth-changed', {
       detail: u ? { uid: u.uid } : null
     }));
     if (!u) {
-      window.location.href = 'landing.html';
+      redirectToLanding();
     }
   });
-}
+
+  if (!auth.currentUser) {
+    window.setTimeout(() => {
+      if (!receivedAuthEvent && !getUser()) {
+        redirectToLanding();
+      }
+    }, 2000);
+  }
+};
