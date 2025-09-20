@@ -10,7 +10,30 @@ import {
 } from './firebase';
 import type { User } from 'firebase/auth';
 
+type AuthLandingMode = 'login' | 'register';
+
 let _user: User | null = auth.currentUser;
+
+const AUTH_CHANGED_EVENT = 'auth-changed';
+
+const isLandingPath = (pathname: string) =>
+  pathname.endsWith('/landing.html') || pathname.endsWith('/landing');
+
+const buildLandingUrl = (mode: AuthLandingMode = 'login') => {
+  const url = new URL('landing.html', window.location.href);
+  url.searchParams.set('auth', mode);
+  return url.toString();
+};
+
+const emitAuthChange = (user: User | null) => {
+  _user = user;
+  document.dispatchEvent(
+    new CustomEvent(AUTH_CHANGED_EVENT, {
+      detail: user ? { uid: user.uid } : null,
+    }),
+  );
+};
+
 export function getUser() {
   return _user ?? auth.currentUser ?? null;
 }
@@ -29,18 +52,6 @@ export async function registerWithEmail(email: string, password: string) {
   return createUserWithEmailAndPassword(auth, email, password);
 }
 
-type AuthLandingMode = 'login' | 'register';
-
-function isLandingPath(pathname: string) {
-  return pathname.endsWith('/landing.html') || pathname.endsWith('/landing');
-}
-
-function buildLandingUrl(mode: AuthLandingMode = 'login') {
-  const url = new URL('landing.html', window.location.href);
-  url.searchParams.set('auth', mode);
-  return url.toString();
-}
-
 
 export const redirectToLanding = (mode: AuthLandingMode = 'login') => {
   if (isLandingPath(window.location.pathname)) {
@@ -53,40 +64,61 @@ export const redirectToLanding = (mode: AuthLandingMode = 'login') => {
     return;
   }
 
-  window.location.href = buildLandingUrl(mode);
+  window.location.replace(buildLandingUrl(mode));
+
 };
 
 export async function logout() {
   try {
     await signOut(auth);
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    console.error('Erro ao encerrar sessão.', error);
   }
-  redirectToLanding();
 
+  redirectToLanding();
+}
 
 export const requireAuth = () => {
-
   let receivedAuthEvent = false;
+  let fallbackTimer: number | undefined;
 
-  onAuthStateChanged(auth, (u) => {
+  const handleAuthState = (user: User | null) => {
     receivedAuthEvent = true;
-    _user = u;
-    document.dispatchEvent(new CustomEvent('auth-changed', {
-      detail: u ? { uid: u.uid } : null
-    }));
-    if (!u) {
+    window.clearTimeout(fallbackTimer);
+    emitAuthChange(user);
+    if (!user) {
       redirectToLanding();
     }
-  });
+  };
+
+  try {
+    onAuthStateChanged(
+      auth,
+      (user) => handleAuthState(user),
+      (error) => {
+        console.error('Falha ao observar a autenticação.', error);
+        window.clearTimeout(fallbackTimer);
+        if (!receivedAuthEvent && !getUser()) {
+          redirectToLanding();
+        }
+      },
+    );
+  } catch (error) {
+    console.error('Falha ao inicializar a verificação de autenticação.', error);
+    if (!getUser()) {
+      redirectToLanding();
+    }
+    return;
+  }
+
+  emitAuthChange(auth.currentUser ?? null);
 
   if (!auth.currentUser) {
-    window.setTimeout(() => {
+    fallbackTimer = window.setTimeout(() => {
+
       if (!receivedAuthEvent && !getUser()) {
         redirectToLanding();
       }
     }, 2000);
   }
-
-};
 

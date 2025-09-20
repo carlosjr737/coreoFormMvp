@@ -1,14 +1,19 @@
 type AuthMode = 'login' | 'register';
 
+type AuthModule = typeof import('./auth');
+type FirebaseModule = typeof import('./firebase');
+
 const isAuthMode = (value: string | undefined): value is AuthMode =>
   value === 'login' || value === 'register';
 
 type LandingAuthDeps = {
-  loginWithEmail: typeof import('./auth')['loginWithEmail'];
-  loginWithGoogle: typeof import('./auth')['loginWithGoogle'];
-  registerWithEmail: typeof import('./auth')['registerWithEmail'];
-  auth: typeof import('./firebase')['auth'];
-  onAuthStateChanged: typeof import('./firebase')['onAuthStateChanged'];
+
+  loginWithEmail: AuthModule['loginWithEmail'];
+  loginWithGoogle: AuthModule['loginWithGoogle'];
+  registerWithEmail: AuthModule['registerWithEmail'];
+  auth: FirebaseModule['auth'];
+  onAuthStateChanged: FirebaseModule['onAuthStateChanged'];
+
 };
 
 let authDepsPromise: Promise<LandingAuthDeps | null> | null = null;
@@ -36,7 +41,19 @@ const loadAuthDeps = async (): Promise<LandingAuthDeps | null> => {
     })();
   }
 
-  return authDepsPromise;
+
+  const deps = await authDepsPromise;
+  if (!deps) {
+    authDepsPromise = null;
+  }
+  return deps;
+};
+
+const prefetchAuthDeps = () => {
+  if (!authDepsPromise) {
+    void loadAuthDeps();
+  }
+
 };
 
 const authUnavailableMessage =
@@ -179,6 +196,7 @@ const setAuthMode = (mode: AuthMode, { focusField = true } = {}) => {
 
 const showLoginModal = (mode: AuthMode = 'login') => {
   if (!loginModal || !loginBackdrop) return;
+  prefetchAuthDeps();
   loginModal.hidden = false;
   loginModal.setAttribute('aria-hidden', 'false');
   loginBackdrop.hidden = false;
@@ -288,12 +306,16 @@ const handleLoginClick = (event: Event) => {
   event.preventDefault();
   const element = event.currentTarget as HTMLElement;
   const mode = element.dataset.authOpenMode;
-  void loadAuthDeps();
+
+  prefetchAuthDeps();
+
   showLoginModal(isAuthMode(mode) ? mode : 'login');
 };
 
 loginTargets.forEach((element) => {
   element.addEventListener('click', handleLoginClick);
+  element.addEventListener('pointerenter', prefetchAuthDeps, { once: true });
+  element.addEventListener('focus', prefetchAuthDeps, { once: true });
 });
 
 const closeButtons = document.querySelectorAll<HTMLElement>('[data-close-login-modal]');
@@ -362,5 +384,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const initialAuthModeParam = urlParams.get('auth') ?? undefined;
 if (isAuthMode(initialAuthModeParam)) {
 
-  void loadAuthDeps();
-
+  prefetchAuthDeps();
+  showLoginModal(initialAuthModeParam);
+}
+=
