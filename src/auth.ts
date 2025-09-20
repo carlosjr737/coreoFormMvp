@@ -52,6 +52,7 @@ export async function registerWithEmail(email: string, password: string) {
   return createUserWithEmailAndPassword(auth, email, password);
 }
 
+
 export const redirectToLanding = (mode: AuthLandingMode = 'login') => {
   if (isLandingPath(window.location.pathname)) {
     const current = new URL(window.location.href);
@@ -64,6 +65,7 @@ export const redirectToLanding = (mode: AuthLandingMode = 'login') => {
   }
 
   window.location.replace(buildLandingUrl(mode));
+
 };
 
 export async function logout() {
@@ -113,9 +115,10 @@ export const requireAuth = () => {
 
   if (!auth.currentUser) {
     fallbackTimer = window.setTimeout(() => {
+
       if (!receivedAuthEvent && !getUser()) {
         redirectToLanding();
       }
     }, 2000);
   }
-};
+

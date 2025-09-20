@@ -7,11 +7,13 @@ const isAuthMode = (value: string | undefined): value is AuthMode =>
   value === 'login' || value === 'register';
 
 type LandingAuthDeps = {
+
   loginWithEmail: AuthModule['loginWithEmail'];
   loginWithGoogle: AuthModule['loginWithGoogle'];
   registerWithEmail: AuthModule['registerWithEmail'];
   auth: FirebaseModule['auth'];
   onAuthStateChanged: FirebaseModule['onAuthStateChanged'];
+
 };
 
 let authDepsPromise: Promise<LandingAuthDeps | null> | null = null;
@@ -39,6 +41,7 @@ const loadAuthDeps = async (): Promise<LandingAuthDeps | null> => {
     })();
   }
 
+
   const deps = await authDepsPromise;
   if (!deps) {
     authDepsPromise = null;
@@ -50,6 +53,7 @@ const prefetchAuthDeps = () => {
   if (!authDepsPromise) {
     void loadAuthDeps();
   }
+
 };
 
 const authUnavailableMessage =
@@ -302,7 +306,9 @@ const handleLoginClick = (event: Event) => {
   event.preventDefault();
   const element = event.currentTarget as HTMLElement;
   const mode = element.dataset.authOpenMode;
+
   prefetchAuthDeps();
+
   showLoginModal(isAuthMode(mode) ? mode : 'login');
 };
 
@@ -377,6 +383,8 @@ void loadAuthDeps().then((deps) => {
 const urlParams = new URLSearchParams(window.location.search);
 const initialAuthModeParam = urlParams.get('auth') ?? undefined;
 if (isAuthMode(initialAuthModeParam)) {
+
   prefetchAuthDeps();
   showLoginModal(initialAuthModeParam);
 }
+=
