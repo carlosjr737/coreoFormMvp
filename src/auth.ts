@@ -64,7 +64,6 @@ export async function logout() {
   }
   redirectToLanding();
 
-}
 
 export const requireAuth = () => {
 

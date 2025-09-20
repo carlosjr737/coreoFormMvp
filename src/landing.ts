@@ -1,10 +1,46 @@
-import { auth, onAuthStateChanged } from './firebase';
-import { loginWithEmail, loginWithGoogle, registerWithEmail } from './auth';
-
 type AuthMode = 'login' | 'register';
 
 const isAuthMode = (value: string | undefined): value is AuthMode =>
   value === 'login' || value === 'register';
+
+type LandingAuthDeps = {
+  loginWithEmail: typeof import('./auth')['loginWithEmail'];
+  loginWithGoogle: typeof import('./auth')['loginWithGoogle'];
+  registerWithEmail: typeof import('./auth')['registerWithEmail'];
+  auth: typeof import('./firebase')['auth'];
+  onAuthStateChanged: typeof import('./firebase')['onAuthStateChanged'];
+};
+
+let authDepsPromise: Promise<LandingAuthDeps | null> | null = null;
+
+const loadAuthDeps = async (): Promise<LandingAuthDeps | null> => {
+  if (!authDepsPromise) {
+    authDepsPromise = (async () => {
+      try {
+        const [authModule, firebaseModule] = await Promise.all([
+          import('./auth'),
+          import('./firebase'),
+        ]);
+
+        return {
+          loginWithEmail: authModule.loginWithEmail,
+          loginWithGoogle: authModule.loginWithGoogle,
+          registerWithEmail: authModule.registerWithEmail,
+          auth: firebaseModule.auth,
+          onAuthStateChanged: firebaseModule.onAuthStateChanged,
+        };
+      } catch (error) {
+        console.error('Não foi possível carregar as dependências de autenticação.', error);
+        return null;
+      }
+    })();
+  }
+
+  return authDepsPromise;
+};
+
+const authUnavailableMessage =
+  'Não foi possível conectar ao serviço de autenticação. Verifique sua configuração e tente novamente.';
 
 const selectors = ['#btn-login', '[data-login-button]'];
 const loginTargets = new Set<HTMLElement>();
@@ -220,10 +256,16 @@ const handleAuthFormSubmit = async (event: SubmitEvent) => {
   setButtonLoading(submitButton, true);
 
   try {
+    const deps = await loadAuthDeps();
+    if (!deps) {
+      showError(mode, authUnavailableMessage);
+      return;
+    }
+
     if (mode === 'login') {
-      await loginWithEmail(email, password);
+      await deps.loginWithEmail(email, password);
     } else {
-      await registerWithEmail(email, password);
+      await deps.registerWithEmail(email, password);
     }
     form.reset();
     hideLoginModal();
@@ -246,6 +288,7 @@ const handleLoginClick = (event: Event) => {
   event.preventDefault();
   const element = event.currentTarget as HTMLElement;
   const mode = element.dataset.authOpenMode;
+  void loadAuthDeps();
   showLoginModal(isAuthMode(mode) ? mode : 'login');
 };
 
@@ -286,7 +329,13 @@ googleButton?.addEventListener('click', async (event) => {
   setButtonLoading(googleButton, true);
   clearErrors(currentMode);
   try {
-    await loginWithGoogle();
+    const deps = await loadAuthDeps();
+    if (!deps) {
+      showError(currentMode, authUnavailableMessage);
+      return;
+    }
+
+    await deps.loginWithGoogle();
     hideLoginModal();
   } catch (error) {
     console.error(error);
@@ -299,14 +348,19 @@ googleButton?.addEventListener('click', async (event) => {
   }
 });
 
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    window.location.href = 'index.html';
-  }
+void loadAuthDeps().then((deps) => {
+  if (!deps) return;
+  const { auth, onAuthStateChanged } = deps;
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      window.location.href = 'index.html';
+    }
+  });
 });
 
 const urlParams = new URLSearchParams(window.location.search);
 const initialAuthModeParam = urlParams.get('auth') ?? undefined;
 if (isAuthMode(initialAuthModeParam)) {
-  showLoginModal(initialAuthModeParam);
-}
+
+  void loadAuthDeps();
+
