@@ -159,14 +159,25 @@ const ensureAuthenticated = async () => {
 void ensureAuthenticated();
 
 // === Faz o palco ocupar o máximo possível (mantendo 16:9) ===
+const fitStageCleanupSymbol = Symbol('fitStageCleanup');
+
+type WrapperWithCleanup = HTMLElement & {
+  [fitStageCleanupSymbol]?: () => void;
+};
+
 function fitStageToWrapper() {
-  const wrapper = document.querySelector('.palco-wrapper') as HTMLElement | null;
+  const wrapper = document.querySelector('.palco-wrapper') as WrapperWithCleanup | null;
   const palco = document.getElementById('palco') as HTMLElement | null;
   if (!wrapper || !palco) return;
 
+  const win = window as Window &
+    typeof globalThis & {
+      ResizeObserver?: typeof globalThis.ResizeObserver;
+    };
+
   const recalc = () => {
-     // NÃO mexe no palco enquanto grava
-  if (document.body.classList.contains('recording')) return;
+    // NÃO mexe no palco enquanto grava
+    if (document.body.classList.contains('recording')) return;
     const W = wrapper.clientWidth;
 
     // Altura disponível = altura do wrapper - (altura dos controles do palco, se houver) - folga
@@ -182,8 +193,23 @@ function fitStageToWrapper() {
     palco.style.height = `${Math.floor(targetH)}px`;
   };
 
+  // Limpa observadores anteriores, caso a função seja chamada novamente
+  wrapper[fitStageCleanupSymbol]?.();
+
   // Recalcula quando a janela mudar de tamanho
-  new ResizeObserver(recalc).observe(wrapper);
+  if ('ResizeObserver' in window && win.ResizeObserver) {
+    const Observer = win.ResizeObserver;
+    const observer = new Observer(recalc);
+    observer.observe(wrapper);
+    wrapper[fitStageCleanupSymbol] = () => observer.disconnect();
+  } else {
+    const handleResize = () => recalc();
+    win.addEventListener('resize', handleResize);
+    wrapper[fitStageCleanupSymbol] = () => {
+      win.removeEventListener('resize', handleResize);
+    };
+  }
+
   recalc(); // e já calcula agora
 }
 
