@@ -122,3 +122,4 @@ export const requireAuth = () => {
     }, 2000);
   }
 
+};
