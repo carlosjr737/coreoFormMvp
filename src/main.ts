@@ -11,15 +11,14 @@ import { startPresentationRecording, stopPresentationRecording } from './record_
 import { btnLogout, userBadgeEl } from './dom';
 import { initReportUI } from './report';
 
-document.addEventListener('DOMContentLoaded', () => initUI());
+const runWhenDomReady = (callback: () => void) => {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', callback, { once: true });
+    return;
+  }
 
-
-// logo após sua inicialização atual:
-requireAuth();
-initPersistenceUI();
-initReportUI();
-// tenta preencher a combo de projetos quando possível
-setTimeout(refreshProjectListUI, 600);
+  callback();
+};
 
 
 if (btnLogout && !btnLogout.hasAttribute('type')) {
@@ -117,11 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-
-window.addEventListener('DOMContentLoaded', () => {
-  initUI();
-});
-
 // Stage hooks from timeline
 document.addEventListener('stage-render-transition' as any, (e:any)=> {
   const { from, to, t } = e.detail;
@@ -135,15 +129,34 @@ document.addEventListener('stage-render-pause' as any, (e:any)=> {
 // 👇 re-render quando o banco muda (cria 1ª formação, adiciona bailarino, etc.)
 document.addEventListener('db-changed' as any, () => renderizarTudo(true));
 
-initUI();
-initZoomControls(setZoom);
-initScrubHandlers();
-initPlaybackAndIO();
-initAudioUI();
-initBailarinoUI(); // <-- LIGA O BOTÃO + Adicionar Bailarino
-renderizarTudo(true);
+const bootstrapAfterAuth = () => {
+  runWhenDomReady(() => {
+    initUI();
+    initPersistenceUI();
+    initReportUI();
+    window.setTimeout(refreshProjectListUI, 600);
 
-window.addEventListener('resize', ()=> renderizarTudo());
+    initZoomControls(setZoom);
+    initScrubHandlers();
+    initPlaybackAndIO();
+    initAudioUI();
+    initBailarinoUI(); // <-- LIGA O BOTÃO + Adicionar Bailarino
+
+    renderizarTudo(true);
+    window.addEventListener('resize', () => renderizarTudo());
+  });
+};
+
+const ensureAuthenticated = async () => {
+  try {
+    await requireAuth();
+    bootstrapAfterAuth();
+  } catch (error) {
+    console.warn('Redirecionando para a landing por ausência de autenticação.', error);
+  }
+};
+
+void ensureAuthenticated();
 
 // === Faz o palco ocupar o máximo possível (mantendo 16:9) ===
 function fitStageToWrapper() {
