@@ -1457,8 +1457,8 @@
           <select id="sel-projeto">
             <option value="">(sem projetos)</option>
           </select>
-          <button id="btn-novo-projeto" title="Criar novo projeto">Novo</button>
-          <button id="btn-salvar-projeto" title="Salvar o projeto">Salvar</button>
+          <button id="btn-novo-projeto" type="button" title="Criar novo projeto">Novo</button>
+          <button id="btn-salvar-projeto" type="button" title="Salvar o projeto">Salvar</button>
           <button
             id="btn-open-report"
             class="report-button"
@@ -1468,10 +1468,10 @@
             <span class="ico" aria-hidden="true">✶</span>
             <span>Reportar feedback</span>
           </button>
-          <button id="btn-logout" style="display: none">Sair</button>
+          <button id="btn-logout" type="button" style="display: none">Sair</button>
           <div id="present-rec-bar">
-            <button id="btn-start-present-rec" title="Gravar apresentação">🎥 Gravar</button>
-            <button id="btn-stop-present-rec" disabled title="Parar gravação">■ Parar</button>
+            <button id="btn-start-present-rec" type="button" title="Gravar apresentação">🎥 Gravar</button>
+            <button id="btn-stop-present-rec" type="button" disabled title="Parar gravação">■ Parar</button>
             <span class="rec-indicator" aria-live="polite" style="display: none">● gravando…</span>
           </div>
         </div>
@@ -1480,7 +1480,7 @@
 
     <div class="container-principal">
       <nav id="side-rail" class="side-rail">
-        <button id="btn-panel-formacoes" class="rail-btn active" title="Formações" aria-label="Formações">
+        <button id="btn-panel-formacoes" class="rail-btn active" type="button" title="Formações" aria-label="Formações">
           <span class="ico" aria-hidden="true">
             <svg viewBox="0 0 24 24" role="presentation" focusable="false">
 
@@ -1489,7 +1489,7 @@
             </svg>
           </span>
         </button>
-        <button id="btn-panel-bailarinos" class="rail-btn" title="Bailarinos" aria-label="Bailarinos">
+        <button id="btn-panel-bailarinos" class="rail-btn" type="button" title="Bailarinos" aria-label="Bailarinos">
           <span class="ico" aria-hidden="true">
             <svg viewBox="0 0 24 24" role="presentation" focusable="false">
               <use href="/assets/users-group.svg#users-group" />
@@ -1502,7 +1502,7 @@
         <section id="panel-formacoes" class="side-panel">
           <div class="panel-head">
             <h2>Formações</h2>
-            <button id="btn-add-formacao" title="Adicionar formação">+ Add</button>
+            <button id="btn-add-formacao" type="button" title="Adicionar formação">+ Add</button>
           </div>
           <ul id="lista-formacoes" class="lista-formacoes"></ul>
           <div class="hint">
@@ -1515,7 +1515,7 @@
             <h2>Bailarinos</h2>
           </div>
           <input id="busca-bailarinos" class="busca-input" placeholder="Buscar bailarino..." />
-          <button id="btn-add-bailarino">+ Adicionar Bailarino</button>
+          <button id="btn-add-bailarino" type="button">+ Adicionar Bailarino</button>
           <ul id="lista-bailarinos" class="lista-bailarinos"></ul>
         </section>
       </aside>
@@ -1530,17 +1530,17 @@
         <div class="tl-left hint">Timeline</div>
 
         <div id="transport" class="transport">
-          <button id="btn-anterior" class="icon-btn" title="Anterior (←)" aria-label="Anterior">«</button>
-          <button id="btn-play-pause" class="icon-btn primary" title="Play/Pause (Barra de espaço)" aria-label="Play">▶</button>
-          <button id="btn-proxima" class="icon-btn" title="Próxima (→)" aria-label="Próxima">»</button>
+          <button id="btn-anterior" class="icon-btn" type="button" title="Anterior (←)" aria-label="Anterior">«</button>
+          <button id="btn-play-pause" class="icon-btn primary" type="button" title="Play/Pause (Barra de espaço)" aria-label="Play">▶</button>
+          <button id="btn-proxima" class="icon-btn" type="button" title="Próxima (→)" aria-label="Próxima">»</button>
           <span id="time-display" class="timecode">00:00.0</span>
         </div>
 
         <div class="tl-right" id="zoom-controls">
-          <button id="zoom-out" title="Diminuir zoom">−</button>
+          <button id="zoom-out" type="button" title="Diminuir zoom">−</button>
           <span id="zoom-value" class="hint">100%</span>
-          <button id="zoom-in" title="Aumentar zoom">+</button>
-          <button id="zoom-reset" title="Resetar para 100%">⟲</button>
+          <button id="zoom-in" type="button" title="Aumentar zoom">+</button>
+          <button id="zoom-reset" type="button" title="Resetar para 100%">⟲</button>
         </div>
       </div>
 
