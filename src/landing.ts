@@ -227,6 +227,8 @@ const formatFirebaseError = (error: unknown) => {
       case 'auth/user-not-found':
       case 'auth/wrong-password':
         return 'Não foi possível encontrar uma conta com essas credenciais.';
+      case 'auth/unauthorized-domain':
+        return 'Este domínio ainda não está autorizado para login. Abra o app pelo link oficial enviado pela equipe.';
       case 'auth/popup-closed-by-user':
       case 'auth/cancelled-popup-request':
         return '';

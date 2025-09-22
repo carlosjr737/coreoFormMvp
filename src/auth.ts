@@ -1,5 +1,8 @@
 // src/auth.ts
 import { onAuthStateChanged, type User } from 'firebase/auth';
+
+import type { FirebaseError } from 'firebase/app';
+
 import {
   auth,
   provider,
@@ -7,6 +10,7 @@ import {
   signOut,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  redirectToAuthorizedAuthHost,
 } from './firebase';
 
 type AuthLandingMode = 'login' | 'register';
@@ -39,22 +43,50 @@ const emitAuthChange = (user: User | null) => {
   );
 };
 
+const isFirebaseAuthError = (error: unknown): error is FirebaseError =>
+  !!error && typeof error === 'object' && 'code' in (error as Record<string, unknown>);
+
+const handleFirebaseAuthError = (error: unknown) => {
+  if (!isFirebaseAuthError(error)) return;
+  if (error.code === 'auth/unauthorized-domain') {
+    const redirected = redirectToAuthorizedAuthHost();
+    if (!redirected) {
+      console.error('Domínio não autorizado para autenticação e nenhum fallback configurado.', error);
+    }
+  }
+};
+
 export function getUser() {
   return _user ?? auth.currentUser ?? null;
 }
 
 export async function loginWithGoogle() {
-  return signInWithPopup(auth, provider);
+  try {
+    return await signInWithPopup(auth, provider);
+  } catch (error) {
+    handleFirebaseAuthError(error);
+    throw error;
+  }
 }
 
 export const login = loginWithGoogle;
 
 export async function loginWithEmail(email: string, password: string) {
-  return signInWithEmailAndPassword(auth, email, password);
+  try {
+    return await signInWithEmailAndPassword(auth, email, password);
+  } catch (error) {
+    handleFirebaseAuthError(error);
+    throw error;
+  }
 }
 
 export async function registerWithEmail(email: string, password: string) {
-  return createUserWithEmailAndPassword(auth, email, password);
+  try {
+    return await createUserWithEmailAndPassword(auth, email, password);
+  } catch (error) {
+    handleFirebaseAuthError(error);
+    throw error;
+  }
 }
 
 
@@ -150,6 +182,7 @@ export const requireAuth = (): Promise<User> =>
           }
         },
         (error) => {
+          handleFirebaseAuthError(error);
           console.error('Falha ao observar a autenticação.', error);
           cleanup();
           if (!auth.currentUser) {
@@ -159,6 +192,7 @@ export const requireAuth = (): Promise<User> =>
         },
       );
     } catch (error) {
+      handleFirebaseAuthError(error);
       console.error('Falha ao inicializar a verificação de autenticação.', error);
       cleanup();
       if (!auth.currentUser) {
