@@ -1,6 +1,8 @@
 // src/auth.ts
 import { onAuthStateChanged, type User } from 'firebase/auth';
+
 import type { FirebaseError } from 'firebase/app';
+
 import {
   auth,
   provider,
