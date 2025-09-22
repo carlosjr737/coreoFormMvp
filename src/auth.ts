@@ -1,14 +1,15 @@
 // src/auth.ts
+import { onAuthStateChanged, type User } from 'firebase/auth';
+import type { FirebaseError } from 'firebase/app';
 import {
   auth,
   provider,
   signInWithPopup,
   signOut,
-  onAuthStateChanged,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  redirectToAuthorizedAuthHost,
 } from './firebase';
-import type { User } from 'firebase/auth';
 
 type AuthLandingMode = 'login' | 'register';
 
@@ -18,6 +19,12 @@ const AUTH_CHANGED_EVENT = 'auth-changed';
 
 const isLandingPath = (pathname: string) =>
   pathname.endsWith('/landing.html') || pathname.endsWith('/landing');
+
+const isAppPath = (pathname: string) =>
+  pathname.endsWith('/index.html') ||
+  pathname.endsWith('/index') ||
+  pathname === '/' ||
+  pathname === '';
 
 const buildLandingUrl = (mode: AuthLandingMode = 'login') => {
   const url = new URL('landing.html', window.location.href);
@@ -34,39 +41,84 @@ const emitAuthChange = (user: User | null) => {
   );
 };
 
+const isFirebaseAuthError = (error: unknown): error is FirebaseError =>
+  !!error && typeof error === 'object' && 'code' in (error as Record<string, unknown>);
+
+const handleFirebaseAuthError = (error: unknown) => {
+  if (!isFirebaseAuthError(error)) return;
+  if (error.code === 'auth/unauthorized-domain') {
+    const redirected = redirectToAuthorizedAuthHost();
+    if (!redirected) {
+      console.error('Domínio não autorizado para autenticação e nenhum fallback configurado.', error);
+    }
+  }
+};
+
 export function getUser() {
   return _user ?? auth.currentUser ?? null;
 }
 
 export async function loginWithGoogle() {
-  return signInWithPopup(auth, provider);
+  try {
+    return await signInWithPopup(auth, provider);
+  } catch (error) {
+    handleFirebaseAuthError(error);
+    throw error;
+  }
 }
 
 export const login = loginWithGoogle;
 
 export async function loginWithEmail(email: string, password: string) {
-  return signInWithEmailAndPassword(auth, email, password);
+  try {
+    return await signInWithEmailAndPassword(auth, email, password);
+  } catch (error) {
+    handleFirebaseAuthError(error);
+    throw error;
+  }
 }
 
 export async function registerWithEmail(email: string, password: string) {
-  return createUserWithEmailAndPassword(auth, email, password);
+  try {
+    return await createUserWithEmailAndPassword(auth, email, password);
+  } catch (error) {
+    handleFirebaseAuthError(error);
+    throw error;
+  }
 }
 
 
 export const redirectToLanding = (mode: AuthLandingMode = 'login') => {
-  if (isLandingPath(window.location.pathname)) {
+  const target = buildLandingUrl(mode);
+  const { pathname } = window.location;
+
+  if (isAppPath(pathname)) {
+    window.location.replace(target);
+    return;
+  }
+
+  if (isLandingPath(pathname)) {
     const current = new URL(window.location.href);
     current.searchParams.set('auth', mode);
-    const target = current.toString();
-    if (target !== window.location.href) {
-      window.location.replace(target);
+    const next = current.toString();
+    if (next !== window.location.href) {
+      window.location.replace(next);
     }
     return;
   }
 
-  window.location.replace(buildLandingUrl(mode));
-
+  window.location.href = target;
 };
+
+const handleGlobalAuthState = (user: User | null) => {
+  emitAuthChange(user);
+  if (!user && isAppPath(window.location.pathname)) {
+    redirectToLanding();
+  }
+};
+
+emitAuthChange(auth.currentUser ?? null);
+onAuthStateChanged(auth, handleGlobalAuthState);
 
 export async function logout() {
   try {
@@ -78,80 +130,73 @@ export async function logout() {
   redirectToLanding();
 }
 
-export const requireAuth = (): Promise<User> => {
-  let fallbackTimer: number | undefined;
-  let settled = false;
+export const requireAuth = (): Promise<User> =>
+  new Promise<User>((resolve, reject) => {
+    let settled = false;
+    let unsubscribe: (() => void) | undefined;
+    let timeoutId: number | undefined;
 
-  const clearFallbackTimer = () => {
-    if (fallbackTimer !== undefined) {
-      window.clearTimeout(fallbackTimer);
-      fallbackTimer = undefined;
-    }
-  };
+    const settleResolve = (user: User) => {
+      if (settled) return;
+      settled = true;
+      resolve(user);
+    };
 
-  const resolveOnce = (resolve: (user: User) => void, user: User) => {
-    if (settled) return;
-    settled = true;
-    clearFallbackTimer();
-    resolve(user);
-  };
+    const settleReject = (reason: unknown) => {
+      if (settled) return;
+      settled = true;
+      reject(reason);
+    };
 
-  const rejectOnce = (reject: (reason?: unknown) => void, reason?: unknown) => {
-    if (settled) return;
-    settled = true;
-    clearFallbackTimer();
-    reject(reason ?? new Error('auth-required'));
-  };
-
-  return new Promise<User>((resolve, reject) => {
-    const handleAuthState = (user: User | null) => {
-      emitAuthChange(user);
-      if (user) {
-        resolveOnce(resolve, user);
-      } else {
-        redirectToLanding();
-        rejectOnce(reject, new Error('auth-required'));
+    const cleanup = () => {
+      if (timeoutId !== undefined) {
+        window.clearTimeout(timeoutId);
+        timeoutId = undefined;
+      }
+      if (unsubscribe) {
+        unsubscribe();
+        unsubscribe = undefined;
       }
     };
 
+    timeoutId = window.setTimeout(() => {
+      if (!auth.currentUser) {
+        cleanup();
+        redirectToLanding();
+        settleReject(new Error('auth-timeout'));
+      }
+    }, 2000);
+
     try {
-      onAuthStateChanged(
+      unsubscribe = onAuthStateChanged(
         auth,
         (user) => {
-          clearFallbackTimer();
-          handleAuthState(user);
+          cleanup();
+          if (user) {
+            settleResolve(user);
+          } else {
+            redirectToLanding();
+            settleReject(new Error('not-authenticated'));
+          }
         },
         (error) => {
+          handleFirebaseAuthError(error);
           console.error('Falha ao observar a autenticação.', error);
-          clearFallbackTimer();
-          if (!getUser()) {
+          cleanup();
+          if (!auth.currentUser) {
             redirectToLanding();
           }
-          rejectOnce(reject, error);
+          settleReject(error);
         },
       );
     } catch (error) {
+      handleFirebaseAuthError(error);
       console.error('Falha ao inicializar a verificação de autenticação.', error);
-      if (!getUser()) {
+      cleanup();
+      if (!auth.currentUser) {
         redirectToLanding();
       }
-      rejectOnce(reject, error);
-      return;
+      const reason = error instanceof Error ? error : new Error('auth-initialization');
+      settleReject(reason);
     }
-
-    const initialUser = auth.currentUser ?? null;
-    emitAuthChange(initialUser);
-    if (initialUser) {
-      resolveOnce(resolve, initialUser);
-      return;
-    }
-
-    fallbackTimer = window.setTimeout(() => {
-      if (!settled && !getUser()) {
-        console.warn('Tempo limite ao verificar autenticação. Redirecionando para a landing.');
-        redirectToLanding();
-        rejectOnce(reject, new Error('auth-timeout'));
-      }
-    }, 2000);
   });
-};

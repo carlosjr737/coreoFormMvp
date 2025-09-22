@@ -34,6 +34,29 @@ import {
   type UploadResult,
 } from 'firebase/storage';
 
+type HostMatcher = { literal?: string; suffix?: string };
+
+const normalizeHost = (host?: string | null): string | null => {
+  if (!host) return null;
+  const trimmed = host.trim();
+  if (!trimmed) return null;
+
+  const candidate = trimmed.includes('://') ? trimmed : `https://${trimmed}`;
+  try {
+    return new URL(candidate).hostname.toLowerCase();
+  } catch {
+    return trimmed.replace(/^[*]+\./, '').toLowerCase();
+  }
+};
+
+const parseHostList = (value: string | undefined): string[] =>
+  value
+    ? value
+        .split(',')
+        .map((entry) => entry.trim())
+        .filter(Boolean)
+    : [];
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY ?? '',
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ?? '',
@@ -42,6 +65,104 @@ const firebaseConfig = {
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID ?? '',
   appId: import.meta.env.VITE_FIREBASE_APP_ID ?? '',
 };
+
+const literalAuthHosts = new Set<string>();
+const wildcardAuthHosts: HostMatcher[] = [];
+
+const registerHost = (host?: string | null) => {
+  const normalized = normalizeHost(host);
+  if (!normalized) return;
+  literalAuthHosts.add(normalized);
+};
+
+const registerWildcardHost = (host?: string | null) => {
+  const normalized = normalizeHost(host);
+  if (!normalized) return;
+  wildcardAuthHosts.push({ suffix: normalized });
+};
+
+registerHost(import.meta.env.VITE_FIREBASE_AUTH_FALLBACK_DOMAIN ?? null);
+registerHost(firebaseConfig.authDomain);
+
+if (firebaseConfig.projectId) {
+  registerHost(`${firebaseConfig.projectId}.firebaseapp.com`);
+  registerHost(`${firebaseConfig.projectId}.web.app`);
+}
+
+['localhost', '127.0.0.1', '::1', '[::1]'].forEach(registerHost);
+
+const extraDomains = parseHostList(import.meta.env.VITE_FIREBASE_AUTHORIZED_DOMAINS);
+extraDomains.forEach((entry) => {
+  if (entry.startsWith('*.')) {
+    registerWildcardHost(entry.slice(2));
+    return;
+  }
+  registerHost(entry);
+});
+
+const wildcardSuffixes = parseHostList(import.meta.env.VITE_FIREBASE_AUTHORIZED_WILDCARDS);
+wildcardSuffixes.forEach(registerWildcardHost);
+
+const fallbackAuthHost = (() => {
+  const explicitFallback = normalizeHost(import.meta.env.VITE_FIREBASE_AUTH_FALLBACK_DOMAIN ?? null);
+  if (explicitFallback) return explicitFallback;
+  const normalizedConfigDomain = normalizeHost(firebaseConfig.authDomain);
+  if (normalizedConfigDomain) return normalizedConfigDomain;
+  if (firebaseConfig.projectId) {
+    return normalizeHost(`${firebaseConfig.projectId}.firebaseapp.com`);
+  }
+  return null;
+})();
+
+if (fallbackAuthHost) {
+  literalAuthHosts.add(fallbackAuthHost);
+}
+
+const hostMatchesWildcard = (host: string, matcher: HostMatcher) => {
+  if (!matcher.suffix) return false;
+  return host === matcher.suffix || host.endsWith(`.${matcher.suffix}`);
+};
+
+const isHostAuthorizedForFirebaseAuth = (host: string): boolean => {
+  const normalized = normalizeHost(host);
+  if (!normalized) return false;
+  if (literalAuthHosts.has(normalized)) return true;
+  return wildcardAuthHosts.some((matcher) => hostMatchesWildcard(normalized, matcher));
+};
+
+const buildFallbackRedirectUrl = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  if (!fallbackAuthHost) return null;
+  const currentHost = normalizeHost(window.location.hostname);
+  if (!currentHost || currentHost === fallbackAuthHost) return null;
+  try {
+    const target = new URL(window.location.href);
+    target.hostname = fallbackAuthHost;
+    target.port = '';
+    return target.toString();
+  } catch (error) {
+    console.warn('Não foi possível construir a URL de fallback para autenticação.', error);
+    return null;
+  }
+};
+
+export const isRunningOnAuthorizedAuthHost = (() => {
+  if (typeof window === 'undefined') return true;
+  return isHostAuthorizedForFirebaseAuth(window.location.hostname);
+})();
+
+export const redirectToAuthorizedAuthHost = (): boolean => {
+  if (isRunningOnAuthorizedAuthHost) return false;
+  const redirectUrl = buildFallbackRedirectUrl();
+  if (!redirectUrl) return false;
+  console.warn('Domínio atual não autorizado para autenticação. Redirecionando para', redirectUrl);
+  window.location.replace(redirectUrl);
+  return true;
+};
+
+if (typeof window !== 'undefined' && !isRunningOnAuthorizedAuthHost) {
+  redirectToAuthorizedAuthHost();
+}
 
 export const app: FirebaseApp = initializeApp(firebaseConfig);
 export const auth: Auth = getAuth(app);
