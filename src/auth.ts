@@ -78,48 +78,80 @@ export async function logout() {
   redirectToLanding();
 }
 
-export const requireAuth = () => {
-  let receivedAuthEvent = false;
+export const requireAuth = (): Promise<User> => {
   let fallbackTimer: number | undefined;
+  let settled = false;
 
-  const handleAuthState = (user: User | null) => {
-    receivedAuthEvent = true;
-    window.clearTimeout(fallbackTimer);
-    emitAuthChange(user);
-    if (!user) {
-      redirectToLanding();
+  const clearFallbackTimer = () => {
+    if (fallbackTimer !== undefined) {
+      window.clearTimeout(fallbackTimer);
+      fallbackTimer = undefined;
     }
   };
 
-  try {
-    onAuthStateChanged(
-      auth,
-      (user) => handleAuthState(user),
-      (error) => {
-        console.error('Falha ao observar a autenticação.', error);
-        window.clearTimeout(fallbackTimer);
-        if (!receivedAuthEvent && !getUser()) {
-          redirectToLanding();
-        }
-      },
-    );
-  } catch (error) {
-    console.error('Falha ao inicializar a verificação de autenticação.', error);
-    if (!getUser()) {
-      redirectToLanding();
-    }
-    return;
-  }
+  const resolveOnce = (resolve: (user: User) => void, user: User) => {
+    if (settled) return;
+    settled = true;
+    clearFallbackTimer();
+    resolve(user);
+  };
 
-  emitAuthChange(auth.currentUser ?? null);
+  const rejectOnce = (reject: (reason?: unknown) => void, reason?: unknown) => {
+    if (settled) return;
+    settled = true;
+    clearFallbackTimer();
+    reject(reason ?? new Error('auth-required'));
+  };
 
-  if (!auth.currentUser) {
-    fallbackTimer = window.setTimeout(() => {
+  return new Promise<User>((resolve, reject) => {
+    const handleAuthState = (user: User | null) => {
+      emitAuthChange(user);
+      if (user) {
+        resolveOnce(resolve, user);
+      } else {
+        redirectToLanding();
+        rejectOnce(reject, new Error('auth-required'));
+      }
+    };
 
-      if (!receivedAuthEvent && !getUser()) {
+    try {
+      onAuthStateChanged(
+        auth,
+        (user) => {
+          clearFallbackTimer();
+          handleAuthState(user);
+        },
+        (error) => {
+          console.error('Falha ao observar a autenticação.', error);
+          clearFallbackTimer();
+          if (!getUser()) {
+            redirectToLanding();
+          }
+          rejectOnce(reject, error);
+        },
+      );
+    } catch (error) {
+      console.error('Falha ao inicializar a verificação de autenticação.', error);
+      if (!getUser()) {
         redirectToLanding();
       }
-    }, 2000);
-  }
+      rejectOnce(reject, error);
+      return;
+    }
 
+    const initialUser = auth.currentUser ?? null;
+    emitAuthChange(initialUser);
+    if (initialUser) {
+      resolveOnce(resolve, initialUser);
+      return;
+    }
+
+    fallbackTimer = window.setTimeout(() => {
+      if (!settled && !getUser()) {
+        console.warn('Tempo limite ao verificar autenticação. Redirecionando para a landing.');
+        redirectToLanding();
+        rejectOnce(reject, new Error('auth-timeout'));
+      }
+    }, 2000);
+  });
 };
