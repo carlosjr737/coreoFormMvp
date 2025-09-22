@@ -1,7 +1,9 @@
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from './firebase';
+
 type AuthMode = 'login' | 'register';
 
 type AuthModule = typeof import('./auth');
-type FirebaseModule = typeof import('./firebase');
 
 const isAuthMode = (value: string | undefined): value is AuthMode =>
   value === 'login' || value === 'register';
@@ -11,8 +13,6 @@ type LandingAuthDeps = {
   loginWithEmail: AuthModule['loginWithEmail'];
   loginWithGoogle: AuthModule['loginWithGoogle'];
   registerWithEmail: AuthModule['registerWithEmail'];
-  auth: FirebaseModule['auth'];
-  onAuthStateChanged: FirebaseModule['onAuthStateChanged'];
 
 };
 
@@ -22,17 +22,12 @@ const loadAuthDeps = async (): Promise<LandingAuthDeps | null> => {
   if (!authDepsPromise) {
     authDepsPromise = (async () => {
       try {
-        const [authModule, firebaseModule] = await Promise.all([
-          import('./auth'),
-          import('./firebase'),
-        ]);
+        const authModule = await import('./auth');
 
         return {
           loginWithEmail: authModule.loginWithEmail,
           loginWithGoogle: authModule.loginWithGoogle,
           registerWithEmail: authModule.registerWithEmail,
-          auth: firebaseModule.auth,
-          onAuthStateChanged: firebaseModule.onAuthStateChanged,
         };
       } catch (error) {
         console.error('Não foi possível carregar as dependências de autenticação.', error);
@@ -370,14 +365,10 @@ googleButton?.addEventListener('click', async (event) => {
   }
 });
 
-void loadAuthDeps().then((deps) => {
-  if (!deps) return;
-  const { auth, onAuthStateChanged } = deps;
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      window.location.href = 'index.html';
-    }
-  });
+document.documentElement.classList.toggle('is-authenticated', !!auth.currentUser);
+
+onAuthStateChanged(auth, (user) => {
+  document.documentElement.classList.toggle('is-authenticated', !!user);
 });
 
 const urlParams = new URLSearchParams(window.location.search);
