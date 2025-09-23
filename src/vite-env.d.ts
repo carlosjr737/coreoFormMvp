@@ -10,6 +10,11 @@ interface ImportMetaEnv {
   readonly VITE_FIREBASE_AUTH_FALLBACK_DOMAIN?: string
   readonly VITE_FIREBASE_AUTHORIZED_DOMAINS?: string
   readonly VITE_FIREBASE_AUTHORIZED_WILDCARDS?: string
+  readonly VITE_APP_URL?: string
+  readonly VITE_APP_PATH?: string
+  readonly VITE_APP_ENTRY?: string
+  readonly VITE_LANDING_URL?: string
+  readonly VITE_LANDING_PATH?: string
 }
 interface ImportMeta {
   readonly env: ImportMetaEnv

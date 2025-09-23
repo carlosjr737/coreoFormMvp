@@ -1,8 +1,9 @@
 // src/landing.ts
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase';
+import { buildAppUrl, isLandingPath, type AuthLandingMode } from './routes';
 
-type AuthMode = 'login' | 'register';
+type AuthMode = AuthLandingMode;
 type AuthModule = typeof import('./auth');
 
 const isAuthMode = (value: string | undefined): value is AuthMode =>
@@ -60,11 +61,8 @@ const authForms = new Map<AuthMode, HTMLFormElement>();
 const errorOutputs = new Map<AuthMode, HTMLElement>();
 let currentMode: AuthMode = 'login';
 
-const isLandingPath = (pathname: string) =>
-  pathname.endsWith('/landing.html') || pathname.endsWith('/landing') || pathname === '/landing';
-
 const redirectToApp = () => {
-  const target = new URL('/', window.location.origin).toString();
+  const target = buildAppUrl();
   if (window.location.href !== target) window.location.replace(target);
 };
 

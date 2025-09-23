@@ -11,33 +11,17 @@ import {
   signInWithEmailAndPassword,
   redirectToAuthorizedAuthHost,
 } from './firebase';
-
-type AuthLandingMode = 'login' | 'register';
+import {
+  buildAppUrl,
+  buildLandingUrl,
+  isAppPath,
+  isLandingPath,
+  type AuthLandingMode,
+} from './routes';
 
 let _user: User | null = auth.currentUser;
 
 const AUTH_CHANGED_EVENT = 'auth-changed';
-
-// A landing pode ser /landing ou /landing.html
-const isLandingPath = (pathname: string) =>
-  pathname.endsWith('/landing.html') || pathname.endsWith('/landing');
-
-// O app na Vercel fica na RAIZ (/). Mantemos compat com /index(.html)
-const isAppPath = (pathname: string) =>
-  pathname === '/' ||
-  pathname === '' ||
-  pathname.endsWith('/index.html') ||
-  pathname.endsWith('/index');
-
-// landing.html?auth=login|register
-const buildLandingUrl = (mode: AuthLandingMode = 'login') => {
-  const url = new URL('landing.html', window.location.origin);
-  url.searchParams.set('auth', mode);
-  return url.toString();
-};
-
-// >>> App na raiz <<<
-const buildAppUrl = () => new URL('/', window.location.origin).toString();
 
 export const redirectToApp = () => {
   const { pathname, href } = window.location;
