@@ -24,15 +24,11 @@ export const timeDisplayEl = document.getElementById('time-display') as HTMLSpan
 export const btnPlayPause = el<HTMLButtonElement>('btn-play-pause');
 export const btnAnterior = el<HTMLButtonElement>('btn-anterior');
 export const btnProxima = el<HTMLButtonElement>('btn-proxima');
-export const btnExportar = el<HTMLButtonElement>('btn-exportar');
-export const btnImportar = el<HTMLButtonElement>('btn-importar');
-export const importFile = el<HTMLInputElement>('import-file');
 export const btnAddFormacao = el<HTMLButtonElement>('btn-add-formacao');
-export const btnAddBailarino = el<HTMLButtonElement>('btn-add-bailarino');
 
 export const btnCarregarAudio = el<HTMLButtonElement>('btn-carregar-audio');
 export const audioFileInput = el<HTMLInputElement>('audio-file-input');
-export const audioInfoEl = el<HTMLDivElement>('audio-info');
+export const audioStatusEl = el<HTMLSpanElement>('audio-status');
 
 export const btnZoomOut = el<HTMLButtonElement>('zoom-out');
 export const btnZoomIn = el<HTMLButtonElement>('zoom-in');
@@ -40,7 +36,6 @@ export const btnZoomReset = el<HTMLButtonElement>('zoom-reset');
 export const zoomValueEl = el<HTMLSpanElement>('zoom-value');
 
 // Firebase/auth/projetos
-export const btnLogin       = document.getElementById('btn-login') as HTMLButtonElement;
 export const btnLogout      = document.getElementById('btn-logout') as HTMLButtonElement;
 export const userBadgeEl    = document.getElementById('user-badge') as HTMLSpanElement;
 

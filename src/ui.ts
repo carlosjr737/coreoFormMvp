@@ -9,9 +9,9 @@ import {
 } from './projects_firebase';
 
 // Elements (ajuste os IDs se forem diferentes no seu HTML)
-const btnNew  = document.getElementById('btn-new')  as HTMLButtonElement | null;
-const btnSave = document.getElementById('btn-save') as HTMLButtonElement | null;
-const ddProjects = document.getElementById('projects-dd') as HTMLSelectElement | null;
+const btnNew = document.getElementById('btn-novo-projeto') as HTMLButtonElement | null;
+const btnSave = document.getElementById('btn-salvar-projeto') as HTMLButtonElement | null;
+const ddProjects = document.getElementById('sel-projeto') as HTMLSelectElement | null;
 
 // Preenche o dropdown de projetos
 async function refreshProjectsDD() {
