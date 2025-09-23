@@ -41,12 +41,12 @@ const env = (kFB: string, kFirebase: string) =>
   (import.meta.env as any)[kFB] ?? (import.meta.env as any)[kFirebase] ?? '';
 
 const firebaseConfig = {
-  apiKey:            env('VITE_FB_API_KEY',            'VITE_FIREBASE_API_KEY'),
-  authDomain:        env('VITE_FB_AUTH_DOMAIN',        'VITE_FIREBASE_AUTH_DOMAIN'),
-  projectId:         env('VITE_FB_PROJECT_ID',         'VITE_FIREBASE_PROJECT_ID'),
-  storageBucket:     env('VITE_FB_STORAGE_BUCKET',     'VITE_FIREBASE_STORAGE_BUCKET'),
-  messagingSenderId: env('VITE_FB_MESSAGING_SENDER_ID','VITE_FIREBASE_MESSAGING_SENDER_ID'),
-  appId:             env('VITE_FB_APP_ID',             'VITE_FIREBASE_APP_ID'),
+  apiKey:            env('VITE_FB_API_KEY',             'VITE_FIREBASE_API_KEY'),
+  authDomain:        env('VITE_FB_AUTH_DOMAIN',         'VITE_FIREBASE_AUTH_DOMAIN'),
+  projectId:         env('VITE_FB_PROJECT_ID',          'VITE_FIREBASE_PROJECT_ID'),
+  storageBucket:     env('VITE_FB_STORAGE_BUCKET',      'VITE_FIREBASE_STORAGE_BUCKET'),
+  messagingSenderId: env('VITE_FB_MESSAGING_SENDER_ID', 'VITE_FIREBASE_MESSAGING_SENDER_ID'),
+  appId:             env('VITE_FB_APP_ID',              'VITE_FIREBASE_APP_ID'),
 } as const;
 
 // Falhe cedo se faltar algo (evita auth/invalid-api-key)
@@ -58,9 +58,9 @@ for (const [k, v] of Object.entries(firebaseConfig)) {
 }
 
 /* =========================================================
-   Autorização de domínios para Auth (seu código original)
+   Autorização de domínios para Auth (somente checagem local)
    ========================================================= */
-type HostMatcher = { literal?: string; suffix?: string };
+type HostMatcher = { suffix?: string };
 
 const normalizeHost = (host?: string | null): string | null => {
   if (!host) return null;
@@ -74,7 +74,7 @@ const normalizeHost = (host?: string | null): string | null => {
   }
 };
 
-const parseHostList = (value: string | undefined): string[] =>
+const parseHostList = (value?: string): string[] =>
   value ? value.split(',').map((e) => e.trim()).filter(Boolean) : [];
 
 const literalAuthHosts = new Set<string>();
@@ -82,45 +82,31 @@ const wildcardAuthHosts: HostMatcher[] = [];
 
 const registerHost = (host?: string | null) => {
   const normalized = normalizeHost(host);
-  if (!normalized) return;
-  literalAuthHosts.add(normalized);
+  if (normalized) literalAuthHosts.add(normalized);
 };
 
 const registerWildcardHost = (host?: string | null) => {
   const normalized = normalizeHost(host);
-  if (!normalized) return;
-  wildcardAuthHosts.push({ suffix: normalized });
+  if (normalized) wildcardAuthHosts.push({ suffix: normalized });
 };
 
-registerHost((import.meta.env as any).VITE_FIREBASE_AUTH_FALLBACK_DOMAIN ?? null);
+// hosts explícitos
 registerHost(firebaseConfig.authDomain);
 
-if (firebaseConfig.projectId) {
-  registerHost(`${firebaseConfig.projectId}.firebaseapp.com`);
-  registerHost(`${firebaseConfig.projectId}.web.app`);
-}
-
+// hosts padrão de dev
 ['localhost', '127.0.0.1', '::1', '[::1]'].forEach(registerHost);
 
-const extraDomains = parseHostList((import.meta.env as any).VITE_FIREBASE_AUTHORIZED_DOMAINS);
-extraDomains.forEach((entry) => {
+// extras por env (ex.: coreo-form-mvp.vercel.app)
+parseHostList((import.meta.env as any).VITE_FIREBASE_AUTHORIZED_DOMAINS).forEach((entry) => {
   if (entry.startsWith('*.')) registerWildcardHost(entry.slice(2));
   else registerHost(entry);
 });
 
-const wildcardSuffixes = parseHostList((import.meta.env as any).VITE_FIREBASE_AUTHORIZED_WILDCARDS);
-wildcardSuffixes.forEach(registerWildcardHost);
+// também aceita curingas extras
+parseHostList((import.meta.env as any).VITE_FIREBASE_AUTHORIZED_WILDCARDS).forEach(registerWildcardHost);
 
-const fallbackAuthHost = (() => {
-  const explicitFallback = normalizeHost((import.meta.env as any).VITE_FIREBASE_AUTH_FALLBACK_DOMAIN ?? null);
-  if (explicitFallback) return explicitFallback;
-  const normalizedConfigDomain = normalizeHost(firebaseConfig.authDomain);
-  if (normalizedConfigDomain) return normalizedConfigDomain;
-  if (firebaseConfig.projectId) return normalizeHost(`${firebaseConfig.projectId}.firebaseapp.com`);
-  return null;
-})();
-
-if (fallbackAuthHost) literalAuthHosts.add(fallbackAuthHost);
+// fallback só se explicitamente configurado por env (NÃO inferir firebaseapp.com)
+const fallbackAuthHost = normalizeHost((import.meta.env as any).VITE_FIREBASE_AUTH_FALLBACK_DOMAIN ?? null);
 
 const hostMatchesWildcard = (host: string, matcher: HostMatcher) =>
   !!matcher.suffix && (host === matcher.suffix || host.endsWith(`.${matcher.suffix}`));
@@ -147,13 +133,16 @@ const buildFallbackRedirectUrl = (): string | null => {
   }
 };
 
+// status de host (apenas informativo)
 export const isRunningOnAuthorizedAuthHost = (() => {
   if (typeof window === 'undefined') return true;
   return isHostAuthorizedForFirebaseAuth(window.location.hostname);
 })();
 
+// redireciona para fallback SOMENTE se o fallback existir
 export const redirectToAuthorizedAuthHost = (): boolean => {
   if (isRunningOnAuthorizedAuthHost) return false;
+  if (!fallbackAuthHost) return false; // sem fallback definido, não redireciona
   const redirectUrl = buildFallbackRedirectUrl();
   if (!redirectUrl) return false;
   console.warn('Domínio atual não autorizado para autenticação. Redirecionando para', redirectUrl);
@@ -161,8 +150,12 @@ export const redirectToAuthorizedAuthHost = (): boolean => {
   return true;
 };
 
+// ⚠️ Não faça redirecionamento automático no boot.
+// Se quiser apenas logar aviso:
 if (typeof window !== 'undefined' && !isRunningOnAuthorizedAuthHost) {
-  redirectToAuthorizedAuthHost();
+  console.warn(
+    '[Auth] Host não listado localmente. Se o domínio estiver autorizado no Firebase Console, o login por popup funcionará.'
+  );
 }
 
 /* =========================================================
