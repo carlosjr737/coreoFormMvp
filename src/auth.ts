@@ -1,6 +1,5 @@
 // src/auth.ts
 import { onAuthStateChanged, type User } from 'firebase/auth';
-
 import type { FirebaseError } from 'firebase/app';
 
 import {
@@ -19,19 +18,32 @@ let _user: User | null = auth.currentUser;
 
 const AUTH_CHANGED_EVENT = 'auth-changed';
 
+// A landing pode ser /landing ou /landing.html
 const isLandingPath = (pathname: string) =>
   pathname.endsWith('/landing.html') || pathname.endsWith('/landing');
 
+// O app na Vercel fica na RAIZ (/). Mantemos compat com /index(.html)
 const isAppPath = (pathname: string) =>
-  pathname.endsWith('/index.html') ||
-  pathname.endsWith('/index') ||
   pathname === '/' ||
-  pathname === '';
+  pathname === '' ||
+  pathname.endsWith('/index.html') ||
+  pathname.endsWith('/index');
 
+// landing.html?auth=login|register
 const buildLandingUrl = (mode: AuthLandingMode = 'login') => {
-  const url = new URL('landing.html', window.location.href);
+  const url = new URL('landing.html', window.location.origin);
   url.searchParams.set('auth', mode);
   return url.toString();
+};
+
+// >>> App na raiz <<<
+const buildAppUrl = () => new URL('/', window.location.origin).toString();
+
+export const redirectToApp = () => {
+  const { pathname, href } = window.location;
+  if (isAppPath(pathname)) return; // já está no app
+  const target = buildAppUrl();
+  if (target !== href) window.location.replace(target);
 };
 
 const emitAuthChange = (user: User | null) => {
@@ -60,9 +72,12 @@ export function getUser() {
   return _user ?? auth.currentUser ?? null;
 }
 
+// ✅ Após logar com Google, vá para o app
 export async function loginWithGoogle() {
   try {
-    return await signInWithPopup(auth, provider);
+    const res = await signInWithPopup(auth, provider);
+    redirectToApp();
+    return res;
   } catch (error) {
     handleFirebaseAuthError(error);
     throw error;
@@ -71,24 +86,29 @@ export async function loginWithGoogle() {
 
 export const login = loginWithGoogle;
 
+// ✅ Após logar com email/senha, vá para o app
 export async function loginWithEmail(email: string, password: string) {
   try {
-    return await signInWithEmailAndPassword(auth, email, password);
+    const res = await signInWithEmailAndPassword(auth, email, password);
+    redirectToApp();
+    return res;
   } catch (error) {
     handleFirebaseAuthError(error);
     throw error;
   }
 }
 
+// ✅ Após registrar, vá para o app
 export async function registerWithEmail(email: string, password: string) {
   try {
-    return await createUserWithEmailAndPassword(auth, email, password);
+    const res = await createUserWithEmailAndPassword(auth, email, password);
+    redirectToApp();
+    return res;
   } catch (error) {
     handleFirebaseAuthError(error);
     throw error;
   }
 }
-
 
 export const redirectToLanding = (mode: AuthLandingMode = 'login') => {
   const target = buildLandingUrl(mode);
@@ -112,9 +132,17 @@ export const redirectToLanding = (mode: AuthLandingMode = 'login') => {
   window.location.href = target;
 };
 
+// 🔁 Inclui ida para o APP quando já logado e na landing
 const handleGlobalAuthState = (user: User | null) => {
   emitAuthChange(user);
-  if (!user && isAppPath(window.location.pathname)) {
+  const path = window.location.pathname;
+
+  if (user) {
+    if (isLandingPath(path)) redirectToApp();
+    return;
+  }
+
+  if (isAppPath(path)) {
     redirectToLanding();
   }
 };
@@ -128,7 +156,6 @@ export async function logout() {
   } catch (error) {
     console.error('Erro ao encerrar sessão.', error);
   }
-
   redirectToLanding();
 }
 
