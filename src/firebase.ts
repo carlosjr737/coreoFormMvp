@@ -102,7 +102,7 @@ parseHostList((import.meta.env as any).VITE_FIREBASE_AUTHORIZED_DOMAINS).forEach
   else registerHost(entry);
 });
 
-// também aceita curingas extras
+// curingas extras
 parseHostList((import.meta.env as any).VITE_FIREBASE_AUTHORIZED_WILDCARDS).forEach(registerWildcardHost);
 
 // fallback só se explicitamente configurado por env (NÃO inferir firebaseapp.com)
@@ -151,7 +151,7 @@ export const redirectToAuthorizedAuthHost = (): boolean => {
 };
 
 // ⚠️ Não faça redirecionamento automático no boot.
-// Se quiser apenas logar aviso:
+// Apenas loga um aviso para diagnóstico local:
 if (typeof window !== 'undefined' && !isRunningOnAuthorizedAuthHost) {
   console.warn(
     '[Auth] Host não listado localmente. Se o domínio estiver autorizado no Firebase Console, o login por popup funcionará.'
@@ -184,23 +184,27 @@ export function joinStoragePath(...segments: Array<string | number | null | unde
     .join('/');
 }
 
-export function uploadToStorage(
+export async function uploadToStorage(
   path: string,
   data: Blob | ArrayBuffer | Uint8Array,
   metadata?: UploadMetadata,
 ): Promise<UploadResult> {
-  const normalizedPath = joinStoragePath(path);
-  return uploadBytes(storageRef(st, normalizedPath), data, metadata);
+  const ref = storageRef(st, joinStoragePath(path));
+  // Garante um contentType válido mesmo se não vier do chamador
+  const contentType =
+    (metadata as any)?.contentType ||
+    (data as any)?.type ||
+    'application/octet-stream';
+  const meta: UploadMetadata = { contentType, ...metadata };
+  return uploadBytes(ref, data as any, meta);
 }
 
 export function downloadFromStorage(path: string): Promise<string> {
-  const normalizedPath = joinStoragePath(path);
-  return getDownloadURL(storageRef(st, normalizedPath));
+  return getDownloadURL(storageRef(st, joinStoragePath(path)));
 }
 
 export async function deleteFromStorage(path: string): Promise<void> {
-  const normalizedPath = joinStoragePath(path);
-  await deleteObject(storageRef(st, normalizedPath));
+  await deleteObject(storageRef(st, joinStoragePath(path)));
 }
 
 export function describeFirebaseError(err: unknown): string {

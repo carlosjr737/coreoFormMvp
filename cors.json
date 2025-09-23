@@ -1,0 +1,9 @@
+[
+    {
+      "origin": ["https://coreo-form-mvp.vercel.app", "http://localhost:5173"],
+      "method": ["GET", "HEAD"],
+      "responseHeader": ["Content-Type", "Authorization"],
+      "maxAgeSeconds": 3600
+    }
+  ]
+  
